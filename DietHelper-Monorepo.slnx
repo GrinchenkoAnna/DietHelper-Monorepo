@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="DietHelper.Common/DietHelper.Common.csproj" />
+  <Project Path="DietHelper.Server/DietHelper.Server.csproj" />
+  <Project Path="DietHelper/DietHelper.csproj" />
+</Solution>
