@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm ="clr-namespace:DietHelper.ViewModels.Dishes"
+			 xmlns:ingredients="clr-namespace:DietHelper.Views.Products"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DietHelper.Views.Dishes.DishView"
+			 x:DataType="vm:DishViewModel"
+			 x:Name="root">
+
+	<StackPanel Margin="10 0 10 0">
+		<Grid ColumnDefinitions="Auto,*">
+			<TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
+		</Grid>
+
+		<StackPanel Margin="12 10 0 10">
+			<TextBlock Text="Пищевая ценность всего блюда:" />
+
+			<StackPanel Orientation="Horizontal">
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="К: "/>
+					<TextBlock Text="{Binding NutritionFacts.FormattedCalories}" Width="100" />
+				</StackPanel>
+
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Б: "/>
+					<TextBlock Text="{Binding NutritionFacts.FormattedProtein}" Width="100" />
+				</StackPanel>
+
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Ж: "/>
+					<TextBlock Text="{Binding NutritionFacts.FormattedFat}" Width="100" />
+				</StackPanel>
+
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="У: "/>
+					<TextBlock Text="{Binding NutritionFacts.FormattedCarbs}" Width="100" />
+				</StackPanel>
+
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Вес: "/>
+					<TextBlock Text="{Binding FormattedQuantity}" Width="100" />
+				</StackPanel>
+			</StackPanel>
+		</StackPanel>
+		
+		<ListBox x:Name="ingredientsList" ItemsSource="{Binding Ingredients}">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<StackPanel Orientation="Horizontal">
+						<ingredients:ProductView />
+						<Button Content="-" HorizontalAlignment="Right"
+								Margin="10 -5 0 0"
+								Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"
+								CommandParameter="{Binding}"/>
+					</StackPanel>
+				</DataTemplate>
+			</ListBox.ItemTemplate>			
+		</ListBox>		
+	</StackPanel>
+	
+</UserControl>

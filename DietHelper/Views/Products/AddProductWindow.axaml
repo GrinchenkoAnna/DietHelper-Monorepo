@@ -1,0 +1,62 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="clr-namespace:DietHelper.ViewModels.Products"
+		xmlns:local="clr-namespace:DietHelper.Views.Products"
+		xmlns:manual="clr-namespace:DietHelper.Views"
+        mc:Ignorable="d"
+		x:Class="DietHelper.Views.Products.AddProductWindow"
+        Title="Добавить продукт" Height="800" Width="900"
+		x:DataType="vm:AddProductViewModel"
+		WindowStartupLocation="CenterScreen">
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Margin="0 5 0 0">
+			<TextBox Watermark="Поиск продукта"
+					 Text="{Binding SearchText, Delay=400}" />
+			<ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+		</StackPanel>
+
+		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
+			<ListBox ItemsSource="{Binding SearchResults}"
+					 SelectedItem="{Binding SelectedItem}">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal">
+							<local:ProductView />
+							<Button Content="Забыть"
+									Command="{Binding $parent[Window].DataContext.DeleteItemFromDatabaseCommand}"
+									CommandParameter="{Binding}"
+									HorizontalAlignment="Center"
+									VerticalAlignment="Center"/>
+						</StackPanel>						
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</ScrollViewer>
+
+		<Button Grid.Row="2"
+			   Content="Добавить продукт"
+			   Command="{Binding AddItemCommand}"
+			   HorizontalAlignment="Center"
+			   Margin="0 5 0 5"/>
+
+		<manual:AddItemManuallyView Grid.Row="3" />
+
+		<Button Grid.Row="4"
+			   Content="Создать продукт"
+			   Command="{Binding AddManualItemCommand}"
+			   HorizontalAlignment="Center"
+			   Margin="0 5 0 10"/>
+	</Grid>
+</Window>
+
