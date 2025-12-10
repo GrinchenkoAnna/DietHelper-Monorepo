@@ -1,4 +1,5 @@
-﻿using DietHelper.Common.Models.Dishes;
+﻿using DietHelper.Common.Models;
+using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,9 +24,17 @@ namespace DietHelper.Common.Data
                 optionsBuilder.UseNpgsql("Host=localhost;Database=nutrition;Username=postgres;Password=p5t9R_1g7!;Port=5432");
         }
 
+        //старые таблицы
         public DbSet<Product> Products { get; set; }
         public DbSet<Dish> Dishes { get; set; }
         public DbSet<DishIngredient> DishIngredients { get; set; }
+
+        //новые таблицы
+        public DbSet<User> Users { get; set; }
+        public DbSet<BaseProduct> BaseProducts { get; set; }
+        public DbSet<UserProduct> UserProducts { get; set; }
+        public DbSet<UserDish> UserDishes { get; set; }
+        public DbSet<UserDishIngredient> UserDishIngredients { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
