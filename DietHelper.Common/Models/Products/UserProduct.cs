@@ -16,7 +16,6 @@ namespace DietHelper.Common.Models.Products
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        //владелец
         [Required]
         public int UserId { get; set; }
         public virtual User User { get; set; } = null!;
@@ -28,6 +27,6 @@ namespace DietHelper.Common.Models.Products
 
         public bool IsDeleted { get; set; } = false;
 
-        public virtual ICollection<DishIngredient> DishIngredients { get; set; } = new List<DishIngredient>();
+        public virtual ICollection<UserDishIngredient> DishIngredients { get; set; } = new List<UserDishIngredient>();
     }
 }

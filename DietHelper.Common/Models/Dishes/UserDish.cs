@@ -28,7 +28,6 @@ namespace DietHelper.Common.Models.Dishes
 
         public virtual ICollection<UserDishIngredient> Ingredients { get; set; } = new List<UserDishIngredient>();
 
-        [NotMapped]
         public NutritionInfo DishNutrition => new()
         {
             Calories = Ingredients.Sum(i => i.CurrentNutrition.Calories),

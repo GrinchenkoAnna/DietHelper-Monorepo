@@ -1,4 +1,5 @@
-﻿using DietHelper.Common.Models.Products;
+﻿using DietHelper.Common.Models.Dishes;
+using DietHelper.Common.Models.Products;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -21,5 +22,7 @@ namespace DietHelper.Common.Models
         public string? Name { get; set; }
 
         public virtual ICollection<UserProduct> Products { get; set; } = new List<UserProduct>();
+
+        public virtual ICollection<UserDish> Dishes { get; set; } = new List<UserDish>();
     }
 }

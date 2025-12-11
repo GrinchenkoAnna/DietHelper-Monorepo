@@ -1,4 +1,5 @@
-﻿using DietHelper.Common.Models.Core;
+﻿using DietHelper.Common.Interfaces.Core;
+using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DietHelper.Common.Models.Products
 {
-    public class BaseProduct
+    public class BaseProduct : INutritional
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

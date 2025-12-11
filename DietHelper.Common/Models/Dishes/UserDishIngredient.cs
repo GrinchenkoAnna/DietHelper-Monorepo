@@ -18,11 +18,11 @@ namespace DietHelper.Common.Models.Dishes
 
         [Required]
         public int UserDishId { get; set; }
-        public virtual UserDish Dish { get; set; } = null!;
+        public virtual UserDish UserDish { get; set; } = null!;
 
         [Required]
         public int UserProductId { get; set; }
-        public virtual UserProduct Product { get; set; } = null!;
+        public virtual UserProduct UserProduct { get; set; } = null!;
 
         [Required]
         public double Quantity { get; set; }
@@ -32,15 +32,14 @@ namespace DietHelper.Common.Models.Dishes
 
         public bool IsDeleted { get; set; } = false;        
 
-        [NotMapped]
-        public NutritionInfo CurrentNutrition
+        public NutritionInfo CurrentNutrition //нужно вообще??
         {
             get
             {
-                if (Product == null) return new NutritionInfo();
+                if (UserProduct == null) return new NutritionInfo();
 
                 var factor = Quantity / 100;
-                var nutrition = Product.CustomNutrition;
+                var nutrition = UserProduct.CustomNutrition;
 
                 return new NutritionInfo()
                 {
