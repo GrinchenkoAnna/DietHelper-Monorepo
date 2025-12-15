@@ -131,8 +131,8 @@ namespace DietHelper.ViewModels
         }
         private void OnUserProductPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ProductViewModel.Quantity) ||
-                e.PropertyName == nameof(ProductViewModel.TotalNutritionInfo))
+            if (e.PropertyName == nameof(UserProductViewModel.Quantity) ||
+                e.PropertyName == nameof(UserProductViewModel.NutritionFacts))
                 UpdateTotals();
         }
 
@@ -148,8 +148,8 @@ namespace DietHelper.ViewModels
         }
         private void OnUserDishPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(DishViewModel.Quantity) ||
-                e.PropertyName == nameof(DishViewModel.NutritionFacts))
+            if (e.PropertyName == nameof(UserDishViewModel.Quantity) ||
+                e.PropertyName == nameof(UserDishViewModel.NutritionFacts))
                 UpdateTotals();
         }
 
@@ -254,9 +254,8 @@ namespace DietHelper.ViewModels
         [RelayCommand]
         private async Task AddUserProduct()
         {
-            var userProduct = await WeakReferenceMessenger.Default.Send(new AddProductMessage());
-            //в messages возвращается не тот тип, что нужен. Раскомментировать после правки messages
-            //if (userProduct is not null) UserProducts.Add(userProduct);
+            var userProduct = await WeakReferenceMessenger.Default.Send(new AddUserProductMessage());
+            if (userProduct is not null) UserProducts.Add(userProduct);
         }
 
         [RelayCommand]
@@ -268,9 +267,8 @@ namespace DietHelper.ViewModels
         [RelayCommand]
         private async Task AddDish()
         {
-            var userDish = await WeakReferenceMessenger.Default.Send(new AddDishMessage());
-            // в messages возвращается не тот тип, что нужен. Раскомментировать после правки messages
-            //if (userDish is not null) UserDishes.Add(userDish);
+            var userDish = await WeakReferenceMessenger.Default.Send(new AddUserDishMessage());
+            if (userDish is not null) UserDishes.Add(userDish);
         }
 
         [RelayCommand]

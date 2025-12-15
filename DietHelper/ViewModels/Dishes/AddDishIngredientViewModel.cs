@@ -69,7 +69,7 @@ namespace DietHelper.ViewModels.Dishes
             //AllItems.Remove(productViewModel);
             await _dbService.DeleteProductAsync(productViewModel.Id);
 
-            WeakReferenceMessenger.Default.Send(new ProductDeleteMessage(productViewModel.Id));
+            WeakReferenceMessenger.Default.Send(new DeleteUserProductMessage(productViewModel.Id));
         }
     }
 }

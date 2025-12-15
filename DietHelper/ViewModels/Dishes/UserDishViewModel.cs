@@ -147,15 +147,13 @@ namespace DietHelper.ViewModels.Dishes
         [RelayCommand]
         private async Task AddDishIngredient()
         {
-            //переделать messages
             var ingredient = await WeakReferenceMessenger.Default.Send(new AddDishIngredientMessage());
 
             if (ingredient is not null)
             {
                 if (Ingredients.Any(i => i.Id == ingredient.Id)) return;
 
-                //в messages возвращается не тот тип, что нужен. Раскомментировать после правки messages
-                //Ingredients.Add(ingredient);
+                Ingredients.Add(ingredient);
                 SetupIngredientSubscriptions();
                 Recalculate();
 

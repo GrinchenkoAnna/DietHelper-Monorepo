@@ -12,7 +12,7 @@ public partial class AddProductWindow : Window
     {
         InitializeComponent();
 
-        WeakReferenceMessenger.Default.Register<AddProductWindow, AddProductClosedMessage>(this,
+        WeakReferenceMessenger.Default.Register<AddProductWindow, AddUserProductClosedMessage>(this,
             static (window, message) =>
             {
                 window.Close(message.SelectedProduct);

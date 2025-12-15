@@ -85,7 +85,7 @@ namespace DietHelper.ViewModels.Dishes
             //AllItems.Remove(dishViewModel);
             await _dbService.DeleteDishAsync(dishViewModel.Id);
 
-            WeakReferenceMessenger.Default.Send(new DishDeleteMessage(dishViewModel.Id));
+            WeakReferenceMessenger.Default.Send(new DeleteUserDishMessage(dishViewModel.Id));
         }
     }
 }
