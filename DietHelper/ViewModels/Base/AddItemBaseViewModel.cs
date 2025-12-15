@@ -39,7 +39,7 @@ namespace DietHelper.ViewModels.Base
 
         protected AddItemBaseViewModel(DatabaseService dbService)
         {
-            _dbService = dbService;
+            //_dbService = dbService;
             InitializeMockData();
         }
 
@@ -55,10 +55,10 @@ namespace DietHelper.ViewModels.Base
             IsBusy = true;
             SearchResults.Clear();
 
-            // временно для имитации работы
+            //временно
             foreach (var item in AllItems)
             {
-                // не очень эффективный алгоритм поиска
+                //не очень эффективный алгоритм поиска
                 if (term is not null && item.GetType().GetProperty("Name")!.GetValue(item)!.ToString()
                     .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
                     SearchResults.Add(item);

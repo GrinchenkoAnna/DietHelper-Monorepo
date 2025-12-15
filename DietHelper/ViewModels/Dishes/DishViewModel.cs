@@ -16,6 +16,7 @@ namespace DietHelper.ViewModels.Dishes
 {
     public partial class DishViewModel : ObservableValidator
     {
+        //класс будет удален. Все закомментированные строки кода уже не используются
         private readonly Dish _model;
         private readonly NutritionCalculator _calculator;
         private readonly DatabaseService _dbService;
@@ -75,7 +76,7 @@ namespace DietHelper.ViewModels.Dishes
 
             if (!IsManual)
             {
-                NutritionFacts = _calculator.CalculateDishNutrition(dishIngredients);
+                //NutritionFacts = _calculator.CalculateDishNutrition(dishIngredients);
             }                
             
             UpdateTotalQuantity();           

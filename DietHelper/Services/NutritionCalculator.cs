@@ -7,6 +7,8 @@ using System.Linq;
 
 namespace DietHelper.Services
 {
+    public record IngredientCalculationDto(int UserProductId, double Quantity);
+
     public class NutritionCalculator
     {
         private static double CalculateNutritionValue(double value, double quantity)
@@ -27,18 +29,26 @@ namespace DietHelper.Services
             };
         }
 
-        public NutritionInfo CalculateDishNutrition(IEnumerable<DishIngredient> ingredients)
+        //!!!
+        public NutritionInfo CalculateDishNutrition(IEnumerable<IngredientCalculationDto> ingredients)
         {
-            return ingredients == null
-            ? throw new ArgumentNullException(nameof(ingredients))
-            : ingredients.Aggregate(new NutritionInfo(), (total, item) =>
-            {
-                total.Calories += CalculateNutritionValue(item.Ingredient.NutritionFacts.Calories, item.Quantity);
-                total.Protein += CalculateNutritionValue(item.Ingredient.NutritionFacts.Protein, item.Quantity);
-                total.Fat += CalculateNutritionValue(item.Ingredient.NutritionFacts.Fat, item.Quantity);
-                total.Carbs += CalculateNutritionValue(item.Ingredient.NutritionFacts.Carbs, item.Quantity);
-                return total;
-            });
+            //реализовать с помощью api
+            return new NutritionInfo();
         }
+
+        //убрать - это для старых классов
+        //public NutritionInfo CalculateDishNutrition(IEnumerable<DishIngredient> ingredients)
+        //{
+        //    return ingredients == null
+        //    ? throw new ArgumentNullException(nameof(ingredients))
+        //    : ingredients.Aggregate(new NutritionInfo(), (total, item) =>
+        //    {
+        //        total.Calories += CalculateNutritionValue(item.Ingredient.NutritionFacts.Calories, item.Quantity);
+        //        total.Protein += CalculateNutritionValue(item.Ingredient.NutritionFacts.Protein, item.Quantity);
+        //        total.Fat += CalculateNutritionValue(item.Ingredient.NutritionFacts.Fat, item.Quantity);
+        //        total.Carbs += CalculateNutritionValue(item.Ingredient.NutritionFacts.Carbs, item.Quantity);
+        //        return total;
+        //    });
+        //}
     }
 }

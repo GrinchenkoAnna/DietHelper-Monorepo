@@ -27,12 +27,9 @@ namespace DietHelper.Common.Models.Dishes
         [Required]
         public double Quantity { get; set; }
 
-        [NotMapped]
-        private double Factor => Quantity / 100;
-
         public bool IsDeleted { get; set; } = false;        
 
-        public NutritionInfo CurrentNutrition //нужно вообще??
+        public NutritionInfo CurrentNutrition
         {
             get
             {
