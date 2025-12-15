@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -20,21 +21,15 @@ namespace DietHelper.Services
             };
         }
 
-        public async Task<Product> GetProductMockAsync()
+        public async Task<UserProduct?> GetUserProductMockAsync()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync("simpleproducts/mock");
+            var response = await _httpClient.GetAsync("simpleproducts/mock");
 
-                response.EnsureSuccessStatusCode();
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
 
-                return await response.Content.ReadFromJsonAsync<Product>() ?? new Product();
-            }
-            catch 
-            {
-                return new Product();
-            }
-            
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<UserProduct>();
         }
     }
 }

@@ -37,7 +37,7 @@ namespace DietHelper.ViewModels.Products
         private double quantity = 100;
 
         [ObservableProperty]
-        private NutritionInfo totalNutritionInfo = new();
+        private NutritionInfo nutritionFacts = new();
 
         public BaseProductViewModel()
         {
@@ -70,7 +70,7 @@ namespace DietHelper.ViewModels.Products
         {
             var factor = Quantity / 100.0;
 
-            TotalNutritionInfo = new()
+            NutritionFacts = new()
             {
                 Calories = Calories * factor,
                 Protein = Protein * factor,

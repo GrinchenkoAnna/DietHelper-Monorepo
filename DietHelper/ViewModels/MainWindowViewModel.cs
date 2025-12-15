@@ -21,105 +21,155 @@ namespace DietHelper.ViewModels
         //private readonly DatabaseService _dbService;
         private readonly ApiService _apiService;
 
-        private ObservableCollection<ProductViewModel> _products = [];
-        public ObservableCollection<ProductViewModel> Products
+        private ObservableCollection<UserProductViewModel> _userProducts = [];
+
+        public ObservableCollection<UserProductViewModel> UserProducts
         {
-            get => _products;
+            get => _userProducts;
             set
             {
-                if (_products is not null)
+                if (_userProducts is not null)
                 {
-                    _products.CollectionChanged -= OnProductsCollectionChanged;
-                    UnsubscribeFromProducts(_products);
+                    _userProducts.CollectionChanged -= OnUserProductsCollectionChanged;
+                    UnsubscribeFromUserProducts(_userProducts);
                 }
 
-                SetProperty(ref _products, value);
+                SetProperty(ref _userProducts, value);
 
-                if (_products is not null)
+                if (_userProducts is not null)
                 {
-                    _products.CollectionChanged += OnProductsCollectionChanged; 
-                    SubscribeToProducts(_products);
+                    _userProducts.CollectionChanged += OnUserProductsCollectionChanged;
+                    SubscribeToUserProducts(_userProducts);
                 }
 
                 UpdateTotals();
             }
         }
 
-        private ObservableCollection<DishViewModel> _dishes = [];
-        public ObservableCollection<DishViewModel> Dishes
+        private ObservableCollection<UserDishViewModel> _userDishes = [];
+
+        public ObservableCollection<UserDishViewModel> UserDishes
         {
-            get => _dishes;
+            get => _userDishes;
             set
             {
-                if (_dishes is not null)
+                if (_userDishes is not null)
                 {
-                    _dishes.CollectionChanged -= OnDishesCollectionChanged;
-                    UnsubscribeFromDishes(_dishes);
+                    _userDishes.CollectionChanged -= OnUserDishesCollectionChanged;
+                    UnsubscribeFromUserDishes(_userDishes);
                 }
 
-                SetProperty(ref _dishes, value);
+                SetProperty(ref _userDishes, value);
 
-                if (_dishes is not null)
+                if (_userDishes is not null)
                 {
-                    _dishes.CollectionChanged += OnDishesCollectionChanged;
-                    SubscribeToDishes(_dishes);
+                    _userDishes.CollectionChanged += OnUserDishesCollectionChanged;
+                    SubscribeToUserDishes(_userDishes);
                 }
 
                 UpdateTotals();
             }
         }
 
-        private void SubscribeToProducts(IEnumerable<ProductViewModel> products)
+        //private ObservableCollection<ProductViewModel> _products = [];
+        //public ObservableCollection<ProductViewModel> Products
+        //{
+        //    get => _products;
+        //    set
+        //    {
+        //        if (_products is not null)
+        //        {
+        //            _products.CollectionChanged -= OnProductsCollectionChanged;
+        //            UnsubscribeFromProducts(_products);
+        //        }
+
+        //        SetProperty(ref _products, value);
+
+        //        if (_products is not null)
+        //        {
+        //            _products.CollectionChanged += OnProductsCollectionChanged; 
+        //            SubscribeToProducts(_products);
+        //        }
+
+        //        UpdateTotals();
+        //    }
+        //}
+
+        //private ObservableCollection<DishViewModel> _dishes = [];
+        //public ObservableCollection<DishViewModel> Dishes
+        //{
+        //    get => _dishes;
+        //    set
+        //    {
+        //        if (_dishes is not null)
+        //        {
+        //            _dishes.CollectionChanged -= OnDishesCollectionChanged;
+        //            UnsubscribeFromDishes(_dishes);
+        //        }
+
+        //        SetProperty(ref _dishes, value);
+
+        //        if (_dishes is not null)
+        //        {
+        //            _dishes.CollectionChanged += OnDishesCollectionChanged;
+        //            SubscribeToDishes(_dishes);
+        //        }
+
+        //        UpdateTotals();
+        //    }
+        //}
+
+        private void SubscribeToUserProducts(IEnumerable<UserProductViewModel> userProducts)
         {
-            foreach (var product in products) 
-                product.PropertyChanged += OnProductPropertyChanged;
+            foreach (var userProduct in userProducts) 
+                userProduct.PropertyChanged += OnUserProductPropertyChanged;
         }
-        private void UnsubscribeFromProducts(IEnumerable<ProductViewModel> products)
+        private void UnsubscribeFromUserProducts(IEnumerable<UserProductViewModel> userProducts)
         {
-            foreach (var product in products)
-                product.PropertyChanged -= OnProductPropertyChanged;
+            foreach (var userProduct in userProducts)
+                userProduct.PropertyChanged -= OnUserProductPropertyChanged;
         }
-        private void OnProductPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void OnUserProductPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ProductViewModel.Quantity) ||
                 e.PropertyName == nameof(ProductViewModel.TotalNutritionInfo))
                 UpdateTotals();
         }
 
-        private void SubscribeToDishes(IEnumerable<DishViewModel> dishes)
+        private void SubscribeToUserDishes(IEnumerable<UserDishViewModel> userDishes)
         {
-            foreach (var dish in dishes)
-                dish.PropertyChanged += OnDishPropertyChanged;
+            foreach (var userDish in userDishes)
+                userDish.PropertyChanged += OnUserDishPropertyChanged;
         }
-        private void UnsubscribeFromDishes(IEnumerable<DishViewModel> dishes)
+        private void UnsubscribeFromUserDishes(IEnumerable<UserDishViewModel> userDishes)
         {
-            foreach (var dish in dishes)
-                dish.PropertyChanged -= OnDishPropertyChanged;
+            foreach (var userDish in userDishes)
+                userDish.PropertyChanged -= OnUserDishPropertyChanged;
         }
-        private void OnDishPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void OnUserDishPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(DishViewModel.Quantity) ||
                 e.PropertyName == nameof(DishViewModel.NutritionFacts))
                 UpdateTotals();
         }
 
-        private void OnProductsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void OnUserProductsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems is not null)
-                SubscribeToProducts(e.NewItems.Cast<ProductViewModel>());
+                SubscribeToUserProducts(e.NewItems.Cast<UserProductViewModel>());
 
             if (e.OldItems is not null)
-                UnsubscribeFromProducts(e.OldItems.Cast<ProductViewModel>());
+                UnsubscribeFromUserProducts(e.OldItems.Cast<UserProductViewModel>());
 
             UpdateTotals();
         }
-        private void OnDishesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void OnUserDishesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems is not null)
-                SubscribeToDishes(e.NewItems.Cast<DishViewModel>());
+                SubscribeToUserDishes(e.NewItems.Cast<UserDishViewModel>());
 
             if (e.OldItems is not null)
-                UnsubscribeFromDishes(e.OldItems.Cast<DishViewModel>());
+                UnsubscribeFromUserDishes(e.OldItems.Cast<UserDishViewModel>());
 
             UpdateTotals();
         }
@@ -128,8 +178,8 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                var product = await _apiService.GetProductMockAsync();
-                Products.Add(new ProductViewModel(product));
+                var userProduct = await _apiService.GetUserProductMockAsync();
+                 if (userProduct is not null) UserProducts.Add(new UserProductViewModel(userProduct));
 
                 //+ блюда
             }
@@ -146,11 +196,13 @@ namespace DietHelper.ViewModels
             _apiService = apiService;
             LoadMocksFromServerAsync();
 
-            _products.CollectionChanged += OnProductsCollectionChanged;
-            _dishes.CollectionChanged += OnDishesCollectionChanged;
+            //_products.CollectionChanged += OnProductsCollectionChanged;
+            _userProducts.CollectionChanged += OnUserProductsCollectionChanged;
+            _userDishes.CollectionChanged += OnUserDishesCollectionChanged;
 
-            SubscribeToProducts(_products);
-            SubscribeToDishes(_dishes);
+            //SubscribeToProducts(_products);
+            SubscribeToUserProducts(_userProducts);
+            SubscribeToUserDishes(_userDishes);
 
             UpdateTotals();
         }
@@ -171,15 +223,15 @@ namespace DietHelper.ViewModels
 
         private void UpdateTotalNutrition()
         {
-            var totalProductCalories = Products.Sum(p => p.TotalNutritionInfo.Calories);
-            var totalProductProtein = Products.Sum(p => p.TotalNutritionInfo.Protein);
-            var totalProductFat = Products.Sum(p => p.TotalNutritionInfo.Fat);
-            var totalProductCarbs = Products.Sum(p => p.TotalNutritionInfo.Carbs);
+            var totalProductCalories = UserProducts.Sum(up => up.NutritionFacts.Calories);
+            var totalProductProtein = UserProducts.Sum(up => up.NutritionFacts.Protein);
+            var totalProductFat = UserProducts.Sum(up => up.NutritionFacts.Fat);
+            var totalProductCarbs = UserProducts.Sum(up => up.NutritionFacts.Carbs);
 
-            var totalDishCalories = Dishes.Sum(d => d.NutritionFacts.Calories);
-            var totalDishProtein = Dishes.Sum(d => d.NutritionFacts.Protein);
-            var totalDishFat = Dishes.Sum(d => d.NutritionFacts.Fat);
-            var totalDishCarbs = Dishes.Sum(d => d.NutritionFacts.Carbs);
+            var totalDishCalories = UserDishes.Sum(ud => ud.NutritionFacts.Calories);
+            var totalDishProtein = UserDishes.Sum(ud => ud.NutritionFacts.Protein);
+            var totalDishFat = UserDishes.Sum(ud => ud.NutritionFacts.Fat);
+            var totalDishCarbs = UserDishes.Sum(ud => ud.NutritionFacts.Carbs);
 
             TotalNutrition = new NutritionInfo
             {
@@ -192,37 +244,39 @@ namespace DietHelper.ViewModels
 
         private void UpdateTotalQuantity()
         {
-            var productQuantity = Products.Sum(p => p.Quantity);
-            var dishQuantity = Dishes.Sum(d => d.Quantity);
+            var userProductsQuantity = UserProducts.Sum(up => up.Quantity);
+            var userDishesQuantity = UserDishes.Sum(d => d.Quantity);
 
-            TotalQuantity = productQuantity + dishQuantity;
+            TotalQuantity = userProductsQuantity + userDishesQuantity;
             FormattedTotalQuantity = $"{TotalQuantity} г";
         }
 
         [RelayCommand]
-        private async Task AddProduct()
+        private async Task AddUserProduct()
         {
-            var product = await WeakReferenceMessenger.Default.Send(new AddProductMessage());
-            if (product is not null) Products.Add(product);
+            var userProduct = await WeakReferenceMessenger.Default.Send(new AddProductMessage());
+            //в messages возвращается не тот тип, что нужен. Раскомментировать после правки messages
+            //if (userProduct is not null) UserProducts.Add(userProduct);
         }
 
         [RelayCommand]
-        private async Task RemoveProduct(ProductViewModel product)
+        private async Task RemoveUserProduct(UserProductViewModel userProduct)
         {            
-            Products.Remove(product);
+            UserProducts.Remove(userProduct);
         }
 
         [RelayCommand]
         private async Task AddDish()
         {
-            var dish = await WeakReferenceMessenger.Default.Send(new AddDishMessage());
-            if (dish is not null) Dishes.Add(dish);
+            var userDish = await WeakReferenceMessenger.Default.Send(new AddDishMessage());
+            // в messages возвращается не тот тип, что нужен. Раскомментировать после правки messages
+            //if (userDish is not null) UserDishes.Add(userDish);
         }
 
         [RelayCommand]
-        private void RemoveDish(DishViewModel dish)
+        private void RemoveDish(UserDishViewModel userDish)
         {
-            Dishes.Remove(dish);
+            UserDishes.Remove(userDish);
         }
     }
 }
