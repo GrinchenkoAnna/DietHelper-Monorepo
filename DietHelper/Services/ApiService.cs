@@ -44,7 +44,7 @@ namespace DietHelper.Services
             throw new NotImplementedException();
         }
 
-        public async Task AddUserProductAsync(UserProduct newUserProduct)
+        public async Task<UserProduct> AddUserProductAsync(UserProduct newUserProduct)
         {
             throw new NotImplementedException();
         }

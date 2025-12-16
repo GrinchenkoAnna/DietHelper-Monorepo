@@ -36,7 +36,7 @@ namespace DietHelper
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<AddProductViewModel>();
             services.AddTransient<AddUserDishViewModel>();
-            services.AddTransient<AddDishIngredientViewModel>();
+            services.AddTransient<AddUserDishIngredientViewModel>();
 
             _serviceProvider = services.BuildServiceProvider();
 

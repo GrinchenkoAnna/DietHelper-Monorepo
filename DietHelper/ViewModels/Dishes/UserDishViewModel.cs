@@ -115,7 +115,18 @@ namespace DietHelper.ViewModels.Dishes
             UserId = userDish.UserId;
             Name = userDish.Name ?? string.Empty;
 
-            Ingredients.CollectionChanged += (s, e) => Recalculate();
+            Ingredients.CollectionChanged += (s, e) =>
+            {
+                Recalculate();
+                if (e.NewItems != null)
+                {
+                    foreach (var item in e.NewItems.OfType<UserDishIngredientViewModel>())
+                    {
+                        SetupIngredientSubscription(item);
+                    }
+                }
+            };
+
 
             PropertyChanged += (s, e) =>
             {
@@ -129,13 +140,16 @@ namespace DietHelper.ViewModels.Dishes
             Recalculate();
         }
 
+        private void SetupIngredientSubscription(UserDishIngredientViewModel ingredient)
+        {
+            ingredient.PropertyChanged -= OnIngredientPropertyChanged;
+            ingredient.PropertyChanged += OnIngredientPropertyChanged;
+        }
+
         private void SetupIngredientSubscriptions()
         {
             foreach (var ingredient in Ingredients)
-            {
-                ingredient.PropertyChanged -= OnIngredientPropertyChanged;
-                ingredient.PropertyChanged += OnIngredientPropertyChanged;
-            }
+                SetupIngredientSubscription(ingredient);
         }
 
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -153,11 +167,13 @@ namespace DietHelper.ViewModels.Dishes
             {
                 if (Ingredients.Any(i => i.Id == ingredient.Id)) return;
 
+                ingredient.UserDishId = Id;
                 Ingredients.Add(ingredient);
-                SetupIngredientSubscriptions();
+                SetupIngredientSubscription(ingredient);
                 Recalculate();
 
                 await _apiService.UpdateUserDishAsync(_model);
+                await UpdateModelAsync();
             }
         }
 
@@ -166,11 +182,12 @@ namespace DietHelper.ViewModels.Dishes
         {
             if (Ingredients.Contains(ingredient))
             {
-                ingredient.PropertyChanged -= OnIngredientPropertyChanged; // Отписываемся
+                ingredient.PropertyChanged -= OnIngredientPropertyChanged; 
                 Ingredients.Remove(ingredient);
                 Recalculate();
 
                 await _apiService.UpdateUserDishAsync(_model);
+                await UpdateModelAsync();
             }
         }
 
