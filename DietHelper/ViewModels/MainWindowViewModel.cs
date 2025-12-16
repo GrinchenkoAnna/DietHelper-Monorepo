@@ -18,7 +18,6 @@ namespace DietHelper.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        //private readonly DatabaseService _dbService;
         private readonly ApiService _apiService;
 
         private ObservableCollection<UserProductViewModel> _userProducts = [];

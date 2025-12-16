@@ -19,8 +19,8 @@ namespace DietHelper.ViewModels.Dishes
     public partial class UserDishViewModel : ObservableValidator
     {
         private readonly UserDish _model;
-        private readonly NutritionCalculator _calculator;
-        private readonly DatabaseService _dbService;
+        private readonly NutritionCalculator _calculator;     
+        private readonly ApiService _apiService;
 
         public ObservableCollection<UserDishIngredientViewModel> Ingredients { get; } = new();
 
@@ -104,11 +104,11 @@ namespace DietHelper.ViewModels.Dishes
 
         public UserDishViewModel() {}
 
-        public UserDishViewModel(UserDish userDish, NutritionCalculator calculator, bool isManual = false)
+        public UserDishViewModel(UserDish userDish, NutritionCalculator calculator, ApiService apiService, bool isManual = false)
         {
             _model = userDish;
             _calculator = calculator;
-            //_dbService = new DatabaseService();
+            _apiService = apiService;
 
             IsManual = isManual;      
             Id = userDish.Id;
@@ -157,9 +157,7 @@ namespace DietHelper.ViewModels.Dishes
                 SetupIngredientSubscriptions();
                 Recalculate();
 
-                //Обновить модель через API
-                //await UpdateModelAsync();
-                //await _apiService.UpdateUserDishAsync(_model);
+                await _apiService.UpdateUserDishAsync(_model);
             }
         }
 
@@ -172,9 +170,7 @@ namespace DietHelper.ViewModels.Dishes
                 Ingredients.Remove(ingredient);
                 Recalculate();
 
-                //Обновить модель через API
-                //await UpdateModelAsync();
-                //await _apiService.UpdateUserDishAsync(_model);
+                await _apiService.UpdateUserDishAsync(_model);
             }
         }
 

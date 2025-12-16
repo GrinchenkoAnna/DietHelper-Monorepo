@@ -44,7 +44,7 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddUserDishMessage>(this, static (w, m) =>
             {
-                var viewModel = w._serviceProvider.GetRequiredService<AddDishViewModel>();
+                var viewModel = w._serviceProvider.GetRequiredService<AddUserDishViewModel>();
 
                 var dialog = new AddDishWindow
                 {

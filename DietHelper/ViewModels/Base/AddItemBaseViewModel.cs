@@ -59,8 +59,12 @@ namespace DietHelper.ViewModels.Base
             foreach (var item in AllUserItems)
             {
                 //не очень эффективный алгоритм поиска
-                if (term is not null && item.GetType().GetProperty("Name")!.GetValue(item)!.ToString()
-                    .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
+                if (term is not null 
+                    && item.GetType()
+                           .GetProperty("Name")!
+                           .GetValue(item)!
+                           .ToString()
+                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
                     UserSearchResults.Add(item);
             }
 

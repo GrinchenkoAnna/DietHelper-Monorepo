@@ -17,7 +17,7 @@ namespace DietHelper
 {
     public partial class App : Application
     {
-        private IServiceProvider _serviceProvider;
+        private IServiceProvider? _serviceProvider;
 
         public override void Initialize()
         {
@@ -29,13 +29,13 @@ namespace DietHelper
             var services = new ServiceCollection();
 
             services.AddSingleton<NutritionCalculator>();
-            //services.AddSingleton<DatabaseService>();
             services.AddSingleton<ApiService>();
 
             services.AddTransient<ViewModelBase>();
+            services.AddTransient<UserDishViewModel>();
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<AddProductViewModel>();
-            services.AddTransient<AddDishViewModel>();
+            services.AddTransient<AddUserDishViewModel>();
             services.AddTransient<AddDishIngredientViewModel>();
 
             _serviceProvider = services.BuildServiceProvider();

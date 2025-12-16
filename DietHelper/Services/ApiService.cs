@@ -1,4 +1,5 @@
 ﻿using DietHelper.Common.Models;
+using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
 using System;
 using System.Collections.Generic;
@@ -58,7 +59,27 @@ namespace DietHelper.Services
             throw new NotImplementedException();
         }
 
-        internal async Task DeleteUserProductAsync(int id)
+        public async Task DeleteUserProductAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<UserDish>> GetDishesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<UserDish> AddUserDishAsync(UserDish userDish)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task UpdateUserDishAsync(UserDish userDish)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task DeleteDishAsync(int id)
         {
             throw new NotImplementedException();
         }
