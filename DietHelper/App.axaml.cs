@@ -32,13 +32,13 @@ namespace DietHelper
             //services.AddSingleton<DatabaseService>();
             services.AddSingleton<ApiService>();
 
+            services.AddTransient<ViewModelBase>();
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<AddProductViewModel>();
             services.AddTransient<AddDishViewModel>();
             services.AddTransient<AddDishIngredientViewModel>();
 
             _serviceProvider = services.BuildServiceProvider();
-
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {

@@ -191,7 +191,7 @@ namespace DietHelper.ViewModels
 
         public MainWindowViewModel() : this(new ApiService()) { }
 
-        public MainWindowViewModel(ApiService apiService)
+        public MainWindowViewModel(ApiService apiService) : base(apiService)
         {
             _apiService = apiService;
             LoadMocksFromServerAsync();

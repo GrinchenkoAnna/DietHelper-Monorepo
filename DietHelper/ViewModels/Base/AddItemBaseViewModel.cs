@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DietHelper.Common.Models.Products;
 using DietHelper.Services;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -10,24 +11,23 @@ namespace DietHelper.ViewModels.Base
         where TModel : class
         where TViewModel : class
     {
-        protected readonly DatabaseService _dbService;
+        protected readonly ApiService _apiService;
 
         [ObservableProperty] private string? searchText = string.Empty;
         [ObservableProperty] private bool isBusy = false;
 
-        [ObservableProperty] private TViewModel? selectedItem;
+        [ObservableProperty] private TViewModel? selectedUserItem;
         
-        public ObservableCollection<TViewModel> SearchResults { get; } = new();
+        public ObservableCollection<TViewModel> UserSearchResults { get; } = new();
 
-        // заменить на подгрузку из бд или вообще переделать коллекции
-        protected ObservableCollection<TViewModel> AllItems { get; } = new();
+        protected ObservableCollection<TViewModel> AllUserItems { get; } = new();
 
         [ObservableProperty] private string? manualName;
         [ObservableProperty] private double manualCalories;
         [ObservableProperty] private double manualProtein;
         [ObservableProperty] private double manualFat;
         [ObservableProperty] private double manualCarbs;
-        protected abstract TModel CreateNewItem();
+        protected abstract Task<TModel> CreateNewUserItem();
         protected void ClearManualEntries()
         {
             ManualName = string.Empty;
@@ -37,13 +37,13 @@ namespace DietHelper.ViewModels.Base
             ManualCarbs = 0;
         }
 
-        protected AddItemBaseViewModel(DatabaseService dbService)
+        protected AddItemBaseViewModel(ApiService apiService) : base(apiService)
         {
-            //_dbService = dbService;
-            InitializeMockData();
+            _apiService = apiService;
+            InitializeData();
         }
 
-        protected abstract void InitializeMockData();
+        protected abstract void InitializeData();
 
         partial void OnSearchTextChanged(string? value)
         {
@@ -53,22 +53,22 @@ namespace DietHelper.ViewModels.Base
         private async Task DoSearch(string? term)
         {
             IsBusy = true;
-            SearchResults.Clear();
+            UserSearchResults.Clear();
 
             //временно
-            foreach (var item in AllItems)
+            foreach (var item in AllUserItems)
             {
                 //не очень эффективный алгоритм поиска
                 if (term is not null && item.GetType().GetProperty("Name")!.GetValue(item)!.ToString()
                     .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                    SearchResults.Add(item);
+                    UserSearchResults.Add(item);
             }
 
             IsBusy = false;
         }
 
         [RelayCommand]
-        protected abstract void AddItem();
+        protected abstract void AddUserItem();
 
         [RelayCommand]
         protected abstract void AddManualItem();

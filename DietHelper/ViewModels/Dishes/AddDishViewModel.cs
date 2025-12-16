@@ -16,7 +16,7 @@ namespace DietHelper.ViewModels.Dishes
             _nutritionCalculator = nutritionCalculator;
         }
 
-        protected override async void InitializeMockData()
+        protected override async void InitializeData()
         {
             var dishes = await _dbService.GetDishesAsync();
 
@@ -24,13 +24,13 @@ namespace DietHelper.ViewModels.Dishes
             {
                 if (dish.Id > 0)
                 {
-                    SearchResults.Add(new DishViewModel(dish, _nutritionCalculator));
-                    //AllItems.Add(new DishViewModel(dish, _calculator));
+                    BaseSearchResults.Add(new DishViewModel(dish, _nutritionCalculator));
+                    //AllUserItems.Add(new DishViewModel(dish, _calculator));
                 }                
             }
         }
         
-        protected override void AddItem()
+        protected override void AddUserItem()
         {
             if (SelectedItem is not null)
             {
@@ -46,7 +46,7 @@ namespace DietHelper.ViewModels.Dishes
                 && ManualCarbs == 0;
         }
 
-        protected override Dish CreateNewItem()
+        protected override Dish CreateNewUserItem()
         {
             return new Dish()
             {
@@ -65,7 +65,7 @@ namespace DietHelper.ViewModels.Dishes
         {
             if (string.IsNullOrEmpty(ManualName)) return;
 
-            var newDish = CreateNewItem();            
+            var newDish = CreateNewUserItem();            
 
             var newItem = new DishViewModel(newDish, _nutritionCalculator, true);
             if (!IsEmpty()) newItem.Quantity = 100;
@@ -81,8 +81,8 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void DeleteItemFromDatabase(DishViewModel dishViewModel)
         {
-            SearchResults.Remove(dishViewModel);
-            //AllItems.Remove(dishViewModel);
+            BaseSearchResults.Remove(dishViewModel);
+            //AllUserItems.Remove(dishViewModel);
             await _dbService.DeleteDishAsync(dishViewModel.Id);
 
             WeakReferenceMessenger.Default.Send(new DeleteUserDishMessage(dishViewModel.Id));

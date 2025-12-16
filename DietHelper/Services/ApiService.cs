@@ -1,4 +1,5 @@
-﻿using DietHelper.Common.Models.Products;
+﻿using DietHelper.Common.Models;
+using DietHelper.Common.Models.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,36 @@ namespace DietHelper.Services
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<UserProduct>();
+        }
+
+        public async Task<List<UserProduct>> GetUserProductsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<BaseProduct>> GetBaseProductsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task AddUserProductAsync(UserProduct newUserProduct)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<BaseProduct> AddProductAsync<BaseProduct>(BaseProduct baseProduct)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<User> GetUserAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal async Task DeleteUserProductAsync(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

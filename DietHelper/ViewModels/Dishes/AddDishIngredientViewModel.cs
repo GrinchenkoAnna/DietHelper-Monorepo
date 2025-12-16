@@ -14,7 +14,7 @@ namespace DietHelper.ViewModels.Dishes
         {
         }
 
-        protected override async void InitializeMockData()
+        protected override async void InitializeData()
         {
             var products = await _dbService.GetProductsAsync();
 
@@ -22,13 +22,13 @@ namespace DietHelper.ViewModels.Dishes
             {
                 if (product.Id > 0)
                 {
-                    SearchResults.Add(new ProductViewModel(product));
-                    //AllItems.Add(new ProductViewModel(product));
+                    BaseSearchResults.Add(new ProductViewModel(product));
+                    //AllUserItems.Add(new ProductViewModel(product));
                 }
             }
         }
 
-        protected override Product CreateNewItem()
+        protected override Product CreateNewUserItem()
         {
             return new Product()
             {
@@ -43,7 +43,7 @@ namespace DietHelper.ViewModels.Dishes
             };
         }
 
-        protected override void AddItem()
+        protected override void AddUserItem()
         {
             if (SelectedItem is not null)
                 WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(SelectedItem));
@@ -53,7 +53,7 @@ namespace DietHelper.ViewModels.Dishes
         {
             if (string.IsNullOrEmpty(ManualName)) return;
 
-            var newIngredient = CreateNewItem();
+            var newIngredient = CreateNewUserItem();
             await _dbService.AddProductAsync(newIngredient);
 
             var newItem = new ProductViewModel(newIngredient);
@@ -65,8 +65,8 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void DeleteItemFromDatabase(ProductViewModel productViewModel)
         {
-            SearchResults.Remove(productViewModel);
-            //AllItems.Remove(productViewModel);
+            BaseSearchResults.Remove(productViewModel);
+            //AllUserItems.Remove(productViewModel);
             await _dbService.DeleteProductAsync(productViewModel.Id);
 
             WeakReferenceMessenger.Default.Send(new DeleteUserProductMessage(productViewModel.Id));

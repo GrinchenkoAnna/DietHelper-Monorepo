@@ -20,6 +20,17 @@ namespace DietHelper.Views
         {
             InitializeComponent();
 
+            WeakReferenceMessenger.Default.Register<MainWindow, AddBaseProductMessage>(this, static (w, m) =>
+            {
+                var viewModel = w._serviceProvider.GetRequiredService<AddProductViewModel>();
+
+                var dialog = new AddProductWindow
+                {
+                    DataContext = viewModel
+                };
+                m.Reply(dialog.ShowDialog<BaseProductViewModel?>(w));
+            });
+
             WeakReferenceMessenger.Default.Register<MainWindow, AddUserProductMessage>(this, static (w, m) =>
             {
                 var viewModel = w._serviceProvider.GetRequiredService<AddProductViewModel>();
