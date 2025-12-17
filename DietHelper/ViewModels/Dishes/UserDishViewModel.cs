@@ -86,7 +86,7 @@ namespace DietHelper.ViewModels.Dishes
 
         private void OnIngredientsChanged() => Recalculate();
 
-        private void Recalculate(UserDishIngredientViewModel? changedProduct = null)
+        private async void Recalculate(UserDishIngredientViewModel? changedProduct = null)
         {
             var dishIngredients = Ingredients
             .Select(ingredient => new IngredientCalculationDto(
@@ -96,7 +96,7 @@ namespace DietHelper.ViewModels.Dishes
 
             if (!IsManual)
             {
-                NutritionFacts = _calculator.CalculateDishNutrition(dishIngredients);
+                NutritionFacts = await _calculator.CalculateUserDishNutrition(dishIngredients);
             }                
             
             UpdateTotalQuantity();           

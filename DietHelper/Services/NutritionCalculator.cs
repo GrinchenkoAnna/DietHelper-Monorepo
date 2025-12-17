@@ -4,6 +4,7 @@ using DietHelper.Common.Models.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DietHelper.Services
 {
@@ -11,33 +12,57 @@ namespace DietHelper.Services
 
     public class NutritionCalculator
     {
+        private readonly ApiService _apiService;
+
+        public NutritionCalculator(ApiService apiService)
+        {
+            _apiService = apiService;
+        }
+
         private static double CalculateNutritionValue(double value, double quantity)
         {
             return value * (quantity / 100);
         }
 
-        public NutritionInfo CalculateProductNutrition(Product product, double quantity)
-        {
-            return product == null
-                ? throw new ArgumentNullException(nameof(product))
-                : new NutritionInfo
-            {
-                Calories = CalculateNutritionValue(product.NutritionFacts.Calories, quantity),
-                Protein = CalculateNutritionValue(product.NutritionFacts.Protein, quantity),
-                Fat = CalculateNutritionValue(product.NutritionFacts.Fat, quantity),
-                Carbs = CalculateNutritionValue(product.NutritionFacts.Carbs, quantity)
-            };
-        }
+        //public NutritionInfo CalculateProductNutrition(Product product, double quantity)
+        //{
+        //    return product == null
+        //        ? throw new ArgumentNullException(nameof(product))
+        //        : new NutritionInfo
+        //    {
+        //        Calories = CalculateNutritionValue(product.NutritionFacts.Calories, quantity),
+        //        Protein = CalculateNutritionValue(product.NutritionFacts.Protein, quantity),
+        //        Fat = CalculateNutritionValue(product.NutritionFacts.Fat, quantity),
+        //        Carbs = CalculateNutritionValue(product.NutritionFacts.Carbs, quantity)
+        //    };
+        //}
 
         //!!!
-        public NutritionInfo CalculateDishNutrition(IEnumerable<IngredientCalculationDto> ingredients)
+        public async Task<NutritionInfo> CalculateUserDishNutrition(IEnumerable<IngredientCalculationDto> ingredients)
         {
-            //реализовать с помощью api
-            return new NutritionInfo();
+            var userDishNutrition = new NutritionInfo();
+
+            foreach (var ingredient in ingredients)
+            {
+                var userProduct = await _apiService.GetUserProductsAsync(ingredient.UserProductId);
+                var quantity = ingredient.Quantity;
+
+                if (userProduct is not null)
+                {
+                    var userProductNutrition = userProduct.CustomNutrition;
+
+                    userDishNutrition.Calories += CalculateNutritionValue(userProductNutrition.Calories, quantity);
+                    userDishNutrition.Protein += CalculateNutritionValue(userProductNutrition.Protein, quantity);
+                    userDishNutrition.Fat += CalculateNutritionValue(userProductNutrition.Fat, quantity);
+                    userDishNutrition.Carbs += CalculateNutritionValue(userProductNutrition.Carbs, quantity);
+                }
+            }
+
+            return userDishNutrition;
         }
 
         //убрать - это для старых классов
-        //public NutritionInfo CalculateDishNutrition(IEnumerable<DishIngredient> ingredients)
+        //public NutritionInfo CalculateUserDishNutrition(IEnumerable<DishIngredient> ingredients)
         //{
         //    return ingredients == null
         //    ? throw new ArgumentNullException(nameof(ingredients))

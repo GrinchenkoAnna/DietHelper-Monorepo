@@ -23,6 +23,11 @@ namespace DietHelper.Services
             };
         }
 
+        public async Task<User> GetUserAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<UserProduct?> GetUserProductMockAsync()
         {
             var response = await _httpClient.GetAsync("simpleproducts/mock");
@@ -44,6 +49,11 @@ namespace DietHelper.Services
             throw new NotImplementedException();
         }
 
+        public async Task<UserProduct> GetUserProductsAsync(int userProductId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<UserProduct> AddUserProductAsync(UserProduct newUserProduct)
         {
             throw new NotImplementedException();
@@ -52,12 +62,7 @@ namespace DietHelper.Services
         public async Task<BaseProduct> AddProductAsync<BaseProduct>(BaseProduct baseProduct)
         {
             throw new NotImplementedException();
-        }
-
-        public async Task<User> GetUserAsync()
-        {
-            throw new NotImplementedException();
-        }
+        }        
 
         public async Task DeleteUserProductAsync(int id)
         {
@@ -82,6 +87,6 @@ namespace DietHelper.Services
         public async Task DeleteDishAsync(int id)
         {
             throw new NotImplementedException();
-        }
+        }        
     }
 }
