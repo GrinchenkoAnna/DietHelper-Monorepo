@@ -131,7 +131,7 @@ namespace DietHelper.ViewModels.Dishes
             {
                 if (Ingredients.Any(i => i.Id == ingredient.Id)) return;
 
-                Ingredients.Add(ingredient);
+                //Ingredients.Add(ingredient);
                 IsManual = false;
                 Recalculate();
                 await UpdateModelAsync();

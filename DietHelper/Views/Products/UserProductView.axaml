@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="clr-namespace:DietHelper.ViewModels.Products"
+             x:Class="DietHelper.Views.Products.UserProductView"
+			 x:DataType="vm:UserProductViewModel">
+  
+    <Grid Margin="10 10 10 0">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<TextBlock Grid.Row="0" HorizontalAlignment="Left"
+				   Text="{Binding Name}" 
+				   Width="200" FontWeight="Bold"/>
+		
+		<StackPanel Grid.Row="1" Orientation="Horizontal">
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="К: "/>
+				<TextBlock Text="{Binding NutritionFacts.FormattedCalories}" Width="100"/>
+			</StackPanel>
+			
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Б: "/>
+				<TextBlock Text="{Binding NutritionFacts.FormattedProtein}" Width="100"/>
+			</StackPanel>
+			
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Ж: "/>
+				<TextBlock Text="{Binding NutritionFacts.FormattedFat}" Width="100"/>
+			</StackPanel>
+			
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="У: " Margin="5 0 0 5" />
+				<TextBlock Text="{Binding NutritionFacts.FormattedCarbs}" Width="100"/>
+			</StackPanel>
+			
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Вес: "/>
+				<TextBox Text="{Binding Quantity}" Width="100" 
+						 Margin="5 -5 0 0"/>
+			</StackPanel>
+		</StackPanel>		
+	</Grid>
+
+</UserControl>

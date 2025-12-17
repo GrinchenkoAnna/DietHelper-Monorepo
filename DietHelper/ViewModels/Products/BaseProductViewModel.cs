@@ -90,7 +90,7 @@ namespace DietHelper.ViewModels.Products
             {
                 Id = Id,
                 Name = Name ?? string.Empty,
-                NutritionFacts = BaseNutrition,
+                NutritionFacts = NutritionFacts,
                 IsDeleted = false
             };
         }

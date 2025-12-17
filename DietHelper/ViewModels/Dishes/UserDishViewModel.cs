@@ -24,6 +24,8 @@ namespace DietHelper.ViewModels.Dishes
 
         public ObservableCollection<UserDishIngredientViewModel> Ingredients { get; } = new();
 
+        public ObservableCollection<UserProductViewModel> DisplayProducts { get; } = new();
+
         private bool IsManual = false;
 
         [ObservableProperty]
