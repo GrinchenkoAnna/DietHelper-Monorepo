@@ -44,7 +44,7 @@ namespace DietHelper.Services
 
             foreach (var ingredient in ingredients)
             {
-                var userProduct = await _apiService.GetUserProductsAsync(ingredient.UserProductId);
+                var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);
                 var quantity = ingredient.Quantity;
 
                 if (userProduct is not null)

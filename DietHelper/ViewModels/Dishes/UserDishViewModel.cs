@@ -1,13 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Products;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -19,12 +20,14 @@ namespace DietHelper.ViewModels.Dishes
     public partial class UserDishViewModel : ObservableValidator
     {
         private readonly UserDish _model;
-        private readonly NutritionCalculator _calculator;     
+        private readonly NutritionCalculator _calculator;
         private readonly ApiService _apiService;
 
         public ObservableCollection<UserDishIngredientViewModel> Ingredients { get; } = new();
 
         public ObservableCollection<UserProductViewModel> DisplayProducts { get; } = new();
+
+        private bool _updatingFromDisplayProducts = false;
 
         private bool IsManual = false;
 
@@ -36,7 +39,7 @@ namespace DietHelper.ViewModels.Dishes
 
         [ObservableProperty]
         [Required(ErrorMessage = "Название обязательно")]
-        [MinLength(1, ErrorMessage = "Название не может быть пустым")]        
+        [MinLength(1, ErrorMessage = "Название не может быть пустым")]
         public string? name;
 
         [ObservableProperty]
@@ -77,9 +80,9 @@ namespace DietHelper.ViewModels.Dishes
             {
                 Quantity = Ingredients.Sum(ingredient => ingredient.Quantity);
             }
-                
+
             FormattedQuantity = $"{Quantity} г";
-        }        
+        }
 
         private void HandleProductChanged(object? sender, EventArgs e)
         {
@@ -99,12 +102,75 @@ namespace DietHelper.ViewModels.Dishes
             if (!IsManual)
             {
                 NutritionFacts = await _calculator.CalculateUserDishNutrition(dishIngredients);
-            }                
-            
-            UpdateTotalQuantity();           
+            }
+
+            UpdateTotalQuantity();
         }
 
-        public UserDishViewModel() {}
+        private async Task SyncDisplayProducts()
+        {
+            foreach (var product in DisplayProducts)
+                product.ProductChanged -= OnDisplayProductChanged;
+
+            DisplayProducts.Clear();
+
+            //нужно загружать реальные UserProduct по UserProductId из Ingredients
+
+            foreach (var ingredient in Ingredients)
+            {
+                //var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);
+
+                User user = await _apiService.GetUserAsync();
+
+                //временно
+                var userProductViewModel = new UserProductViewModel
+                {
+                    Id = ingredient.UserProductId,
+                    UserId = user.Id,
+                    Name = ingredient.Name ?? "Продукт",
+                    Quantity = ingredient.Quantity,
+                    Calories = ingredient.CurrentNutrition.Calories,
+                    Protein = ingredient.CurrentNutrition.Protein,
+                    Fat = ingredient.CurrentNutrition.Fat,
+                    Carbs = ingredient.CurrentNutrition.Carbs
+                };
+
+                userProductViewModel.ProductChanged += OnDisplayProductChanged;
+
+                DisplayProducts.Add(userProductViewModel);
+            }
+        }
+        private async void OnDisplayProductChanged(object? sender, EventArgs e)
+        {
+            if (_updatingFromDisplayProducts) return;
+
+            _updatingFromDisplayProducts = true;
+
+            try
+            {
+                if (sender is UserProductViewModel product)
+                {
+                    var ingredient = Ingredients.FirstOrDefault(i => i.UserProductId == product.Id);
+                    if (ingredient != null && Math.Abs(ingredient.Quantity - product.Quantity) > 0.001)
+                    {
+                        ingredient.Quantity = product.Quantity;
+
+                        await UpdateModelAsync();
+                        await _apiService.UpdateUserDishAsync(_model);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обновлении из UI: {ex.Message}");
+            }
+            finally
+            {
+                _updatingFromDisplayProducts = false;
+            }
+        }
+
+        public UserDishViewModel() { }
 
         public UserDishViewModel(UserDish userDish, NutritionCalculator calculator, ApiService apiService, bool isManual = false)
         {
@@ -112,14 +178,16 @@ namespace DietHelper.ViewModels.Dishes
             _calculator = calculator;
             _apiService = apiService;
 
-            IsManual = isManual;      
+            IsManual = isManual;
             Id = userDish.Id;
             UserId = userDish.UserId;
             Name = userDish.Name ?? string.Empty;
 
-            Ingredients.CollectionChanged += (s, e) =>
+            Ingredients.CollectionChanged += async (s, e) =>
             {
                 Recalculate();
+                await SyncDisplayProducts();
+
                 if (e.NewItems != null)
                 {
                     foreach (var item in e.NewItems.OfType<UserDishIngredientViewModel>())
@@ -127,6 +195,7 @@ namespace DietHelper.ViewModels.Dishes
                         SetupIngredientSubscription(item);
                     }
                 }
+
             };
 
 
@@ -139,6 +208,7 @@ namespace DietHelper.ViewModels.Dishes
                 }
             };
 
+            _ = SyncDisplayProducts();
             Recalculate();
         }
 
@@ -157,7 +227,24 @@ namespace DietHelper.ViewModels.Dishes
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(UserDishIngredientViewModel.Quantity))
+            {
                 Recalculate();
+                if (!_updatingFromDisplayProducts)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await SyncDisplayProducts();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Ошибка при обновлении продуктов: {ex.Message}");
+                        }
+                    });
+                }
+            }
+
         }
 
         [RelayCommand]
@@ -173,6 +260,7 @@ namespace DietHelper.ViewModels.Dishes
                 Ingredients.Add(ingredient);
                 SetupIngredientSubscription(ingredient);
                 Recalculate();
+                await SyncDisplayProducts();
 
                 await _apiService.UpdateUserDishAsync(_model);
                 await UpdateModelAsync();
@@ -184,9 +272,10 @@ namespace DietHelper.ViewModels.Dishes
         {
             if (Ingredients.Contains(ingredient))
             {
-                ingredient.PropertyChanged -= OnIngredientPropertyChanged; 
+                ingredient.PropertyChanged -= OnIngredientPropertyChanged;
                 Ingredients.Remove(ingredient);
                 Recalculate();
+                await SyncDisplayProducts();
 
                 await _apiService.UpdateUserDishAsync(_model);
                 await UpdateModelAsync();

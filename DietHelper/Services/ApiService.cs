@@ -49,7 +49,7 @@ namespace DietHelper.Services
             throw new NotImplementedException();
         }
 
-        public async Task<UserProduct> GetUserProductsAsync(int userProductId)
+        public async Task<UserProduct> GetUserProductAsync(int userProductId)
         {
             throw new NotImplementedException();
         }
