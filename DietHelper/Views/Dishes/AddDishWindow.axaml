@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         x:Class="DietHelper.Views.Dishes.AddDishWindow"
         Title="Добавить блюдо" Height="800" Width="900"
-        x:DataType="vm:AddDishViewModel"
+        x:DataType="vm:AddUserDishViewModel"
         WindowStartupLocation="CenterScreen">
 	<Grid>
 		<Grid.RowDefinitions>
@@ -27,8 +27,8 @@
 		</StackPanel>
 
 		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
-			<ListBox ItemsSource="{Binding SearchResults}"
-                    SelectedItem="{Binding SelectedItem}">
+			<ListBox ItemsSource="{Binding UserSearchResults}"
+                    SelectedItem="{Binding SelectedUserItem}">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<StackPanel Orientation="Horizontal">
@@ -46,7 +46,7 @@
 
 		<Button Grid.Row="2"
                 Content="Добавить блюдо"
-                Command="{Binding AddItemCommand}"
+                Command="{Binding AddUserItemCommand}"
                 HorizontalAlignment="Center"
                 Margin="0 5 0 5"/>
 

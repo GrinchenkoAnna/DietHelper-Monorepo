@@ -25,7 +25,9 @@ namespace DietHelper.Services
 
         public async Task<User> GetUserAsync()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+
+            return new User();
         }
 
         public async Task<UserProduct?> GetUserProductMockAsync()
@@ -41,17 +43,23 @@ namespace DietHelper.Services
 
         public async Task<List<UserProduct>> GetUserProductsAsync()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+
+            return new List<UserProduct>();
         }
 
         public async Task<List<BaseProduct>> GetBaseProductsAsync()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+
+            return new List<BaseProduct>();
         }
 
         public async Task<UserProduct> GetUserProductAsync(int userProductId)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+
+            return new UserProduct();
         }
 
         public async Task<UserProduct> AddUserProductAsync(UserProduct newUserProduct)

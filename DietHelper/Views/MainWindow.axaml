@@ -31,7 +31,7 @@
 							<StackPanel Orientation="Horizontal">
 								<products:ProductView/>
 								<Button Content="-" Margin="10 0 0 0"
-										Command="{Binding $parent[Window].DataContext.RemoveProductCommand}"
+										Command="{Binding $parent[Window].DataContext.RemoveUserProductCommand}"
 										CommandParameter="{Binding}"
 										VerticalAlignment="Top" 
 										HorizontalAlignment="Right"/>
@@ -41,7 +41,7 @@
 				</ListBox>
 
 				<Button Content="+ продукт" Margin="5 0 5 5"
-						Command="{Binding $parent[Window].DataContext.AddProductCommand}"
+						Command="{Binding $parent[Window].DataContext.AddUserProductCommand}"
 						VerticalAlignment="Bottom"
 						HorizontalAlignment="Stretch"
 						HorizontalContentAlignment="Center"/>

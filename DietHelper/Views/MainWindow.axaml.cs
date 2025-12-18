@@ -22,7 +22,7 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddBaseProductMessage>(this, static (w, m) =>
             {
-                var viewModel = w._serviceProvider.GetRequiredService<AddProductViewModel>();
+                var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
 
                 var dialog = new AddProductWindow
                 {
@@ -33,7 +33,7 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddUserProductMessage>(this, static (w, m) =>
             {
-                var viewModel = w._serviceProvider.GetRequiredService<AddProductViewModel>();
+                var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
                 
                 var dialog = new AddProductWindow
                 {
@@ -44,7 +44,7 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddUserDishMessage>(this, static (w, m) =>
             {
-                var viewModel = w._serviceProvider.GetRequiredService<AddUserDishViewModel>();
+                var viewModel = ServiceLocator.GetRequiredService<AddUserDishViewModel>();
 
                 var dialog = new AddDishWindow
                 {
@@ -55,7 +55,7 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddDishIngredientMessage>(this, static (w, m) =>
             {
-                var viewModel = w._serviceProvider.GetRequiredService<AddProductViewModel>(); //разделить продукты и ингредиенты
+                var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>(); //разделить продукты и ингредиенты
 
                 var dialog = new AddDishIngredientWindow
                 {

@@ -1,5 +1,4 @@
-﻿using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.Models;
@@ -25,7 +24,7 @@ namespace DietHelper.ViewModels.Dishes
 
         public ObservableCollection<UserDishIngredientViewModel> Ingredients { get; } = new();
 
-        public ObservableCollection<UserProductViewModel> DisplayProducts { get; } = new();
+        public ObservableCollection<UserProductViewModel> DisplayedIngredients { get; } = new();
 
         private bool _updatingFromDisplayProducts = false;
 
@@ -109,18 +108,17 @@ namespace DietHelper.ViewModels.Dishes
 
         private async Task SyncDisplayProducts()
         {
-            foreach (var product in DisplayProducts)
+            foreach (var product in DisplayedIngredients)
                 product.ProductChanged -= OnDisplayProductChanged;
 
-            DisplayProducts.Clear();
+            DisplayedIngredients.Clear();
 
             //нужно загружать реальные UserProduct по UserProductId из Ingredients
 
             foreach (var ingredient in Ingredients)
             {
-                //var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);
-
                 User user = await _apiService.GetUserAsync();
+                //var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);
 
                 //временно
                 var userProductViewModel = new UserProductViewModel
@@ -137,7 +135,7 @@ namespace DietHelper.ViewModels.Dishes
 
                 userProductViewModel.ProductChanged += OnDisplayProductChanged;
 
-                DisplayProducts.Add(userProductViewModel);
+                DisplayedIngredients.Add(userProductViewModel);
             }
         }
         private async void OnDisplayProductChanged(object? sender, EventArgs e)
@@ -189,12 +187,8 @@ namespace DietHelper.ViewModels.Dishes
                 await SyncDisplayProducts();
 
                 if (e.NewItems != null)
-                {
                     foreach (var item in e.NewItems.OfType<UserDishIngredientViewModel>())
-                    {
                         SetupIngredientSubscription(item);
-                    }
-                }
 
             };
 
@@ -203,9 +197,7 @@ namespace DietHelper.ViewModels.Dishes
             {
                 if (e.PropertyName is nameof(Calories) or nameof(Protein)
                     or nameof(Fat) or nameof(Carbs))
-                {
                     Recalculate();
-                }
             };
 
             _ = SyncDisplayProducts();

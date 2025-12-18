@@ -40,6 +40,8 @@ namespace DietHelper
 
             _serviceProvider = services.BuildServiceProvider();
 
+            ServiceLocator.Initialize(_serviceProvider);
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
