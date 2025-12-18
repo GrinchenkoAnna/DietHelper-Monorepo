@@ -223,6 +223,7 @@ namespace DietHelper.ViewModels
                     },
                     IsDeleted = false
                 });
+            string name = userProductMock.Name;
             UserProducts.Add(userProductMock);
 
             var ingredientMock = new UserDishIngredientViewModel

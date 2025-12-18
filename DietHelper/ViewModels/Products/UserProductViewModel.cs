@@ -51,8 +51,7 @@ namespace DietHelper.ViewModels.Products
         {
             Id = userProduct.Id;
             UserId = userProduct.UserId;
-            Name = userProduct.BaseProduct?.Name 
-                ?? string.Empty;
+            Name = userProduct.BaseProduct?.Name;
             Calories = userProduct.CustomNutrition?.Calories 
                 ?? userProduct.BaseProduct?.NutritionFacts?.Calories 
                 ?? 0;

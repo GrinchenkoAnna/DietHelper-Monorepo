@@ -79,7 +79,9 @@ namespace DietHelper.Services
 
         public async Task<List<UserDish>> GetDishesAsync()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+
+            return new List<UserDish>();
         }
 
         public async Task<UserDish> AddUserDishAsync(UserDish userDish)

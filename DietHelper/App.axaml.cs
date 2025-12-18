@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
@@ -12,6 +10,9 @@ using DietHelper.ViewModels.Dishes;
 using DietHelper.ViewModels.Products;
 using DietHelper.Views;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Globalization;
+using System.Linq;
 
 namespace DietHelper
 {
@@ -26,6 +27,9 @@ namespace DietHelper
 
         public override void OnFrameworkInitializationCompleted()
         {
+            CultureInfo.CurrentCulture = new CultureInfo("ru-RU");
+            CultureInfo.CurrentUICulture = new CultureInfo("ru-RU");
+
             var services = new ServiceCollection();
 
             services.AddSingleton<NutritionCalculator>();

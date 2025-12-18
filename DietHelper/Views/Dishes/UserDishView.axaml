@@ -3,60 +3,60 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 xmlns:ingredients="clr-namespace:DietHelper.Views.Products"
+             xmlns:ingredients="clr-namespace:DietHelper.Views.Products"
              xmlns:vm ="clr-namespace:DietHelper.ViewModels.Dishes"
              x:Class="DietHelper.Views.Dishes.UserDishView"
-			 x:DataType="vm:UserDishViewModel">
+             x:DataType="vm:UserDishViewModel">
   
     <StackPanel Margin="10 0 10 0">
-		<Grid ColumnDefinitions="Auto,*">
-			<TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
-		</Grid>
+        <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
+        </Grid>
 
-		<StackPanel Margin="12 10 0 10">
-			<TextBlock Text="Ïèùåâàÿ öåííîñòü âñåãî áëþäà:" />
+        <StackPanel Margin="12 10 0 10">
+            <TextBlock Text="ÐŸÐ¸Ñ‰ÐµÐ²Ð°Ñ Ñ†ÐµÐ½Ð½Ð¾ÑÑ‚ÑŒ Ð²ÑÐµÐ³Ð¾ Ð±Ð»ÑŽÐ´Ð°:" />
 
-			<StackPanel Orientation="Horizontal">
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Ê: "/>
-					<TextBlock Text="{Binding NutritionFacts.FormattedCalories}" Width="100" />
-				</StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Ðš: "/>
+                    <TextBlock Text="{Binding NutritionFacts.FormattedCalories}" Width="100" />
+                </StackPanel>
 
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Á: "/>
-					<TextBlock Text="{Binding NutritionFacts.FormattedProtein}" Width="100" />
-				</StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Ð‘: "/>
+                    <TextBlock Text="{Binding NutritionFacts.FormattedProtein}" Width="100" />
+                </StackPanel>
 
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Æ: "/>
-					<TextBlock Text="{Binding NutritionFacts.FormattedFat}" Width="100" />
-				</StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Ð–: "/>
+                    <TextBlock Text="{Binding NutritionFacts.FormattedFat}" Width="100" />
+                </StackPanel>
 
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Ó: "/>
-					<TextBlock Text="{Binding NutritionFacts.FormattedCarbs}" Width="100" />
-				</StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Ð£: "/>
+                    <TextBlock Text="{Binding NutritionFacts.FormattedCarbs}" Width="100" />
+                </StackPanel>
 
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Âåñ: "/>
-					<TextBlock Text="{Binding FormattedQuantity}" Width="100" />
-				</StackPanel>
-			</StackPanel>
-		</StackPanel>
-		
-		<ListBox x:Name="ingredientsList" ItemsSource="{Binding DisplayedIngredients}">
-			<ListBox.ItemTemplate>
-				<DataTemplate>
-					<StackPanel Orientation="Horizontal">
-						<ingredients:UserProductView />
-						<Button Content="-" HorizontalAlignment="Right"
-								Margin="10 -5 0 0"
-								Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"
-								CommandParameter="{Binding}"/>
-					</StackPanel>
-				</DataTemplate>
-			</ListBox.ItemTemplate>			
-		</ListBox>		
-	</StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Ð’ÐµÑ: "/>
+                    <TextBlock Text="{Binding FormattedQuantity}" Width="100" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        
+        <ListBox x:Name="ingredientsList" ItemsSource="{Binding DisplayedIngredients}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <ingredients:UserProductView />
+                        <Button Content="-" HorizontalAlignment="Right"
+                                Margin="10 -5 0 0"
+                                Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"
+                                CommandParameter="{Binding}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>			
+        </ListBox>		
+    </StackPanel>
 
 </UserControl>
