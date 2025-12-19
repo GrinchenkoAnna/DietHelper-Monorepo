@@ -2,8 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.Models.Core;
-using DietHelper.Common.Models.Dishes;
-using DietHelper.Common.Models.Products;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Dishes;
@@ -122,7 +120,7 @@ namespace DietHelper.ViewModels
 
         private void SubscribeToUserProducts(IEnumerable<UserProductViewModel> userProducts)
         {
-            foreach (var userProduct in userProducts) 
+            foreach (var userProduct in userProducts)
                 userProduct.PropertyChanged += OnUserProductPropertyChanged;
         }
         private void UnsubscribeFromUserProducts(IEnumerable<UserProductViewModel> userProducts)
@@ -179,10 +177,22 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                var userProduct = await _apiService.GetUserProductMockAsync();
-                 if (userProduct is not null) UserProducts.Add(new UserProductViewModel(userProduct));
+                var userProduct = await _apiService.GetUserProductMockAsync(1);
+                if (userProduct is not null) UserProducts.Add(new UserProductViewModel(userProduct));
 
-                //+ блюда
+                var userDish = await _apiService.GetUserDishMockAsync(1);
+                if (userDish is not null)
+                {
+                    var nutritionCalculator = new NutritionCalculator(_apiService);
+
+                    var userDishViewModel = new UserDishViewModel(
+                        userDish,
+                        nutritionCalculator,
+                        _apiService,
+                        isManual: false);
+
+                    UserDishes.Add(userDishViewModel);
+                }
             }
             catch (Exception ex)
             {
@@ -195,96 +205,11 @@ namespace DietHelper.ViewModels
         public MainWindowViewModel(ApiService apiService) : base(apiService)
         {
             _apiService = apiService;
-            //LoadMocksFromServerAsync();
+            LoadMocksFromServerAsync();
 
-            #region Mocks for debugging bindings
-            var baseProductMock = new BaseProductViewModel
-            {
-                Id = 1,
-                Name = "Молоко 2,5%",
-                Calories = 45.0,
-                Protein = 2.9,
-                Fat = 2.5,
-                Carbs = 4.8
-            };
-
-            var userProductMock = new UserProductViewModel(
-                new UserProduct
-                {
-                    Id = 1,
-                    UserId = 1,
-                    BaseProductId = 1,
-                    CustomNutrition = new NutritionInfo
-                    {
-                        Calories = 45.0,
-                        Protein = 2.9,
-                        Fat = 2.5,
-                        Carbs = 4.8
-                    },
-                    IsDeleted = false
-                });
-            string name = userProductMock.Name;
-            UserProducts.Add(userProductMock);
-
-            var ingredientMock = new UserDishIngredientViewModel
-            {
-                Id = 1,
-                UserDishId = 1,
-                UserProductId = 1,
-                Name = "Молоко 2,5%",
-                Quantity = 200,
-                CurrentNutrition = new NutritionInfo
-                {
-                    Calories = 90.0,
-                    Protein = 5.8,
-                    Fat = 5.0,
-                    Carbs = 9.6
-                }
-            };
-            
-            var dishMock = new UserDishViewModel(
-                new UserDish
-                {
-                    Id = 1,
-                    UserId = 1,
-                    Name = "Куриный суп",
-                    NutritionFacts = new NutritionInfo
-                    {
-                        Calories = 350.0,
-                        Protein = 25.0,
-                        Fat = 12.0,
-                        Carbs = 30.0
-                    },
-                    IsDeleted = false
-                },
-                new NutritionCalculator(new ApiService()),
-                new ApiService(),
-                isManual: false);
-
-            dishMock.Ingredients.Add(ingredientMock);
-            dishMock.Ingredients.Add(new UserDishIngredientViewModel
-            {
-                Id = 2,
-                UserDishId = 1,
-                UserProductId = 2,
-                Name = "Курица",
-                Quantity = 150,
-                CurrentNutrition = new NutritionInfo
-                {
-                    Calories = 357.0,  // 238 * (150/100)
-                    Protein = 27.3,
-                    Fat = 27.6,
-                    Carbs = 0
-                }
-            });
-            UserDishes.Add(dishMock);
-            #endregion
-
-            //_products.CollectionChanged += OnProductsCollectionChanged;
             _userProducts.CollectionChanged += OnUserProductsCollectionChanged;
             _userDishes.CollectionChanged += OnUserDishesCollectionChanged;
 
-            //SubscribeToProducts(_products);
             SubscribeToUserProducts(_userProducts);
             SubscribeToUserDishes(_userDishes);
 
@@ -344,7 +269,7 @@ namespace DietHelper.ViewModels
 
         [RelayCommand]
         private async Task RemoveUserProduct(UserProductViewModel userProduct)
-        {            
+        {
             UserProducts.Remove(userProduct);
         }
 

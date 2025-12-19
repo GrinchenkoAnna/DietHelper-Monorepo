@@ -22,6 +22,19 @@ namespace DietHelper.Services
                 BaseAddress = new Uri("http://localhost:5119/api/")
             };
         }
+        
+        public async Task<bool> CheckServerConnectionAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("health");
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         public async Task<User> GetUserAsync()
         {
@@ -30,7 +43,7 @@ namespace DietHelper.Services
             return new User();
         }
 
-        public async Task<UserProduct?> GetUserProductMockAsync()
+        public async Task<UserProduct?> GetUserProductsMockAsync()
         {
             var response = await _httpClient.GetAsync("simpleproducts/mock");
 
@@ -39,6 +52,28 @@ namespace DietHelper.Services
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<UserProduct>();
+        }
+
+        public async Task<UserProduct?> GetUserProductMockAsync(int id)
+        {
+            var response = await _httpClient.GetAsync("simpleproducts/mockProduct/{id}");
+
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<UserProduct>();
+        }
+
+        public async Task<UserDish?> GetUserDishMockAsync(int id)
+        {
+            var response = await _httpClient.GetAsync("simpleproducts/mockDish/{id}");
+
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<UserDish>();
         }
 
         public async Task<List<UserProduct>> GetUserProductsAsync()

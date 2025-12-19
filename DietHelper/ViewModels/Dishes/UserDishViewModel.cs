@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
+using DietHelper.Common.Models.Products;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Products;
@@ -98,10 +99,11 @@ namespace DietHelper.ViewModels.Dishes
                 ingredient.Quantity))
             .ToList();
 
-            if (!IsManual)
-            {
-                NutritionFacts = await _calculator.CalculateUserDishNutrition(dishIngredients);
-            }
+            NutritionFacts = await _calculator.CalculateUserDishNutrition(dishIngredients);
+            //if (!IsManual)
+            //{
+            //    NutritionFacts = await _calculator.CalculateUserDishNutrition(dishIngredients);
+            //}
 
             UpdateTotalQuantity();
         }
@@ -121,16 +123,38 @@ namespace DietHelper.ViewModels.Dishes
                 //var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);
 
                 //временно
-                var userProductViewModel = new UserProductViewModel
+                var userProduct = new UserProduct
                 {
                     Id = ingredient.UserProductId,
                     UserId = user.Id,
-                    Name = ingredient.Name ?? "Продукт",
-                    Quantity = ingredient.Quantity,
-                    Calories = ingredient.CurrentNutrition.Calories,
-                    Protein = ingredient.CurrentNutrition.Protein,
-                    Fat = ingredient.CurrentNutrition.Fat,
-                    Carbs = ingredient.CurrentNutrition.Carbs
+                    User = user,
+
+                    BaseProduct = new BaseProduct
+                    {
+                        Id = ingredient.UserProductId, //в корне неправильно только для проверки калькулятора
+                        Name = ingredient.Name,
+                        NutritionFacts = new NutritionInfo
+                        {
+                            Calories = ingredient.CurrentNutrition.Calories * (100.0 / ingredient.Quantity),
+                            Protein = ingredient.CurrentNutrition.Protein * (100.0 / ingredient.Quantity),
+                            Fat = ingredient.CurrentNutrition.Fat * (100.0 / ingredient.Quantity),
+                            Carbs = ingredient.CurrentNutrition.Carbs * (100.0 / ingredient.Quantity)
+                        }
+                    },
+                    BaseProductId = ingredient.UserProductId,
+
+                    CustomNutrition = new NutritionInfo
+                    {
+                        Calories = ingredient.CurrentNutrition.Calories * (100.0 / ingredient.Quantity),
+                        Protein = ingredient.CurrentNutrition.Protein * (100.0 / ingredient.Quantity),
+                        Fat = ingredient.CurrentNutrition.Fat * (100.0 / ingredient.Quantity),
+                        Carbs = ingredient.CurrentNutrition.Carbs * (100.0 / ingredient.Quantity)
+                    }
+                };
+
+                var userProductViewModel = new UserProductViewModel(userProduct)
+                {
+                    Quantity = ingredient.Quantity
                 };
 
                 userProductViewModel.ProductChanged += OnDisplayProductChanged;
@@ -181,17 +205,37 @@ namespace DietHelper.ViewModels.Dishes
             UserId = userDish.UserId;
             Name = userDish.Name ?? string.Empty;
 
+            foreach (var ingredient in userDish.Ingredients)
+            {
+                Ingredients.Add(new UserDishIngredientViewModel(ingredient));
+            }            
+
             Ingredients.CollectionChanged += async (s, e) =>
             {
-                Recalculate();
-                await SyncDisplayProducts();
-
                 if (e.NewItems != null)
+                {
                     foreach (var item in e.NewItems.OfType<UserDishIngredientViewModel>())
+                    {
                         SetupIngredientSubscription(item);
+                    }
+                }                
 
+                if (e.OldItems != null)
+                {
+                    foreach (var item in e.OldItems.OfType<UserDishIngredientViewModel>())
+                    {
+                        item.PropertyChanged -= OnIngredientPropertyChanged;
+                    }
+                }
+
+                Recalculate();
+                _ = SyncDisplayProducts();
             };
 
+            foreach (var ingredient in Ingredients)
+            {
+                SetupIngredientSubscription(ingredient);
+            }
 
             PropertyChanged += (s, e) =>
             {
