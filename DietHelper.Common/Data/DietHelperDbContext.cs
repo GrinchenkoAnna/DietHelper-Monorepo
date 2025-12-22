@@ -47,10 +47,10 @@ namespace DietHelper.Common.Data
                 entity.Property(u => u.PasswordHash).IsRequired();
                 entity.Property(u => u.Name);
 
-                entity.HasMany(u => u.Dishes)
-                    .WithOne(ud => ud.User)
-                    .HasForeignKey(ud => ud.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                //entity.HasMany(u => u.Dishes)
+                //    .WithOne(ud => ud.User)
+                //    .HasForeignKey(ud => ud.UserId)
+                //    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<BaseProduct>(entity =>
@@ -77,12 +77,12 @@ namespace DietHelper.Common.Data
                 entity.Property(up => up.BaseProductId);
 
                 entity.HasOne(up => up.User)
-                    .WithMany(u => u.Products)
+                    .WithMany()
                     .HasForeignKey(up => up.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(up => up.BaseProduct)
-                    .WithMany(u => u.UserProducts)
+                    .WithMany()
                     .HasForeignKey(up => up.BaseProductId)
                     .OnDelete(DeleteBehavior.SetNull);
 
@@ -107,8 +107,8 @@ namespace DietHelper.Common.Data
                 entity.Property(d => d.UserId).IsRequired();
                 entity.Property(d => d.Name).IsRequired();
 
-                entity.HasOne(ud => ud.User)
-                    .WithMany(u => u.Dishes)
+                entity.HasOne<User>()
+                    .WithMany()
                     .HasForeignKey(ud => ud.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
                 
@@ -130,13 +130,13 @@ namespace DietHelper.Common.Data
                 entity.Property(udi => udi.UserDishId).IsRequired();
                 entity.Property(udi => udi.Quantity).IsRequired();
 
-                entity.HasOne(udi => udi.UserDish)
+                entity.HasOne<UserDish>()
                     .WithMany(ud => ud.Ingredients)
                     .HasForeignKey(udi => udi.UserDishId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(udi => udi.UserProduct)
-                    .WithMany(up => up.DishIngredients)
+                    .WithMany()
                     .HasForeignKey(udi => udi.UserProductId)
                     .OnDelete(DeleteBehavior.Restrict);
 

@@ -27,6 +27,6 @@ namespace DietHelper.Common.Models.Products
 
         public bool IsDeleted { get; set; } = false;
 
-        public virtual ICollection<UserDishIngredient> DishIngredients { get; set; } = new List<UserDishIngredient>();
+        //public virtual ICollection<UserDishIngredient> DishIngredients { get; set; } = new List<UserDishIngredient>();
     }
 }

@@ -23,6 +23,6 @@ namespace DietHelper.Common.Models.Products
 
         public bool IsDeleted { get; set; } = false;
 
-        public virtual ICollection<UserProduct> UserProducts { get; set; } = new List<UserProduct>();
+        //public virtual ICollection<UserProduct> UserProducts { get; set; } = new List<UserProduct>();
     }
 }

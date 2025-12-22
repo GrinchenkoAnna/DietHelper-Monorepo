@@ -47,7 +47,6 @@ namespace DietHelper.ViewModels.Dishes
             var userDish = new UserDish()
             {
                 UserId = user.Id,
-                User = user,
                 Name = ManualName!,
                 NutritionFacts = new NutritionInfo()
                 {

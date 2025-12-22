@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -173,30 +174,44 @@ namespace DietHelper.ViewModels
             UpdateTotals();
         }
 
-        private async void LoadMocksFromServerAsync()
+        private async Task LoadMocksFromServerAsync()
         {
             try
             {
-                var userProduct = await _apiService.GetUserProductMockAsync(1);
-                if (userProduct is not null) UserProducts.Add(new UserProductViewModel(userProduct));
+                var userProducts = await _apiService.GetUserProductsAsync();
 
-                var userDish = await _apiService.GetUserDishMockAsync(1);
-                if (userDish is not null)
-                {
-                    var nutritionCalculator = new NutritionCalculator(_apiService);
+                foreach (var userProduct in userProducts)
+                    if (userProducts is not null) UserProducts.Add(new UserProductViewModel(userProduct));
 
-                    var userDishViewModel = new UserDishViewModel(
-                        userDish,
-                        nutritionCalculator,
-                        _apiService,
-                        isManual: false);
+                //var userDish = await _apiService.GetUserDishMockAsync(1);
+                //if (userDish is not null)
+                //{
+                //    var nutritionCalculator = new NutritionCalculator(_apiService);
 
-                    UserDishes.Add(userDishViewModel);
-                }
+                //    var userDishViewModel = new UserDishViewModel(
+                //        userDish,
+                //        nutritionCalculator,
+                //        _apiService,
+                //        isManual: false);
+
+                //    UserDishes.Add(userDishViewModel);
+                //}
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка загрузки данных с сервера: {ex.Message}");
+            }
+        }
+
+        private async void InitializeAsync()
+        {
+            try
+            {
+                await LoadMocksFromServerAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindowWiewModel]: {ex.Message}");
             }
         }
 
@@ -205,7 +220,10 @@ namespace DietHelper.ViewModels
         public MainWindowViewModel(ApiService apiService) : base(apiService)
         {
             _apiService = apiService;
-            LoadMocksFromServerAsync();
+            InitializeAsync();
+
+            int products = UserProducts.Count;
+            int Dishes = UserDishes.Count;
 
             _userProducts.CollectionChanged += OnUserProductsCollectionChanged;
             _userDishes.CollectionChanged += OnUserDishesCollectionChanged;
@@ -214,7 +232,7 @@ namespace DietHelper.ViewModels
             SubscribeToUserDishes(_userDishes);
 
             UpdateTotals();
-        }
+        }        
 
         [ObservableProperty]
         private NutritionInfo totalNutrition = new();

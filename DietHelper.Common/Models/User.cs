@@ -21,8 +21,8 @@ namespace DietHelper.Common.Models
 
         public string? Name { get; set; }
 
-        public virtual ICollection<UserProduct> Products { get; set; } = new List<UserProduct>();
+        //public virtual ICollection<UserProduct> Products { get; set; } = new List<UserProduct>();
 
-        public virtual ICollection<UserDish> Dishes { get; set; } = new List<UserDish>();
+        //public virtual ICollection<UserDish> Dishes { get; set; } = new List<UserDish>();
     }
 }

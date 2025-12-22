@@ -3,6 +3,7 @@ using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,8 +16,12 @@ namespace DietHelper.Services
     public class ApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly int _currentUserId; 
+
         public ApiService() 
         {
+            _currentUserId = 1; //временно
+
             _httpClient = new HttpClient()
             {
                 BaseAddress = new Uri("http://localhost:5119/api/")
@@ -43,44 +48,77 @@ namespace DietHelper.Services
             return new User();
         }
 
-        public async Task<UserProduct?> GetUserProductsMockAsync()
+        //public async Task<UserProduct?> GetUserProductsMockAsync()
+        //{
+        //    var response = await _httpClient.GetAsync("simpleproducts/mock");
+
+        //    if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+        //    response.EnsureSuccessStatusCode();
+
+        //    return await response.Content.ReadFromJsonAsync<UserProduct>();
+        //}
+
+        //public async Task<UserProduct?> GetUserProductMockAsync(int id)
+        //{
+        //    Debug.WriteLine($"******Запрос продукта с id={id}");
+        //    var response = await _httpClient.GetAsync("simpleproducts/mockProduct/{id}");
+        //    Debug.WriteLine($"******Статус: {response.StatusCode}");
+
+        //    if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+        //    response.EnsureSuccessStatusCode();
+
+        //    return await response.Content.ReadFromJsonAsync<UserProduct>();
+        //}
+
+        //public async Task<UserDish?> GetUserDishMockAsync(int id)
+        //{
+        //    var response = await _httpClient.GetAsync("simpleproducts/mockDish/{id}");
+
+        //    if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+        //    response.EnsureSuccessStatusCode();
+
+        //    return await response.Content.ReadFromJsonAsync<UserDish>();
+        //}
+
+        public async Task<List<UserProduct>?> GetUserProductsAsync()
         {
-            var response = await _httpClient.GetAsync("simpleproducts/mock");
+            try
+            {
+                Debug.WriteLine($"[ApiService] === ВХОД В GetUserProductsAsync ===");
+                Debug.WriteLine($"[ApiService] _currentUserId = {_currentUserId}");
+                Debug.WriteLine($"[ApiService] _httpClient.BaseAddress = {_httpClient?.BaseAddress}");
+                Debug.WriteLine($"[ApiService] _httpClient is null = {_httpClient == null}");
 
-            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+                // Точка 1 - до GetAsync
+                Debug.WriteLine($"[ApiService] Точка 1: Перед GetAsync");
 
-            response.EnsureSuccessStatusCode();
+                var response = await _httpClient.GetAsync($"simpleproducts/{_currentUserId}/products");
 
-            return await response.Content.ReadFromJsonAsync<UserProduct>();
-        }
+                // Точка 2 - после GetAsync
+                Debug.WriteLine($"[ApiService] Точка 2: После GetAsync, StatusCode = {response.StatusCode}");
 
-        public async Task<UserProduct?> GetUserProductMockAsync(int id)
-        {
-            var response = await _httpClient.GetAsync("simpleproducts/mockProduct/{id}");
+                if (response.StatusCode == HttpStatusCode.NotFound) return null;
 
-            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+                response.EnsureSuccessStatusCode();
 
-            response.EnsureSuccessStatusCode();
+                var userProducts = await response.Content.ReadFromJsonAsync<List<UserProduct>>();
 
-            return await response.Content.ReadFromJsonAsync<UserProduct>();
-        }
+                Debug.WriteLine($"[ApiService] Точка 3: Десериализовано {userProducts?.Count ?? 0} продуктов");
 
-        public async Task<UserDish?> GetUserDishMockAsync(int id)
-        {
-            var response = await _httpClient.GetAsync("simpleproducts/mockDish/{id}");
-
-            if (response.StatusCode == HttpStatusCode.NotFound) return null;
-
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadFromJsonAsync<UserDish>();
-        }
-
-        public async Task<List<UserProduct>> GetUserProductsAsync()
-        {
-            //throw new NotImplementedException();
-
-            return new List<UserProduct>();
+                return userProducts.ToList();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                Debug.WriteLine($"[ApiService] === ВЫХОД ИЗ GetUserProductsAsync ===");
+            }
         }
 
         public async Task<List<BaseProduct>> GetBaseProductsAsync()
