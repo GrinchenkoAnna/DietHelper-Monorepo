@@ -1,14 +1,17 @@
 ﻿using DietHelper.Common.Models;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
+using DietHelper.ViewModels.Dishes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace DietHelper.Services
@@ -138,14 +141,40 @@ namespace DietHelper.Services
             throw new NotImplementedException();
         }
 
-        public async Task UpdateUserDishAsync(UserDish userDish)
-        {
-            throw new NotImplementedException();
-        }
+        //public async Task UpdateUserDishAsync(UserDish userDish)
+        //{
+        //    var response = await _httpClient.PutAsync($"dishes/{_currentUserId}/{userDish}");
+
+        //    response.EnsureSuccessStatusCode();
+        //}
 
         public async Task DeleteDishAsync(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<int?> AddUserDishIngredientAsync(int dishId, UserDishIngredient userDishIngredient)
+        {
+            var json = JsonSerializer.Serialize(userDishIngredient);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(
+                $"dishes/{_currentUserId}/{dishId}/ingredients",
+                content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (int.TryParse(responseContent, out var userDishIngredientId)) 
+                    return userDishIngredientId;
+            }
+            return null;
+        }
+
+        public async Task<bool> RemoveUserDishIngredientAsync(int dishId, int ingredientId)
+        {
+            var response = await _httpClient.DeleteAsync($"dishes/{_currentUserId}/{dishId}/ingredients/{ingredientId}");
+            
+            return response.IsSuccessStatusCode;
         }
         #endregion
     }

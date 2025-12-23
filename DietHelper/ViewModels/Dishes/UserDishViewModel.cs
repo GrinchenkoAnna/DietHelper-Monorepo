@@ -143,7 +143,7 @@ namespace DietHelper.ViewModels.Dishes
                         ingredient.Quantity = product.Quantity;
 
                         await UpdateModelAsync();
-                        await _apiService.UpdateUserDishAsync(_model);
+                        //await _apiService.UpdateUserDishAsync(_model);
                     }
                 }
             }
@@ -251,36 +251,70 @@ namespace DietHelper.ViewModels.Dishes
         [RelayCommand]
         private async Task AddDishIngredient()
         {
-            var ingredient = await WeakReferenceMessenger.Default.Send(new AddDishIngredientMessage());
+            var userDishIngredientViewModel = await WeakReferenceMessenger.Default.Send(new AddDishIngredientMessage());
 
-            if (ingredient is not null)
+            if (userDishIngredientViewModel is not null)
             {
-                if (Ingredients.Any(i => i.Id == ingredient.Id)) return;
+                if (Ingredients.Any(i => i.Id == userDishIngredientViewModel.Id)) return;
 
-                ingredient.UserDishId = Id;
-                Ingredients.Add(ingredient);
-                SetupIngredientSubscription(ingredient);
-                Recalculate();
-                await SyncDisplayProducts();
+                userDishIngredientViewModel.UserDishId = Id;
 
-                await _apiService.UpdateUserDishAsync(_model);
-                await UpdateModelAsync();
+                var userDishIngredient = userDishIngredientViewModel.ToModel();
+
+                var newIngredientId = await _apiService.AddUserDishIngredientAsync(Id, userDishIngredient);
+
+                if (newIngredientId.HasValue)
+                {
+                    userDishIngredientViewModel.Id = newIngredientId.Value;
+                    Ingredients.Add(userDishIngredientViewModel);
+                    SetupIngredientSubscription(userDishIngredientViewModel);
+
+                    UpdateLocalModel(userDishIngredientViewModel);
+
+                    Recalculate();
+                    await SyncDisplayProducts();
+                }                
             }
         }
 
         [RelayCommand]
-        private async Task RemoveIngredient(UserDishIngredientViewModel ingredient)
+        private async Task RemoveIngredient(UserDishIngredientViewModel userDishIngredientViewModel)
         {
-            if (Ingredients.Contains(ingredient))
+            if (Ingredients.Contains(userDishIngredientViewModel))
             {
-                ingredient.PropertyChanged -= OnIngredientPropertyChanged;
-                Ingredients.Remove(ingredient);
-                Recalculate();
-                await SyncDisplayProducts();
+                var result = await _apiService.RemoveUserDishIngredientAsync(Id, userDishIngredientViewModel.Id);
 
-                await _apiService.UpdateUserDishAsync(_model);
-                await UpdateModelAsync();
+                if (result)
+                {
+                    userDishIngredientViewModel.PropertyChanged -= OnIngredientPropertyChanged;
+                    Ingredients.Remove(userDishIngredientViewModel);
+
+                    var ingredientToRemove = _model.Ingredients.FirstOrDefault(i => i.Id == userDishIngredientViewModel.Id);
+                    if (ingredientToRemove is not null)
+                    {
+                        _model.Ingredients.Remove(ingredientToRemove);
+                        _model.UpdateNutritionFromIngredients();
+                    }
+
+                    Recalculate();
+                    await SyncDisplayProducts();
+                }
             }
+        }
+
+        private void UpdateLocalModel(UserDishIngredientViewModel userDishIngredientViewModel)
+        {
+            var ingredient = new UserDishIngredient
+            {
+                Id = userDishIngredientViewModel.Id,
+                UserDishId = _model.Id,
+                UserProductId = userDishIngredientViewModel.UserProductId,
+                Quantity = userDishIngredientViewModel.Quantity,
+                IsDeleted = false
+            };
+
+            _model.Ingredients.Add(ingredient);
+            _model.UpdateNutritionFromIngredients();
         }
 
         private async Task UpdateModelAsync()
@@ -301,7 +335,7 @@ namespace DietHelper.ViewModels.Dishes
             }
 
             _model.UpdateNutritionFromIngredients();
-        }
+        }        
     }
 }
 

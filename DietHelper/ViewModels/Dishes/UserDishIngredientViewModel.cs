@@ -44,5 +44,17 @@ namespace DietHelper.ViewModels.Dishes
             Quantity = userDishIngredient.Quantity;
             CurrentNutrition = userDishIngredient.CurrentNutrition;
         }
+
+        public UserDishIngredient ToModel()
+        {
+            return new UserDishIngredient
+            {
+                Id = Id,
+                UserDishId = UserDishId,
+                UserProductId = UserProductId,
+                Quantity = Quantity,
+                IsDeleted = false
+            };
+        }
     }
 }
