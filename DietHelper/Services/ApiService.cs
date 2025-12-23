@@ -48,57 +48,12 @@ namespace DietHelper.Services
             return new User();
         }
 
-        //public async Task<UserProduct?> GetUserProductsMockAsync()
-        //{
-        //    var response = await _httpClient.GetAsync("simpleproducts/mock");
-
-        //    if (response.StatusCode == HttpStatusCode.NotFound) return null;
-
-        //    response.EnsureSuccessStatusCode();
-
-        //    return await response.Content.ReadFromJsonAsync<UserProduct>();
-        //}
-
-        //public async Task<UserProduct?> GetUserProductMockAsync(int id)
-        //{
-        //    Debug.WriteLine($"******Запрос продукта с id={id}");
-        //    var response = await _httpClient.GetAsync("simpleproducts/mockProduct/{id}");
-        //    Debug.WriteLine($"******Статус: {response.StatusCode}");
-
-        //    if (response.StatusCode == HttpStatusCode.NotFound) return null;
-
-        //    response.EnsureSuccessStatusCode();
-
-        //    return await response.Content.ReadFromJsonAsync<UserProduct>();
-        //}
-
-        //public async Task<UserDish?> GetUserDishMockAsync(int id)
-        //{
-        //    var response = await _httpClient.GetAsync("simpleproducts/mockDish/{id}");
-
-        //    if (response.StatusCode == HttpStatusCode.NotFound) return null;
-
-        //    response.EnsureSuccessStatusCode();
-
-        //    return await response.Content.ReadFromJsonAsync<UserDish>();
-        //}
-
+        #region Products
         public async Task<List<UserProduct>?> GetUserProductsAsync()
         {
             try
             {
-                Debug.WriteLine($"[ApiService] === ВХОД В GetUserProductsAsync ===");
-                Debug.WriteLine($"[ApiService] _currentUserId = {_currentUserId}");
-                Debug.WriteLine($"[ApiService] _httpClient.BaseAddress = {_httpClient?.BaseAddress}");
-                Debug.WriteLine($"[ApiService] _httpClient is null = {_httpClient == null}");
-
-                // Точка 1 - до GetAsync
-                Debug.WriteLine($"[ApiService] Точка 1: Перед GetAsync");
-
-                var response = await _httpClient.GetAsync($"simpleproducts/{_currentUserId}/products");
-
-                // Точка 2 - после GetAsync
-                Debug.WriteLine($"[ApiService] Точка 2: После GetAsync, StatusCode = {response.StatusCode}");
+                var response = await _httpClient.GetAsync($"products/{_currentUserId}");
 
                 if (response.StatusCode == HttpStatusCode.NotFound) return null;
 
@@ -106,18 +61,12 @@ namespace DietHelper.Services
 
                 var userProducts = await response.Content.ReadFromJsonAsync<List<UserProduct>>();
 
-                Debug.WriteLine($"[ApiService] Точка 3: Десериализовано {userProducts?.Count ?? 0} продуктов");
-
                 return userProducts.ToList();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[ApiService]: {ex.Message}");
                 return null;
-            }
-            finally
-            {
-                Debug.WriteLine($"[ApiService] === ВЫХОД ИЗ GetUserProductsAsync ===");
             }
         }
 
@@ -130,9 +79,15 @@ namespace DietHelper.Services
 
         public async Task<UserProduct> GetUserProductAsync(int userProductId)
         {
-            //throw new NotImplementedException();
+            var response = await _httpClient.GetAsync($"products/{_currentUserId}/{userProductId}");
 
-            return new UserProduct();
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+            response.EnsureSuccessStatusCode();
+
+            var userProduct = await response.Content.ReadFromJsonAsync<UserProduct>();
+
+            return userProduct;
         }
 
         public async Task<UserProduct> AddUserProductAsync(UserProduct newUserProduct)
@@ -149,12 +104,33 @@ namespace DietHelper.Services
         {
             throw new NotImplementedException();
         }
+        #endregion
 
-        public async Task<List<UserDish>> GetDishesAsync()
+        #region Dishes
+        public async Task<List<UserDish>> GetUserDishesAsync()
         {
-            //throw new NotImplementedException();
+            var response = await _httpClient.GetAsync($"dishes/{_currentUserId}");
 
-            return new List<UserDish>();
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+            response.EnsureSuccessStatusCode();
+
+            var UserDishes = await response.Content.ReadFromJsonAsync<List<UserDish>>();
+
+            return UserDishes;
+        }
+
+        public async Task<UserDish> GetUserDishAsync(int id)
+        {
+            var response = await _httpClient.GetAsync($"dishes/{_currentUserId}/{id}");
+
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+            response.EnsureSuccessStatusCode();
+
+            var UserDish = await response.Content.ReadFromJsonAsync<UserDish>();
+
+            return UserDish;
         }
 
         public async Task<UserDish> AddUserDishAsync(UserDish userDish)
@@ -170,6 +146,7 @@ namespace DietHelper.Services
         public async Task DeleteDishAsync(int id)
         {
             throw new NotImplementedException();
-        }        
+        }
+        #endregion
     }
 }

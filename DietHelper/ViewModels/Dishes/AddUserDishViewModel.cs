@@ -20,7 +20,7 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void InitializeData()
         {
-            var dishes = await _apiService.GetDishesAsync();
+            var dishes = await _apiService.GetUserDishesAsync();
 
             foreach (var dish in dishes)
             {

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.Models.Core;
+using DietHelper.Common.Models.Dishes;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Dishes;
@@ -178,24 +179,18 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                var userProducts = await _apiService.GetUserProductsAsync();
+                var userProduct = await _apiService.GetUserProductAsync(1);
+                if (userProduct is not null)
+                    UserProducts.Add(new UserProductViewModel(userProduct));
 
-                foreach (var userProduct in userProducts)
-                    if (userProducts is not null) UserProducts.Add(new UserProductViewModel(userProduct));
+                var userDish = await _apiService.GetUserDishAsync(1);
+                if (userDish is not null)
+                {
+                    var nutritionCalculator = new NutritionCalculator(_apiService);
 
-                //var userDish = await _apiService.GetUserDishMockAsync(1);
-                //if (userDish is not null)
-                //{
-                //    var nutritionCalculator = new NutritionCalculator(_apiService);
-
-                //    var userDishViewModel = new UserDishViewModel(
-                //        userDish,
-                //        nutritionCalculator,
-                //        _apiService,
-                //        isManual: false);
-
-                //    UserDishes.Add(userDishViewModel);
-                //}
+                    var userDishViewModel = new UserDishViewModel(userDish, nutritionCalculator, _apiService);
+                    UserDishes.Add(userDishViewModel);
+                }
             }
             catch (Exception ex)
             {
@@ -220,7 +215,7 @@ namespace DietHelper.ViewModels
         public MainWindowViewModel(ApiService apiService) : base(apiService)
         {
             _apiService = apiService;
-            InitializeAsync();
+            InitializeAsync(); //для отладки
 
             int products = UserProducts.Count;
             int Dishes = UserDishes.Count;
@@ -232,7 +227,7 @@ namespace DietHelper.ViewModels
             SubscribeToUserDishes(_userDishes);
 
             UpdateTotals();
-        }        
+        }
 
         [ObservableProperty]
         private NutritionInfo totalNutrition = new();

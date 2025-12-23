@@ -100,10 +100,6 @@ namespace DietHelper.ViewModels.Dishes
             .ToList();
 
             NutritionFacts = await _calculator.CalculateUserDishNutrition(dishIngredients);
-            //if (!IsManual)
-            //{
-            //    NutritionFacts = await _calculator.CalculateUserDishNutrition(dishIngredients);
-            //}
 
             UpdateTotalQuantity();
         }
@@ -115,42 +111,11 @@ namespace DietHelper.ViewModels.Dishes
 
             DisplayedIngredients.Clear();
 
-            //нужно загружать реальные UserProduct по UserProductId из Ingredients
-
             foreach (var ingredient in Ingredients)
             {
                 User user = await _apiService.GetUserAsync();
-                //var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);
-
-                //временно
-                var userProduct = new UserProduct
-                {
-                    Id = ingredient.UserProductId,
-                    UserId = user.Id,
-                    User = user,
-
-                    BaseProduct = new BaseProduct
-                    {
-                        Id = ingredient.UserProductId, //в корне неправильно только для проверки калькулятора
-                        Name = ingredient.Name,
-                        NutritionFacts = new NutritionInfo
-                        {
-                            Calories = ingredient.CurrentNutrition.Calories * (100.0 / ingredient.Quantity),
-                            Protein = ingredient.CurrentNutrition.Protein * (100.0 / ingredient.Quantity),
-                            Fat = ingredient.CurrentNutrition.Fat * (100.0 / ingredient.Quantity),
-                            Carbs = ingredient.CurrentNutrition.Carbs * (100.0 / ingredient.Quantity)
-                        }
-                    },
-                    BaseProductId = ingredient.UserProductId,
-
-                    CustomNutrition = new NutritionInfo
-                    {
-                        Calories = ingredient.CurrentNutrition.Calories * (100.0 / ingredient.Quantity),
-                        Protein = ingredient.CurrentNutrition.Protein * (100.0 / ingredient.Quantity),
-                        Fat = ingredient.CurrentNutrition.Fat * (100.0 / ingredient.Quantity),
-                        Carbs = ingredient.CurrentNutrition.Carbs * (100.0 / ingredient.Quantity)
-                    }
-                };
+                
+                var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);                
 
                 var userProductViewModel = new UserProductViewModel(userProduct)
                 {
