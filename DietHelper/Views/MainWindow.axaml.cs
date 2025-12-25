@@ -55,7 +55,7 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddDishIngredientMessage>(this, static (w, m) =>
             {
-                var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>(); //разделить продукты и ингредиенты
+                var viewModel = ServiceLocator.GetRequiredService<AddUserDishIngredientViewModel>();
 
                 var dialog = new AddDishIngredientWindow
                 {

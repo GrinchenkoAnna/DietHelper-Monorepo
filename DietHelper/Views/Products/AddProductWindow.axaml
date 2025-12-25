@@ -32,7 +32,7 @@
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<StackPanel Orientation="Horizontal">
-							<local:ProductView />
+							<local:UserProductView />
 							<Button Content="Забыть"
 									Command="{Binding $parent[Window].DataContext.DeleteItemFromDatabaseCommand}"
 									CommandParameter="{Binding}"

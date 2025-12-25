@@ -10,13 +10,14 @@ using DietHelper.Services;
 using DietHelper.ViewModels.Base;
 using DietHelper.ViewModels.Products;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels.Dishes
 {
     public partial class AddUserDishIngredientViewModel : AddItemBaseViewModel<UserProduct, UserProductViewModel>
     {
-        public AddUserDishIngredientViewModel(ApiService apiService) : base(apiService) { }
+        public AddUserDishIngredientViewModel(ApiService _apiService) : base(_apiService) { }
 
         [ObservableProperty] private BaseProductViewModel? selectedBaseItem;
 
@@ -96,14 +97,14 @@ namespace DietHelper.ViewModels.Dishes
             {
                 UserProductId = SelectedUserItem.Id,
                 Name = SelectedUserItem.Name,
-                Quantity = Quantity, 
+                Quantity = Quantity,
                 CurrentNutrition = new NutritionInfo()
                 {
                     Calories = SelectedUserItem.Calories * (Quantity / 100),
                     Protein = SelectedUserItem.Protein * (Quantity / 100),
                     Fat = SelectedUserItem.Fat * (Quantity / 100),
                     Carbs = SelectedUserItem.Carbs * (Quantity / 100)
-                }                
+                }
             };
 
             WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(ingredient));
