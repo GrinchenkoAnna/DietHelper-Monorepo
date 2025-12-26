@@ -12,6 +12,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -183,6 +184,7 @@ namespace DietHelper.ViewModels.Dishes
                     {
                         SetupIngredientSubscription(item);
                     }
+                    _ = SyncDisplayProducts();
                 }                
 
                 if (e.OldItems != null)
@@ -191,10 +193,11 @@ namespace DietHelper.ViewModels.Dishes
                     {
                         item.PropertyChanged -= OnIngredientPropertyChanged;
                     }
+                    _ = SyncDisplayProducts();
                 }
 
                 Recalculate();
-                _ = SyncDisplayProducts();
+                //_ = SyncDisplayProducts();
             };
 
             foreach (var ingredient in Ingredients)
@@ -209,7 +212,8 @@ namespace DietHelper.ViewModels.Dishes
                     Recalculate();
             };
 
-            _ = SyncDisplayProducts();
+            _ = Task.Run(async () => await SyncDisplayProducts());
+            //_ = SyncDisplayProducts();
             Recalculate();
         }
 
@@ -255,7 +259,13 @@ namespace DietHelper.ViewModels.Dishes
 
             if (userDishIngredientViewModel is not null)
             {
-                if (Ingredients.Any(i => i.Id == userDishIngredientViewModel.Id)) return;
+                if (Id <= 0)
+                {
+                    Debug.WriteLine($"[UserDishViewModel] DishId is invalid: {Id}");
+                    return;
+                }
+
+                if (Ingredients.Any(i => i.UserProductId == userDishIngredientViewModel.UserProductId)) return;
 
                 userDishIngredientViewModel.UserDishId = Id;
 
@@ -272,7 +282,7 @@ namespace DietHelper.ViewModels.Dishes
                     UpdateLocalModel(userDishIngredientViewModel);
 
                     Recalculate();
-                    await SyncDisplayProducts();
+                    //await SyncDisplayProducts();
                 }                
             }
         }

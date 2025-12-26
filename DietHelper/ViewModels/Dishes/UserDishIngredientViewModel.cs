@@ -49,11 +49,11 @@ namespace DietHelper.ViewModels.Dishes
         {
             return new UserDishIngredient
             {
-                Id = Id,
+                //Id должен генерироваться на сервере
                 UserDishId = UserDishId,
                 UserProductId = UserProductId,
                 Quantity = Quantity,
-                IsDeleted = false
+                //IsDeleted = false
             };
         }
     }

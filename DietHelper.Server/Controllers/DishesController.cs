@@ -56,39 +56,75 @@ namespace DietHelper.Server.Controllers
             }
         }
 
+        public class AddIngredientRequest
+        {
+            public int UserProductId { get; set; }
+            public double Quantity { get; set; }
+        }
+
+
         [HttpPost("{userId}/{dishId}/ingredients")]
-        public async Task<ActionResult> AddUserDishIngredient(int userId, int dishId, UserDishIngredient userDishIngredient)
+        public async Task<ActionResult> AddUserDishIngredient(    
+            int userId,
+            int dishId,
+            [FromBody] AddIngredientRequest request)
         {
             try
             {
-                //найти блюдо
+                // Найти блюдо
                 var userDish = await _dbContext.UserDishes
                     .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dishId && !d.IsDeleted);
 
-                if (userDish is null) return NotFound();
+                if (userDish is null)
+                    return NotFound();
 
-                //добавить связь с блюдом
-                userDishIngredient.UserDishId = dishId;
-                userDishIngredient.IsDeleted = false;
+                // Проверить, не добавлен ли ингредиент в блюдо
+                var existingIngredient = await _dbContext.UserDishIngredients
+                    .FirstOrDefaultAsync(udi => udi.UserDishId == dishId
+                        && udi.UserProductId == request.UserProductId
+                        && !udi.IsDeleted);
 
-                //найти соответствующий продукт
+                if (existingIngredient is not null)
+                {
+                    // Чтобы получить имя продукта, нужно загрузить его
+                    var existingProduct = await _dbContext.UserProducts
+                        .Include(up => up.BaseProduct)
+                        .FirstOrDefaultAsync(up => up.Id == existingIngredient.UserProductId);
+
+                    var productName = existingProduct?.BaseProduct?.Name ?? "Unknown";
+                    return Conflict($"Product {productName} already added to dish {userDish.Name}");
+                }
+
+                // Найти соответствующий продукт
                 var userProduct = await _dbContext.UserProducts
                     .Include(up => up.BaseProduct)
-                    .FirstOrDefaultAsync(up => up.Id == userDishIngredient.UserProductId && !up.IsDeleted);
+                    .FirstOrDefaultAsync(up => up.Id == request.UserProductId && !up.IsDeleted);
 
-                //рассчитать кбжу ингредиента по продукту
-                userDishIngredient.CalculateNutrition(userProduct);
+                if (userProduct is null)
+                    return NotFound($"Product with id {request.UserProductId} not found");
 
-                //добавить в таблицу
-                _dbContext.UserDishIngredients.Add(userDishIngredient);
+                // Создать новый ингредиент
+                var newIngredient = new UserDishIngredient
+                {
+                    UserDishId = dishId,
+                    UserProductId = request.UserProductId,
+                    Quantity = request.Quantity,
+                    IsDeleted = false
+                };
 
-                //обновить кбжу блюда
+                // Рассчитать кбжу ингредиента по продукту
+                newIngredient.CalculateNutrition(userProduct);
+
+                // Добавить в таблицу
+                _dbContext.UserDishIngredients.Add(newIngredient);
+
+                // Обновить кбжу блюда
                 userDish.UpdateNutritionFromIngredients();
 
                 await _dbContext.SaveChangesAsync();
-                return Ok(userDishIngredient.Id);
+                return Ok(newIngredient.Id);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return StatusCode(500, $"[DishesController]: {ex.Message}");
             }
@@ -122,33 +158,6 @@ namespace DietHelper.Server.Controllers
             {
                 return StatusCode(500, $"[DishesController]: {ex.Message}");
             }
-        }
-
-        //[HttpPut("{userId}/{userDish}")]
-        //public async Task<ActionResult<UserDish>> UpdateUserDish(int userId, UserDish userDish)
-        //{
-        //    try
-        //    {
-        //        var dish = await _dbContext.UserDishes
-        //            .Include(d => d.Ingredients)
-        //            .ThenInclude(i => i.UserProduct)
-        //            .ThenInclude(up => up.BaseProduct)
-        //            .FirstOrDefaultAsync(d => d.Id == id && d.UserId == userId && !d.IsDeleted);
-
-        //        if (dish == null) return NotFound();
-        //        return Ok(dish);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"[DishesController]: {ex.Message}");
-        //    }
-        //}
-
-        [HttpGet("ping")]
-        public ActionResult<string> Ping()
-        {
-            Console.WriteLine("[Ping] Получен запрос");
-            return Ok("pong");
         }
     }
 }

@@ -155,8 +155,15 @@ namespace DietHelper.Services
 
         public async Task<int?> AddUserDishIngredientAsync(int dishId, UserDishIngredient userDishIngredient)
         {
-            var json = JsonSerializer.Serialize(userDishIngredient);
+            var request = new
+            {
+                UserProductId = userDishIngredient.UserProductId,
+                Quantity = userDishIngredient.Quantity
+            };
+
+            var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
+
             var response = await _httpClient.PostAsync(
                 $"dishes/{_currentUserId}/{dishId}/ingredients",
                 content);
@@ -164,8 +171,8 @@ namespace DietHelper.Services
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                if (int.TryParse(responseContent, out var userDishIngredientId)) 
-                    return userDishIngredientId;
+                if (int.TryParse(responseContent, out var ingredientId))
+                    return ingredientId;
             }
             return null;
         }
