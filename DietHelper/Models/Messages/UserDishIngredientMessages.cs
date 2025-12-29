@@ -15,4 +15,5 @@ namespace DietHelper.Models.Messages
     }
 
     public class AddDishIngredientMessage : AsyncRequestMessage<UserDishIngredientViewModel?> { }
+
 }

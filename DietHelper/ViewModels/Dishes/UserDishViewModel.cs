@@ -282,32 +282,35 @@ namespace DietHelper.ViewModels.Dishes
                     UpdateLocalModel(userDishIngredientViewModel);
 
                     Recalculate();
-                    //await SyncDisplayProducts();
                 }                
             }
         }
 
         [RelayCommand]
-        private async Task RemoveIngredient(UserDishIngredientViewModel userDishIngredientViewModel)
+        private async Task RemoveIngredient(UserProductViewModel userProductViewModel)
         {
-            if (Ingredients.Contains(userDishIngredientViewModel))
+            var ingredientToRemove = Ingredients.FirstOrDefault(i => i.UserProductId == userProductViewModel.Id);
+
+            if (ingredientToRemove is not null)
             {
-                var result = await _apiService.RemoveUserDishIngredientAsync(Id, userDishIngredientViewModel.Id);
+                var result = await _apiService.RemoveUserDishIngredientAsync(Id, ingredientToRemove.Id);
 
                 if (result)
                 {
-                    userDishIngredientViewModel.PropertyChanged -= OnIngredientPropertyChanged;
-                    Ingredients.Remove(userDishIngredientViewModel);
+                    ingredientToRemove.PropertyChanged -= OnIngredientPropertyChanged;
+                    Ingredients.Remove(ingredientToRemove);
 
-                    var ingredientToRemove = _model.Ingredients.FirstOrDefault(i => i.Id == userDishIngredientViewModel.Id);
-                    if (ingredientToRemove is not null)
+                    var modelIngredient = _model.Ingredients.FirstOrDefault(i => i.Id == ingredientToRemove.Id);
+                    if (modelIngredient is not null)
                     {
-                        _model.Ingredients.Remove(ingredientToRemove);
+                        _model.Ingredients.Remove(modelIngredient);
                         _model.UpdateNutritionFromIngredients();
                     }
 
+                    DisplayedIngredients.Remove(userProductViewModel);
+                    userProductViewModel.ProductChanged -= OnDisplayProductChanged;
+
                     Recalculate();
-                    await SyncDisplayProducts();
                 }
             }
         }

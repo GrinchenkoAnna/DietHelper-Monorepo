@@ -49,7 +49,7 @@
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<StackPanel Orientation="Horizontal">
-						<ingredients:ProductView />
+						<ingredients:UserProductView />
 						<Button Content="-" HorizontalAlignment="Right"
 								Margin="10 -5 0 0"
 								Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"
