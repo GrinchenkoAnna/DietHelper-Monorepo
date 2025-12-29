@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
@@ -12,12 +10,15 @@ using DietHelper.ViewModels.Dishes;
 using DietHelper.ViewModels.Products;
 using DietHelper.Views;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Globalization;
+using System.Linq;
 
 namespace DietHelper
 {
     public partial class App : Application
     {
-        private IServiceProvider _serviceProvider;
+        private IServiceProvider? _serviceProvider;
 
         public override void Initialize()
         {
@@ -26,19 +27,24 @@ namespace DietHelper
 
         public override void OnFrameworkInitializationCompleted()
         {
+            CultureInfo.CurrentCulture = new CultureInfo("ru-RU");
+            CultureInfo.CurrentUICulture = new CultureInfo("ru-RU");
+
             var services = new ServiceCollection();
 
             services.AddSingleton<NutritionCalculator>();
-            //services.AddSingleton<DatabaseService>();
             services.AddSingleton<ApiService>();
 
+            services.AddTransient<ViewModelBase>();
+            services.AddTransient<UserDishViewModel>();
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<AddProductViewModel>();
-            services.AddTransient<AddDishViewModel>();
-            services.AddTransient<AddDishIngredientViewModel>();
+            services.AddTransient<AddUserDishViewModel>();
+            services.AddTransient<AddUserDishIngredientViewModel>();
 
             _serviceProvider = services.BuildServiceProvider();
 
+            ServiceLocator.Initialize(_serviceProvider);
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {

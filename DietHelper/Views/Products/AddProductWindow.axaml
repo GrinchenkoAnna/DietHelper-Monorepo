@@ -27,12 +27,12 @@
 		</StackPanel>
 
 		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
-			<ListBox ItemsSource="{Binding SearchResults}"
-					 SelectedItem="{Binding SelectedItem}">
+			<ListBox ItemsSource="{Binding UserSearchResults}"
+					 SelectedItem="{Binding SelectedUserItem}">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<StackPanel Orientation="Horizontal">
-							<local:ProductView />
+							<local:UserProductView />
 							<Button Content="Забыть"
 									Command="{Binding $parent[Window].DataContext.DeleteItemFromDatabaseCommand}"
 									CommandParameter="{Binding}"
@@ -46,7 +46,7 @@
 
 		<Button Grid.Row="2"
 			   Content="Добавить продукт"
-			   Command="{Binding AddItemCommand}"
+			   Command="{Binding AddUserItemCommand}"
 			   HorizontalAlignment="Center"
 			   Margin="0 5 0 5"/>
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DietHelper.Common.Models.Core
@@ -43,9 +44,16 @@ namespace DietHelper.Common.Models.Core
             a.Fat * factor,
             a.Carbs * factor);
 
+        [JsonIgnore]
         public string FormattedCalories => $"{Calories:F1} ккал";
+
+        [JsonIgnore]
         public string FormattedProtein => $"{Protein:F1} г";
+
+        [JsonIgnore]
         public string FormattedFat => $"{Fat:F1} г";
+
+        [JsonIgnore]
         public string FormattedCarbs => $"{Carbs:F1} г";
     }
 }

@@ -12,7 +12,7 @@ public partial class AddDishWindow : Window
     {
         InitializeComponent();
 
-        WeakReferenceMessenger.Default.Register<AddDishWindow, AddDishClosedMessage>(this, static (window, message) =>
+        WeakReferenceMessenger.Default.Register<AddDishWindow, AddUserDishClosedMessage>(this, static (window, message) =>
             {
                 window.Close(message.SelectedDish);
             });
