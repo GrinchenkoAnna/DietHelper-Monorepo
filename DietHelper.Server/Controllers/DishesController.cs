@@ -2,6 +2,7 @@
 using DietHelper.Common.Models.Dishes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace DietHelper.Server.Controllers
 {
@@ -64,38 +65,18 @@ namespace DietHelper.Server.Controllers
 
 
         [HttpPost("{userId}/{dishId}/ingredients")]
-        public async Task<ActionResult> AddUserDishIngredient(    
-            int userId,
-            int dishId,
-            [FromBody] AddIngredientRequest request)
+        public async Task<ActionResult> AddUserDishIngredient(
+    int userId,
+    int dishId,
+    [FromBody] AddIngredientRequest request)
         {
             try
             {
-                // Найти блюдо
                 var userDish = await _dbContext.UserDishes
-                    .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dishId && !d.IsDeleted);
-
+                    .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dishId);
                 if (userDish is null)
                     return NotFound();
 
-                // Проверить, не добавлен ли ингредиент в блюдо
-                var existingIngredient = await _dbContext.UserDishIngredients
-                    .FirstOrDefaultAsync(udi => udi.UserDishId == dishId
-                        && udi.UserProductId == request.UserProductId
-                        && !udi.IsDeleted);
-
-                if (existingIngredient is not null)
-                {
-                    // Чтобы получить имя продукта, нужно загрузить его
-                    var existingProduct = await _dbContext.UserProducts
-                        .Include(up => up.BaseProduct)
-                        .FirstOrDefaultAsync(up => up.Id == existingIngredient.UserProductId);
-
-                    var productName = existingProduct?.BaseProduct?.Name ?? "Unknown";
-                    return Conflict($"Product {productName} already added to dish {userDish.Name}");
-                }
-
-                // Найти соответствующий продукт
                 var userProduct = await _dbContext.UserProducts
                     .Include(up => up.BaseProduct)
                     .FirstOrDefaultAsync(up => up.Id == request.UserProductId && !up.IsDeleted);
@@ -103,26 +84,19 @@ namespace DietHelper.Server.Controllers
                 if (userProduct is null)
                     return NotFound($"Product with id {request.UserProductId} not found");
 
-                // Создать новый ингредиент
-                var newIngredient = new UserDishIngredient
-                {
-                    UserDishId = dishId,
-                    UserProductId = request.UserProductId,
-                    Quantity = request.Quantity,
-                    IsDeleted = false
-                };
+                var existingIngredient = await _dbContext.UserDishIngredients
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(udi => udi.UserDishId == dishId
+                        && udi.UserProductId == request.UserProductId);
 
-                // Рассчитать кбжу ингредиента по продукту
-                newIngredient.CalculateNutrition(userProduct);
+                existingIngredient.IsDeleted = false;
+                existingIngredient.Quantity = request.Quantity;
+                existingIngredient.CalculateNutrition(userProduct);
 
-                // Добавить в таблицу
-                _dbContext.UserDishIngredients.Add(newIngredient);
-
-                // Обновить кбжу блюда
                 userDish.UpdateNutritionFromIngredients();
 
                 await _dbContext.SaveChangesAsync();
-                return Ok(newIngredient.Id);
+                return Ok(existingIngredient.Id);
             }
             catch (Exception ex)
             {
