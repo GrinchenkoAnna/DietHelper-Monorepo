@@ -130,8 +130,8 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)
         {
-            UserSearchResults.Remove(userProductViewModel);
-            AllUserItems.Remove(userProductViewModel);
+            RemoveFromCollections(userProductViewModel)
+
             await _apiService.DeleteUserProductAsync(userProductViewModel.Id);
 
             WeakReferenceMessenger.Default.Send(new DeleteUserProductMessage(userProductViewModel.Id));

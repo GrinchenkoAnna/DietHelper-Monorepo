@@ -120,5 +120,11 @@ namespace DietHelper.ViewModels.Base
 
         [RelayCommand]
         protected abstract void DeleteItemFromDatabase(TViewModel viewModel);
+
+        protected void RemoveFromCollections(TViewModel viewModel)
+        {
+            UserSearchResults.Remove(viewModel);
+            AllUserItems.Remove(viewModel);
+        }
     }
 }

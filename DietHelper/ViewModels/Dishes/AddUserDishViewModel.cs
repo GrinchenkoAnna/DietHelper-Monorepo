@@ -74,8 +74,8 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void DeleteItemFromDatabase(UserDishViewModel userDishViewModel)
         {
-            UserSearchResults.Remove(userDishViewModel);
-            AllUserItems.Remove(userDishViewModel);
+            RemoveFromCollections(userDishViewModel);
+
             await _apiService.DeleteDishAsync(userDishViewModel.Id);
 
             WeakReferenceMessenger.Default.Send(new DeleteUserDishMessage(userDishViewModel.Id));
