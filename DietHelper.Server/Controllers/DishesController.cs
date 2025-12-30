@@ -66,9 +66,9 @@ namespace DietHelper.Server.Controllers
 
         [HttpPost("{userId}/{dishId}/ingredients")]
         public async Task<ActionResult> AddUserDishIngredient(
-    int userId,
-    int dishId,
-    [FromBody] AddIngredientRequest request)
+            int userId,
+            int dishId,
+            [FromBody] AddIngredientRequest request)
         {
             try
             {

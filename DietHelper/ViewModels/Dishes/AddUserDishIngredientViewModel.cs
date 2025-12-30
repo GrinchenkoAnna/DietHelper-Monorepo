@@ -97,13 +97,13 @@ namespace DietHelper.ViewModels.Dishes
             {
                 UserProductId = SelectedUserItem.Id,
                 Name = SelectedUserItem.Name,
-                Quantity = Quantity,
+                Quantity = SelectedUserItem.Quantity,
                 CurrentNutrition = new NutritionInfo()
                 {
-                    Calories = SelectedUserItem.Calories * (Quantity / 100),
-                    Protein = SelectedUserItem.Protein * (Quantity / 100),
-                    Fat = SelectedUserItem.Fat * (Quantity / 100),
-                    Carbs = SelectedUserItem.Carbs * (Quantity / 100)
+                    Calories = SelectedUserItem.NutritionFacts.Calories,
+                    Protein = SelectedUserItem.NutritionFacts.Protein,
+                    Fat = SelectedUserItem.NutritionFacts.Fat,
+                    Carbs = SelectedUserItem.NutritionFacts.Carbs
                 }
             };
 
