@@ -94,39 +94,7 @@ namespace DietHelper.ViewModels.Products
 
         protected override async Task<UserProduct> CreateNewUserItem()
         {
-            var baseProduct = new BaseProduct()
-            {
-                Name = ManualName!,
-                NutritionFacts = new NutritionInfo()
-                {
-                    Calories = ManualCalories,
-                    Protein = ManualProtein,
-                    Fat = ManualFat,
-                    Carbs = ManualCarbs
-                },
-                IsDeleted = false
-            };
-            var createdBaseProduct = await _apiService.AddProductAsync(baseProduct);
-
-            User user = await GetCurrentUser();
-
-            var userProduct = new UserProduct()
-            {
-                UserId = GetCurrentUserId(),
-                User = user,
-                BaseProductId = createdBaseProduct.Id,
-                BaseProduct = createdBaseProduct,
-                CustomNutrition = new NutritionInfo()
-                {
-                    Calories = ManualCalories,
-                    Protein = ManualProtein,
-                    Fat = ManualFat,
-                    Carbs = ManualCarbs
-                },
-                IsDeleted = false
-            };
-
-            return await _apiService.AddUserProductAsync(userProduct);
+            return await CreateProductAsync();
         }
         
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)
