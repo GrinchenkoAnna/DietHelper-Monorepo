@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
@@ -64,10 +65,12 @@ namespace DietHelper.ViewModels.Products
             IsBusy = false;
         }
 
+        [RelayCommand]
         protected void AddBaseItem()
         {
             if (SelectedBaseItem is not null)
                 WeakReferenceMessenger.Default.Send(new AddBaseProductClosedMessage(SelectedBaseItem));
+            //добавить base продукт в user
         }
 
         protected override void AddUserItem()

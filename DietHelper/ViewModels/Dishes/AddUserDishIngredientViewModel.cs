@@ -130,7 +130,7 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)
         {
-            RemoveFromCollections(userProductViewModel)
+            RemoveFromCollections(userProductViewModel);
 
             await _apiService.DeleteUserProductAsync(userProductViewModel.Id);
 
