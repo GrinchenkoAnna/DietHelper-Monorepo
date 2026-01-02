@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
@@ -64,10 +65,12 @@ namespace DietHelper.ViewModels.Products
             IsBusy = false;
         }
 
+        [RelayCommand]
         protected void AddBaseItem()
         {
             if (SelectedBaseItem is not null)
                 WeakReferenceMessenger.Default.Send(new AddBaseProductClosedMessage(SelectedBaseItem));
+            //добавить base продукт в user
         }
 
         protected override void AddUserItem()
@@ -94,45 +97,13 @@ namespace DietHelper.ViewModels.Products
 
         protected override async Task<UserProduct> CreateNewUserItem()
         {
-            var baseProduct = new BaseProduct()
-            {
-                Name = ManualName!,
-                NutritionFacts = new NutritionInfo()
-                {
-                    Calories = ManualCalories,
-                    Protein = ManualProtein,
-                    Fat = ManualFat,
-                    Carbs = ManualCarbs
-                },
-                IsDeleted = false
-            };
-            var createdBaseProduct = await _apiService.AddProductAsync(baseProduct);
-
-            User user = await GetCurrentUser();
-
-            var userProduct = new UserProduct()
-            {
-                UserId = GetCurrentUserId(),
-                User = user,
-                BaseProductId = createdBaseProduct.Id,
-                BaseProduct = createdBaseProduct,
-                CustomNutrition = new NutritionInfo()
-                {
-                    Calories = ManualCalories,
-                    Protein = ManualProtein,
-                    Fat = ManualFat,
-                    Carbs = ManualCarbs
-                },
-                IsDeleted = false
-            };
-
-            return await _apiService.AddUserProductAsync(userProduct);
+            return await CreateProductAsync();
         }
         
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)
         {
-            UserSearchResults.Remove(userProductViewModel);
-            AllUserItems.Remove(userProductViewModel);
+            RemoveFromCollections(userProductViewModel);
+
             await _apiService.DeleteUserProductAsync(userProductViewModel.Id);
 
             WeakReferenceMessenger.Default.Send(new DeleteUserProductMessage(userProductViewModel.Id));

@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DietHelper.Common.Models;
+using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Products;
 using DietHelper.Services;
 using System.Collections.ObjectModel;
@@ -27,7 +29,46 @@ namespace DietHelper.ViewModels.Base
         [ObservableProperty] private double manualProtein;
         [ObservableProperty] private double manualFat;
         [ObservableProperty] private double manualCarbs;
+        
         protected abstract Task<TModel> CreateNewUserItem();
+
+        protected async Task<UserProduct> CreateProductAsync()
+        {
+            var baseProduct = new BaseProduct()
+            {
+                Name = ManualName!,
+                NutritionFacts = new NutritionInfo()
+                {
+                    Calories = ManualCalories,
+                    Protein = ManualProtein,
+                    Fat = ManualFat,
+                    Carbs = ManualCarbs
+                },
+                IsDeleted = false
+            };
+            var createdBaseProduct = await _apiService.AddProductAsync(baseProduct);
+
+            User user = await GetCurrentUser();
+
+            var userProduct = new UserProduct()
+            {
+                UserId = GetCurrentUserId(),
+                User = user,
+                BaseProductId = createdBaseProduct.Id,
+                BaseProduct = createdBaseProduct,
+                CustomNutrition = new NutritionInfo()
+                {
+                    Calories = ManualCalories,
+                    Protein = ManualProtein,
+                    Fat = ManualFat,
+                    Carbs = ManualCarbs
+                },
+                IsDeleted = false
+            };
+
+            return await _apiService.AddUserProductAsync(userProduct);
+        }
+
         protected void ClearManualEntries()
         {
             ManualName = string.Empty;
@@ -79,5 +120,11 @@ namespace DietHelper.ViewModels.Base
 
         [RelayCommand]
         protected abstract void DeleteItemFromDatabase(TViewModel viewModel);
+
+        protected void RemoveFromCollections(TViewModel viewModel)
+        {
+            UserSearchResults.Remove(viewModel);
+            AllUserItems.Remove(viewModel);
+        }
     }
 }

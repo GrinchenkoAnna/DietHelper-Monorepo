@@ -92,8 +92,10 @@ namespace DietHelper.ViewModels.Dishes
 
         private void OnIngredientsChanged() => Recalculate();
 
-        private async void Recalculate(UserDishIngredientViewModel? changedProduct = null)
+        private async void Recalculate()
         {
+            if (Ingredients.Count == 0) return;
+
             var dishIngredients = Ingredients
             .Select(ingredient => new IngredientCalculationDto(
                 ingredient.UserProductId,
