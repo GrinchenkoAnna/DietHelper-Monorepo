@@ -41,6 +41,11 @@ namespace DietHelper.ViewModels.Base
         [ObservableProperty]
         private NutritionInfo nutritionFacts = new();
 
+        public ProductViewModelBase()
+        {
+            ProductChanged += (sender, e) => { };
+        }
+
         public event EventHandler ProductChanged;
 
         protected void Recalculate()

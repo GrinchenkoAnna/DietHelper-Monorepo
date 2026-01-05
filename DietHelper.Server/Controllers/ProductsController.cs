@@ -4,6 +4,8 @@ using DietHelper.Common.Models.Products;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.UserSecrets;
+using System.Security.Cryptography.X509Certificates;
+using static DietHelper.Server.Controllers.DishesController;
 
 namespace DietHelper.Server.Controllers
 {
@@ -69,6 +71,24 @@ namespace DietHelper.Server.Controllers
             {
                 return StatusCode(500, $"[ProductsController]: {ex.Message}");
             }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> AddUserProduct([FromBody] UserProduct userProduct)
+        {
+            var baseProduct = await _dbContext.BaseProducts.FindAsync(userProduct.BaseProductId);
+            if (baseProduct is null)
+                return NotFound($"[ProductsController]: BaseProduct with id = {userProduct.BaseProductId} not found");
+
+            if (userProduct.CustomNutrition is null)
+                userProduct.CustomNutrition = baseProduct.NutritionFacts;
+
+            userProduct.IsDeleted = false;
+
+            _dbContext.UserProducts.Add(userProduct);
+            await _dbContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetUserProduct), new { id = userProduct.Id, userId = userProduct.UserId, BaseProduct = baseProduct }, userProduct);
         }
 
         [HttpGet("ping")]

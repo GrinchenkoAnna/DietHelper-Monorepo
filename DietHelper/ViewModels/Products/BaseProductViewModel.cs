@@ -1,9 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using DietHelper.Common.Models.Core;
+﻿using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Products;
 using DietHelper.ViewModels.Base;
 using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace DietHelper.ViewModels.Products
 {
@@ -32,7 +30,13 @@ namespace DietHelper.ViewModels.Products
             {
                 Id = Id,
                 Name = Name ?? string.Empty,
-                NutritionFacts = NutritionFacts,
+                NutritionFacts = new NutritionInfo()
+                {
+                    Calories = Calories,
+                    Protein = Protein,
+                    Fat = Fat,
+                    Carbs = Carbs
+                },
                 IsDeleted = false
             };
         }

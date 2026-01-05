@@ -66,11 +66,30 @@ namespace DietHelper.ViewModels.Products
         }
 
         [RelayCommand]
-        protected void AddBaseItem()
+        protected async Task AddBaseItem()
         {
-            if (SelectedBaseItem is not null)
-                WeakReferenceMessenger.Default.Send(new AddBaseProductClosedMessage(SelectedBaseItem));
-            //добавить base продукт в user
+            if (SelectedBaseItem is null) return;
+
+            var user = await GetCurrentUser();
+
+            var userProduct = new UserProduct()
+            {
+                UserId = user.Id,
+                BaseProductId = SelectedBaseItem.Id,
+                CustomNutrition = new NutritionInfo()
+                {
+                    Calories = SelectedBaseItem.Calories,
+                    Protein = SelectedBaseItem.Protein,
+                    Fat = SelectedBaseItem.Fat,
+                    Carbs = SelectedBaseItem.Carbs
+                }
+            };
+            var createdUserProduct = await _apiService.AddUserProductAsync(userProduct);
+            var userProductViewModel = new UserProductViewModel(createdUserProduct)
+            {
+                Quantity = SelectedBaseItem.Quantity
+            };
+            WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(userProductViewModel));
         }
 
         protected override void AddUserItem()

@@ -18,7 +18,7 @@ namespace DietHelper.Common.Models.Products
 
         [Required]
         public int UserId { get; set; }
-        public virtual User User { get; set; } = null!;
+        public virtual User? User { get; set; }
 
         public int? BaseProductId { get; set; }
         public virtual BaseProduct? BaseProduct { get; set; }

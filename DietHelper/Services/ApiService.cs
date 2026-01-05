@@ -46,9 +46,15 @@ namespace DietHelper.Services
 
         public async Task<User> GetUserAsync()
         {
-            //throw new NotImplementedException();
+            return new User() //заглушка
+            {
+                Id = _currentUserId
+            };
+        }
 
-            return new User();
+        public async Task<int> GetUserId()
+        {
+            return _currentUserId;
         }
 
         #region Products
@@ -109,7 +115,25 @@ namespace DietHelper.Services
 
         public async Task<UserProduct> AddUserProductAsync(UserProduct newUserProduct)
         {
-            throw new NotImplementedException();
+            var json = JsonSerializer.Serialize(newUserProduct, new JsonSerializerOptions { WriteIndented = true });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+            var response = await _httpClient.PostAsync("products", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Server error response: {errorContent}");
+                Debug.WriteLine($"Status: {response.StatusCode}");
+
+                throw new HttpRequestException(
+                    $"Server returned {response.StatusCode}: {errorContent}",
+                    null, response.StatusCode);
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<UserProduct>();
         }
 
         public async Task<BaseProduct> AddProductAsync<BaseProduct>(BaseProduct baseProduct)
