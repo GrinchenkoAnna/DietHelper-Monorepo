@@ -19,27 +19,27 @@
 		
 		<StackPanel Grid.Row="1" Orientation="Horizontal">
 			<StackPanel Orientation="Horizontal">
-				<TextBlock Text="Ê: "/>
+				<TextBlock Text="Ðš: "/>
 				<TextBlock Text="{Binding NutritionFacts.FormattedCalories}" Width="100"/>
 			</StackPanel>
 			
 			<StackPanel Orientation="Horizontal">
-				<TextBlock Text="Á: "/>
+				<TextBlock Text="Ð‘: "/>
 				<TextBlock Text="{Binding NutritionFacts.FormattedProtein}" Width="100"/>
 			</StackPanel>
 			
 			<StackPanel Orientation="Horizontal">
-				<TextBlock Text="Æ: "/>
+				<TextBlock Text="Ð–: "/>
 				<TextBlock Text="{Binding NutritionFacts.FormattedFat}" Width="100"/>
 			</StackPanel>
 			
 			<StackPanel Orientation="Horizontal">
-				<TextBlock Text="Ó: " Margin="5 0 0 5" />
+				<TextBlock Text="Ð£: " Margin="5 0 0 5" />
 				<TextBlock Text="{Binding NutritionFacts.FormattedCarbs}" Width="100"/>
 			</StackPanel>
 			
 			<StackPanel Orientation="Horizontal">
-				<TextBlock Text="Âåñ: "/>
+				<TextBlock Text="Ð’ÐµÑ: "/>
 				<TextBox Text="{Binding Quantity}" Width="100" 
 						 Margin="5 -5 0 0"/>
 			</StackPanel>

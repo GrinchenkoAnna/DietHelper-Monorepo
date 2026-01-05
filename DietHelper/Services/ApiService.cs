@@ -64,7 +64,7 @@ namespace DietHelper.Services
 
                 var userProducts = await response.Content.ReadFromJsonAsync<List<UserProduct>>();
 
-                return userProducts.ToList();
+                return userProducts;
             }
             catch (Exception ex)
             {
@@ -73,11 +73,25 @@ namespace DietHelper.Services
             }
         }
 
-        public async Task<List<BaseProduct>> GetBaseProductsAsync()
+        public async Task<List<BaseProduct>?> GetBaseProductsAsync()
         {
-            //throw new NotImplementedException();
+            try
+            {
+                var response = await _httpClient.GetAsync($"products/base");
 
-            return new List<BaseProduct>();
+                if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
+                response.EnsureSuccessStatusCode();
+
+                var baseProducts = await response.Content.ReadFromJsonAsync<List<BaseProduct>>();
+
+                return baseProducts;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return null;
+            }
         }
 
         public async Task<UserProduct> GetUserProductAsync(int userProductId)

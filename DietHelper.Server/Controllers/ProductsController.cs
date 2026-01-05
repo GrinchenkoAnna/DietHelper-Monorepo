@@ -54,6 +54,23 @@ namespace DietHelper.Server.Controllers
             }
         }
 
+        [HttpGet("base")]
+        public async Task<ActionResult<List<UserProduct>>> GetBaseProducts()
+        {
+            try
+            {
+                var products = await _dbContext.BaseProducts
+                    .Where(p => !p.IsDeleted)
+                    .ToListAsync();
+
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"[ProductsController]: {ex.Message}");
+            }
+        }
+
         [HttpGet("ping")]
         public ActionResult<string> Ping()
         {
