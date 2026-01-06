@@ -9,6 +9,7 @@ using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Base;
 using DietHelper.ViewModels.Products;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -52,6 +53,48 @@ namespace DietHelper.ViewModels.Dishes
             }
         }
 
+        protected override async Task DoSearch(string? term)
+        {
+            IsBusy = true;
+
+            UserSearchResults.Clear();
+            BaseSearchResults.Clear();
+
+            //UserProducts
+            if (term is null || string.IsNullOrWhiteSpace(term))
+                foreach (var item in AllUserItems) UserSearchResults.Add(item);
+            else
+            {
+                foreach (var item in AllUserItems)
+                {
+                    if (item.GetType()
+                           .GetProperty("Name")!
+                           .GetValue(item)!
+                           .ToString()
+                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
+                        UserSearchResults.Add(item);
+                }
+            }
+
+            //BaseProducts
+            if (term is null || string.IsNullOrWhiteSpace(term))
+                foreach (var item in AllBaseItems) BaseSearchResults.Add(item);
+            else
+            {
+                foreach (var item in AllBaseItems)
+                {
+                    if (item.GetType()
+                           .GetProperty("Name")!
+                           .GetValue(item)!
+                           .ToString()
+                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
+                        BaseSearchResults.Add(item);
+                }
+            }
+
+            IsBusy = false;
+        }
+
         protected override async Task<UserProduct> CreateNewUserItem()
         {
             return await CreateProductAsync();
@@ -78,29 +121,48 @@ namespace DietHelper.ViewModels.Dishes
             WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(ingredient));
         }
 
+        [RelayCommand]
         private async void AddBaseItem()
         {
             if (SelectedBaseItem is null) return;
 
-            User user = await GetCurrentUser();
-
-            var userProduct = new UserProduct()
+            try
             {
-                UserId = GetCurrentUserId(),
-                User = user,
-                BaseProductId = SelectedBaseItem.Id,
-                BaseProduct = SelectedBaseItem.ToModel(),
-                CustomNutrition = new NutritionInfo()
+                var userProduct = new UserProduct()
                 {
-                    Calories = ManualCalories,
-                    Protein = ManualProtein,
-                    Fat = ManualFat,
-                    Carbs = ManualCarbs
-                },
-                IsDeleted = false
-            };
+                    UserId = GetCurrentUserId(),
+                    BaseProductId = SelectedBaseItem.Id,
+                    CustomNutrition = new NutritionInfo()
+                    {
+                        Calories = SelectedBaseItem.Calories,
+                        Protein = SelectedBaseItem.Protein,
+                        Fat = SelectedBaseItem.Fat,
+                        Carbs = SelectedBaseItem.Carbs
+                    }
+                };
+                var createdUserProduct = await _apiService.AddUserProductAsync(userProduct);
+                var userProductViewModel = new UserProductViewModel(createdUserProduct);
 
-            WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(new UserProductViewModel(userProduct)));
+                var userDishIngredient = new UserDishIngredientViewModel()
+                {
+                    UserProductId = createdUserProduct.Id,
+                    Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
+                    Quantity = SelectedBaseItem.Quantity,
+                    CurrentNutrition = new NutritionInfo()
+                    {
+                        Calories = SelectedBaseItem.Calories * (Quantity / 100),
+                        Protein = SelectedBaseItem.Protein * (Quantity / 100),
+                        Fat = SelectedBaseItem.Fat * (Quantity / 100),
+                        Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
+                    }
+                };
+
+                WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userDishIngredient));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[AddUserDishIngredientViewModel]: {ex.Message}");
+            }          
         }
 
         protected override async void AddManualItem()

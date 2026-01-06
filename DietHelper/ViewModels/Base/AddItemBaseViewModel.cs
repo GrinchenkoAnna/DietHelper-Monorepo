@@ -91,7 +91,7 @@ namespace DietHelper.ViewModels.Base
             _ = DoSearch(SearchText);
         }
 
-        private async Task DoSearch(string? term)
+        protected async virtual Task DoSearch(string? term)
         {
             IsBusy = true;
             UserSearchResults.Clear();

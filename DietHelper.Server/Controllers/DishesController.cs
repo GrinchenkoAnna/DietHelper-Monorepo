@@ -89,14 +89,35 @@ namespace DietHelper.Server.Controllers
                     .FirstOrDefaultAsync(udi => udi.UserDishId == dishId
                         && udi.UserProductId == request.UserProductId);
 
-                existingIngredient.IsDeleted = false;
-                existingIngredient.Quantity = request.Quantity;
-                existingIngredient.CalculateNutrition(userProduct);
+                if (existingIngredient is null)
+                {
+                    var newIngredient = new UserDishIngredient
+                    {
+                        UserDishId = dishId,
+                        UserProductId = request.UserProductId,
+                        Quantity = request.Quantity,
+                        IsDeleted = false
+                    };
 
-                userDish.UpdateNutritionFromIngredients();
+                    newIngredient.CalculateNutrition(userProduct);
+                    _dbContext.UserDishIngredients.Add(newIngredient);
 
-                await _dbContext.SaveChangesAsync();
-                return Ok(existingIngredient.Id);
+                    userDish.UpdateNutritionFromIngredients();
+                    await _dbContext.SaveChangesAsync();
+
+                    return Ok(newIngredient.Id);
+                }
+                else
+                {
+                    existingIngredient.IsDeleted = false;
+                    existingIngredient.Quantity = request.Quantity;
+                    existingIngredient.CalculateNutrition(userProduct);
+
+                    userDish.UpdateNutritionFromIngredients();
+                    await _dbContext.SaveChangesAsync();
+
+                    return Ok(existingIngredient.Id);
+                }
             }
             catch (Exception ex)
             {

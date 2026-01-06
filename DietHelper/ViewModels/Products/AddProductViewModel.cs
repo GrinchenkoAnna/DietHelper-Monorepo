@@ -48,18 +48,43 @@ namespace DietHelper.ViewModels.Products
             }
         }
 
-        private async Task DoGlobalSearch(string? term)
+        protected override async Task DoSearch(string? term)
         {
             IsBusy = true;
+
+            UserSearchResults.Clear();
             BaseSearchResults.Clear();
 
-            //временно
-            foreach (var item in AllBaseItems)
+            //UserProducts
+            if (term is null || string.IsNullOrWhiteSpace(term))
+                foreach (var item in AllUserItems) UserSearchResults.Add(item);
+            else
             {
-                //не очень эффективный алгоритм поиска
-                if (term is not null && item.GetType().GetProperty("Name")!.GetValue(item)!.ToString()
-                    .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                    BaseSearchResults.Add(item);
+                foreach (var item in AllUserItems)
+                {
+                    if (item.GetType()
+                           .GetProperty("Name")!
+                           .GetValue(item)!
+                           .ToString()
+                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
+                        UserSearchResults.Add(item);
+                }
+            }
+
+            //BaseProducts
+            if (term is null || string.IsNullOrWhiteSpace(term))
+                foreach (var item in AllBaseItems) BaseSearchResults.Add(item);
+            else
+            {
+                foreach (var item in AllBaseItems)
+                {
+                    if (item.GetType()
+                           .GetProperty("Name")!
+                           .GetValue(item)!
+                           .ToString()
+                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
+                        BaseSearchResults.Add(item);
+                }
             }
 
             IsBusy = false;
