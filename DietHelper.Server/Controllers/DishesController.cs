@@ -1,4 +1,5 @@
 ﻿using DietHelper.Common.Data;
+using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,25 @@ namespace DietHelper.Server.Controllers
         {
             public int UserProductId { get; set; }
             public double Quantity { get; set; }
+        }
+
+        [HttpPost("{userId}")]
+        public async Task<ActionResult> AddUserDish(int userId, [FromBody] UserDish userDish)
+        {
+            if (userDish == null) return BadRequest("Request is null");
+
+            userDish.UserId = userId;
+
+            if (string.IsNullOrWhiteSpace(userDish.Name))
+                return BadRequest("Dish name is required");
+
+            userDish.Ingredients ??= new List<UserDishIngredient>();
+            userDish.IsDeleted = false;
+
+            _dbContext.UserDishes.Add(userDish);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(userDish);
         }
 
 

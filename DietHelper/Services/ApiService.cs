@@ -118,7 +118,7 @@ namespace DietHelper.Services
             var json = JsonSerializer.Serialize(newUserProduct, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             
-            var response = await _httpClient.PostAsync("products", content);
+            var response = await _httpClient.PostAsync("products/user", content);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -136,9 +136,27 @@ namespace DietHelper.Services
             return await response.Content.ReadFromJsonAsync<UserProduct>();
         }
 
-        public async Task<BaseProduct> AddProductAsync<BaseProduct>(BaseProduct baseProduct)
+        public async Task<BaseProduct> AddProductAsync<BaseProduct>(BaseProduct newBaseProduct)
         {
-            throw new NotImplementedException();
+            var json = JsonSerializer.Serialize(newBaseProduct, new JsonSerializerOptions { WriteIndented = true });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("products/base", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Server error response: {errorContent}");
+                Debug.WriteLine($"Status: {response.StatusCode}");
+
+                throw new HttpRequestException(
+                    $"Server returned {response.StatusCode}: {errorContent}",
+                    null, response.StatusCode);
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<BaseProduct>();
         }        
 
         public async Task DeleteUserProductAsync(int id)
@@ -174,14 +192,32 @@ namespace DietHelper.Services
             return UserDish;
         }
 
-        public async Task<UserDish> AddUserDishAsync(UserDish userDish)
+        public async Task<UserDish> AddUserDishAsync(UserDish newUserDish)
         {
-            throw new NotImplementedException();
+            var json = JsonSerializer.Serialize(newUserDish, new JsonSerializerOptions { WriteIndented = true });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"dishes/{_currentUserId}", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Server error response: {errorContent}");
+                Debug.WriteLine($"Status: {response.StatusCode}");
+
+                throw new HttpRequestException(
+                    $"Server returned {response.StatusCode}: {errorContent}",
+                    null, response.StatusCode);
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<UserDish>();
         }
 
-        //public async Task UpdateUserDishAsync(UserDish userDish)
+        //public async Task UpdateUserDishAsync(UserDish newUserDish)
         //{
-        //    var response = await _httpClient.PutAsync($"dishes/{_currentUserId}/{userDish}");
+        //    var response = await _httpClient.PutAsync($"dishes/{_currentUserId}/{newUserDish}");
 
         //    response.EnsureSuccessStatusCode();
         //}

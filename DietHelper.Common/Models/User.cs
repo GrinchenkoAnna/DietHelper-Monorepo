@@ -16,7 +16,6 @@ namespace DietHelper.Common.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required]
         public string PasswordHash { get; set; } = string.Empty;
 
         public string? Name { get; set; }

@@ -169,7 +169,7 @@ namespace DietHelper.ViewModels.Dishes
         {
             if (string.IsNullOrEmpty(ManualName)) return;
 
-            var newProduct = CreateNewUserItem();
+            var newProduct = await CreateNewUserItem();
 
             var userIngredient = new UserDishIngredientViewModel
             {

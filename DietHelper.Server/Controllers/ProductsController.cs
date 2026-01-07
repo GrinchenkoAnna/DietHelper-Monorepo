@@ -1,4 +1,5 @@
 ﻿using DietHelper.Common.Data;
+using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
 using Microsoft.AspNetCore.Mvc;
@@ -73,23 +74,46 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet("base/{id}")]
+        public async Task<ActionResult<BaseProduct>> GetBaseProductById(int id)
+        {
+            var baseProduct = await _dbContext.BaseProducts
+                .FirstOrDefaultAsync(bp => bp.Id == id && !bp.IsDeleted);
+
+            if (baseProduct == null) return NotFound();
+
+            return Ok(baseProduct);
+        }
+
+
+        [HttpPost("user")]
         public async Task<ActionResult> AddUserProduct([FromBody] UserProduct userProduct)
         {
-            var baseProduct = await _dbContext.BaseProducts.FindAsync(userProduct.BaseProductId);
+            var baseProduct = await _dbContext.BaseProducts
+                .Where(bp => bp.Id == userProduct.BaseProductId && !bp.IsDeleted)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
             if (baseProduct is null)
-                return NotFound($"[ProductsController]: BaseProduct with id = {userProduct.BaseProductId} not found");
-
-            if (userProduct.CustomNutrition is null)
-                userProduct.CustomNutrition = baseProduct.NutritionFacts;
+                return NotFound($"[ProductsController]: BaseProduct with id = {userProduct.BaseProductId} not found");            
 
             userProduct.IsDeleted = false;
 
             _dbContext.UserProducts.Add(userProduct);
             await _dbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetUserProduct), new { id = userProduct.Id, userId = userProduct.UserId, BaseProduct = baseProduct }, userProduct);
+            return Ok(userProduct);
         }
+
+        [HttpPost("base")]
+        public async Task<ActionResult> AddBaseProduct([FromBody] BaseProduct baseProduct)
+        {
+            _dbContext.BaseProducts.Add(baseProduct);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(baseProduct);
+        }
+
+        
 
         [HttpGet("ping")]
         public ActionResult<string> Ping()

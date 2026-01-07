@@ -48,14 +48,10 @@ namespace DietHelper.ViewModels.Base
             };
             var createdBaseProduct = await _apiService.AddProductAsync(baseProduct);
 
-            User user = await GetCurrentUser();
-
             var userProduct = new UserProduct()
             {
                 UserId = GetCurrentUserId(),
-                User = user,
                 BaseProductId = createdBaseProduct.Id,
-                BaseProduct = createdBaseProduct,
                 CustomNutrition = new NutritionInfo()
                 {
                     Calories = ManualCalories,
@@ -99,7 +95,7 @@ namespace DietHelper.ViewModels.Base
             //временно
             foreach (var item in AllUserItems)
             {
-                //не очень эффективный алгоритм поиска
+                //не очень эффективный алгоритм поиска -> SearchIndex
                 if (term is not null 
                     && item.GetType()
                            .GetProperty("Name")!

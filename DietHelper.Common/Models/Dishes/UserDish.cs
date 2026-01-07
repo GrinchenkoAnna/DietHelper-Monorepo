@@ -26,6 +26,8 @@ namespace DietHelper.Common.Models.Dishes
 
         public bool IsDeleted { get; set; } = false;
 
+        public double Quantity = 100;
+
         public virtual ICollection<UserDishIngredient> Ingredients { get; set; } = new List<UserDishIngredient>();
 
         public NutritionInfo DishNutrition => new()

@@ -112,6 +112,7 @@ namespace DietHelper.ViewModels.Products
             var createdUserProduct = await _apiService.AddUserProductAsync(userProduct);
             var userProductViewModel = new UserProductViewModel(createdUserProduct)
             {
+                Name = SelectedBaseItem.Name,
                 Quantity = SelectedBaseItem.Quantity
             };
             WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(userProductViewModel));
@@ -123,16 +124,16 @@ namespace DietHelper.ViewModels.Products
                 WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(SelectedUserItem));
         }
         
-        //UserProduct + BaseProduct
         protected override async void AddManualItem()
         {
             if (string.IsNullOrEmpty(ManualName)) return;
 
             var newUserProduct = await CreateNewUserItem();
-            
-            await _apiService.AddUserProductAsync(newUserProduct);
 
-            var newItem = new UserProductViewModel(newUserProduct);
+            var newItem = new UserProductViewModel(newUserProduct)
+            {
+                Name = ManualName,
+            };
 
             ClearManualEntries();
 

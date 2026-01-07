@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
-using DietHelper.Common.Models.Products;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Products;
@@ -94,7 +93,11 @@ namespace DietHelper.ViewModels.Dishes
 
         private async void Recalculate()
         {
-            if (Ingredients.Count == 0) return;
+            if (Ingredients.Count == 0)
+            {
+                UpdateTotalQuantity();
+                return;
+            }
 
             var dishIngredients = Ingredients
             .Select(ingredient => new IngredientCalculationDto(
@@ -117,8 +120,8 @@ namespace DietHelper.ViewModels.Dishes
             foreach (var ingredient in Ingredients)
             {
                 User user = await _apiService.GetUserAsync();
-                
-                var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);                
+
+                var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);
 
                 var userProductViewModel = new UserProductViewModel(userProduct)
                 {
@@ -173,10 +176,20 @@ namespace DietHelper.ViewModels.Dishes
             UserId = userDish.UserId;
             Name = userDish.Name ?? string.Empty;
 
+            NutritionFacts = new NutritionInfo()
+            {
+                Calories = userDish.NutritionFacts?.Calories ?? 0,
+                Protein = userDish.NutritionFacts?.Protein ?? 0,
+                Fat = userDish.NutritionFacts?.Fat ?? 0,
+                Carbs = userDish.NutritionFacts?.Carbs ?? 0
+            };
+
+            Quantity = userDish.Quantity;
+
             foreach (var ingredient in userDish.Ingredients)
             {
                 Ingredients.Add(new UserDishIngredientViewModel(ingredient));
-            }            
+            }
 
             Ingredients.CollectionChanged += async (s, e) =>
             {
@@ -187,7 +200,7 @@ namespace DietHelper.ViewModels.Dishes
                         SetupIngredientSubscription(item);
                     }
                     _ = SyncDisplayProducts();
-                }                
+                }
 
                 if (e.OldItems != null)
                 {
@@ -284,7 +297,7 @@ namespace DietHelper.ViewModels.Dishes
                     UpdateLocalModel(userDishIngredientViewModel);
 
                     Recalculate();
-                }                
+                }
             }
         }
 
@@ -350,7 +363,7 @@ namespace DietHelper.ViewModels.Dishes
             }
 
             _model.UpdateNutritionFromIngredients();
-        }        
+        }
     }
 }
 
