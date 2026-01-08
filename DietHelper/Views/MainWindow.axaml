@@ -62,6 +62,8 @@
 										HorizontalContentAlignment="Center"
 										HorizontalAlignment="Stretch" 
 										Command="{Binding AddDishIngredientCommand}"
+										IsEnabled="{Binding CanAddIngredients}"
+										IsVisible="{Binding CanAddIngredients}"
 										Margin="8 5 -8 0"/>
 							</StackPanel>
 						</DataTemplate>

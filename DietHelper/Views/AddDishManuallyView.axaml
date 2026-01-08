@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:DietHelper.ViewModels.Dishes"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DietHelper.Views.AddDishManuallyView"
+			 x:DataType="vm:AddUserDishViewModel">
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="40" />
+			<RowDefinition Height="40" />
+		</Grid.RowDefinitions>
+
+		<TextBox Grid.Row="0" Watermark="Название"
+				 Text="{Binding ManualName}"
+				 HorizontalAlignment="Stretch"
+				 Height="20" Margin="10 0 10 0"
+				 FontWeight="Bold"/>
+
+		<UniformGrid Grid.Row="1" Columns="4" Margin="10 0 10 0">
+			<TextBox Watermark="Калорий, ккал" Height="20"
+					 Text="{Binding ManualCalories}"
+					IsEnabled="{Binding IsNutritionEnabled}"/>
+			<TextBox Watermark="Белков, г" Height="20"
+					 Text="{Binding ManualProtein}"
+					IsEnabled="{Binding IsNutritionEnabled}"/>
+			<TextBox Watermark="Жиров, г" Height="20"
+					 Text="{Binding ManualFat}"
+					IsEnabled="{Binding IsNutritionEnabled}"/>					
+			<TextBox Watermark="Углеводов, г" Height="20"
+					 Text="{Binding ManualCarbs}"
+					IsEnabled="{Binding IsNutritionEnabled}"/>
+		</UniformGrid>
+	</Grid>
+	
+</UserControl>

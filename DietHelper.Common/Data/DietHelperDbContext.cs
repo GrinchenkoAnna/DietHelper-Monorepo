@@ -106,6 +106,7 @@ namespace DietHelper.Common.Data
                 entity.HasKey(d => d.Id);
                 entity.Property(d => d.UserId).IsRequired();
                 entity.Property(d => d.Name).IsRequired();
+                entity.Property(d => d.IsReadyDish).HasDefaultValue(false);
 
                 entity.HasOne<User>()
                     .WithMany()

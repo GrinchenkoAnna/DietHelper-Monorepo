@@ -35,4 +35,10 @@
   <ItemGroup>
     <ProjectReference Include="..\DietHelper.Common\DietHelper.Common.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\AddDishManuallyView.axaml.cs">
+      <DependentUpon>AddDishManuallyView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

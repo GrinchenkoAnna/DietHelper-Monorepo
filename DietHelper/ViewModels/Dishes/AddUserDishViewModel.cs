@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
@@ -9,13 +10,67 @@ using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels.Dishes
 {
+    public enum DishType
+    {
+        EmptyDish,
+        ReadyDish
+    }
+
     public partial class AddUserDishViewModel : AddItemBaseViewModel<UserDish, UserDishViewModel>
     {
         private readonly NutritionCalculator _nutritionCalculator;
 
+        [ObservableProperty]
+        private DishType selectedDishType = DishType.EmptyDish;
+
+        [ObservableProperty]
+        private bool isNutritionEnabled = false;
+
+        public bool IsEmptyDish
+        {
+            get => SelectedDishType == DishType.EmptyDish;
+            set
+            {
+                if (value) SelectedDishType = DishType.EmptyDish;
+            }
+        }
+
+        public bool IsReadyDish
+        {
+            get => SelectedDishType == DishType.ReadyDish;
+            set
+            {
+                if (value) SelectedDishType = DishType.ReadyDish;
+            }
+        }
+
         public AddUserDishViewModel(ApiService apiService, NutritionCalculator nutritionCalculator) : base(apiService)
         {
             _nutritionCalculator = nutritionCalculator;
+
+            PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(SelectedDishType))
+                {
+                    OnPropertyChanged(nameof(IsEmptyDish));
+                    OnPropertyChanged(nameof(IsReadyDish));
+                    UpdateNutritionState();
+                }                    
+            };
+
+        }
+
+        private void UpdateNutritionState()
+        {
+            IsNutritionEnabled = (SelectedDishType == DishType.ReadyDish);
+
+            if (IsNutritionEnabled)
+            {
+                ManualCalories = 0;
+                ManualProtein = 0;
+                ManualFat = 0;
+                ManualCarbs = 0;
+            }
         }
 
         protected override async void InitializeData()
@@ -55,6 +110,7 @@ namespace DietHelper.ViewModels.Dishes
                     Fat = ManualFat,
                     Carbs = ManualCarbs
                 },
+                IsReadyDish = SelectedDishType == DishType.ReadyDish,
                 IsDeleted = false
             };
 
@@ -80,5 +136,7 @@ namespace DietHelper.ViewModels.Dishes
 
             WeakReferenceMessenger.Default.Send(new DeleteUserDishMessage(userDishViewModel.Id));
         }
+
+
     }
 }

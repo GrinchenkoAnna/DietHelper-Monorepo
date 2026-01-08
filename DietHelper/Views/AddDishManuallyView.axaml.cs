@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace DietHelper.Views;
 
-public partial class AddDishManuallyView : UserControl
+public partial class AddItemManuallyView : UserControl
 {
-    public AddDishManuallyView()
+    public AddItemManuallyView()
     {
         InitializeComponent();
     }

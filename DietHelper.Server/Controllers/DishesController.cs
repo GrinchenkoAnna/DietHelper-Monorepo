@@ -75,6 +75,7 @@ namespace DietHelper.Server.Controllers
                 return BadRequest("Dish name is required");
 
             userDish.Ingredients ??= new List<UserDishIngredient>();
+            userDish.IsReadyDish = userDish.IsReadyDish;
             userDish.IsDeleted = false;
 
             _dbContext.UserDishes.Add(userDish);

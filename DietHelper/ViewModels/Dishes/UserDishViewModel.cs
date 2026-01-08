@@ -32,6 +32,12 @@ namespace DietHelper.ViewModels.Dishes
         private bool IsManual = false;
 
         [ObservableProperty]
+        private bool isReadyDish = false;
+
+        [ObservableProperty]
+        private bool canAddIngredients = true;
+
+        [ObservableProperty]
         private int id = -1;
 
         [ObservableProperty]
@@ -76,11 +82,14 @@ namespace DietHelper.ViewModels.Dishes
         partial void OnQuantityChanged(double value) => UpdateTotalQuantity();
         private void UpdateTotalQuantity()
         {
-            if (!IsManual)
+            if (IsReadyDish)
             {
-                Quantity = Ingredients.Sum(ingredient => ingredient.Quantity);
+                Quantity = 100;
+                FormattedQuantity = $"{Quantity} г";
+                return;
             }
 
+            Quantity = Ingredients.Sum(ingredient => ingredient.Quantity);
             FormattedQuantity = $"{Quantity} г";
         }
 
@@ -93,7 +102,7 @@ namespace DietHelper.ViewModels.Dishes
 
         private async void Recalculate()
         {
-            if (Ingredients.Count == 0)
+            if (Ingredients.Count == 0 || IsReadyDish)
             {
                 UpdateTotalQuantity();
                 return;
@@ -184,40 +193,51 @@ namespace DietHelper.ViewModels.Dishes
                 Carbs = userDish.NutritionFacts?.Carbs ?? 0
             };
 
-            Quantity = userDish.Quantity;
+            IsReadyDish = userDish.IsReadyDish;
+            CanAddIngredients = !IsReadyDish;
 
-            foreach (var ingredient in userDish.Ingredients)
+            if (IsReadyDish) Quantity = 100;
+            else Quantity = userDish.Quantity;
+
+            if (!IsReadyDish)
             {
-                Ingredients.Add(new UserDishIngredientViewModel(ingredient));
+                foreach (var ingredient in userDish.Ingredients)
+                {
+                    Ingredients.Add(new UserDishIngredientViewModel(ingredient));
+                }
+
+                Ingredients.CollectionChanged += async (s, e) =>
+                {
+                    if (e.NewItems != null)
+                    {
+                        foreach (var item in e.NewItems.OfType<UserDishIngredientViewModel>())
+                        {
+                            SetupIngredientSubscription(item);
+                        }
+                        _ = SyncDisplayProducts();
+                    }
+
+                    if (e.OldItems != null)
+                    {
+                        foreach (var item in e.OldItems.OfType<UserDishIngredientViewModel>())
+                        {
+                            item.PropertyChanged -= OnIngredientPropertyChanged;
+                        }
+                        _ = SyncDisplayProducts();
+                    }
+
+                    Recalculate();
+                };
+
+                foreach (var ingredient in Ingredients)
+                    SetupIngredientSubscription(ingredient);
+
+                _ = Task.Run(async () => await SyncDisplayProducts());
             }
-
-            Ingredients.CollectionChanged += async (s, e) =>
+            else
             {
-                if (e.NewItems != null)
-                {
-                    foreach (var item in e.NewItems.OfType<UserDishIngredientViewModel>())
-                    {
-                        SetupIngredientSubscription(item);
-                    }
-                    _ = SyncDisplayProducts();
-                }
-
-                if (e.OldItems != null)
-                {
-                    foreach (var item in e.OldItems.OfType<UserDishIngredientViewModel>())
-                    {
-                        item.PropertyChanged -= OnIngredientPropertyChanged;
-                    }
-                    _ = SyncDisplayProducts();
-                }
-
-                Recalculate();
-                //_ = SyncDisplayProducts();
-            };
-
-            foreach (var ingredient in Ingredients)
-            {
-                SetupIngredientSubscription(ingredient);
+                Quantity = 100;
+                UpdateTotalQuantity();
             }
 
             PropertyChanged += (s, e) =>
@@ -227,8 +247,6 @@ namespace DietHelper.ViewModels.Dishes
                     Recalculate();
             };
 
-            _ = Task.Run(async () => await SyncDisplayProducts());
-            //_ = SyncDisplayProducts();
             Recalculate();
         }
 

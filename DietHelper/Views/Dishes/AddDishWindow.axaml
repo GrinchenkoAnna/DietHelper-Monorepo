@@ -5,15 +5,18 @@
         xmlns:vm="clr-namespace:DietHelper.ViewModels.Dishes"
         xmlns:local="clr-namespace:DietHelper.Views.Dishes"
 		xmlns:manual="clr-namespace:DietHelper.Views"
+		xmlns:converters="clr-namespace:DietHelper.Converters"
         mc:Ignorable="d"
         x:Class="DietHelper.Views.Dishes.AddDishWindow"
         Title="Добавить блюдо" Height="800" Width="900"
         x:DataType="vm:AddUserDishViewModel"
         WindowStartupLocation="CenterScreen">
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
@@ -26,7 +29,8 @@
                         IsVisible="{Binding IsBusy}"/>
 		</StackPanel>
 
-		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
+		<ScrollViewer Grid.Row="1"
+				VerticalScrollBarVisibility="Visible">
 			<ListBox ItemsSource="{Binding UserSearchResults}"
                     SelectedItem="{Binding SelectedUserItem}">
 				<ListBox.ItemTemplate>
@@ -50,12 +54,26 @@
                 HorizontalAlignment="Center"
                 Margin="0 5 0 5"/>
 
-		<manual:AddItemManuallyView Grid.Row="3" />
+		<manual:AddDishManuallyView Grid.Row="3" Grid.ColumnSpan="2" />
 
 		<Button Grid.Row="4"
                 Content="Создать блюдо"
                 Command="{Binding AddManualItemCommand}"
                 HorizontalAlignment="Center"
-                Margin="0 5 0 10"/>
+                Margin="0 5 0 10"/>	
+		
+		<StackPanel Grid.Row="4" Grid.Column="1" 
+			  Orientation="Horizontal"
+			  HorizontalAlignment="Right"
+			  VerticalAlignment="Stretch"
+			  Margin="0 0 10 0">
+			 <RadioButton GroupName="DishType"
+                       Content="Пустое блюдо"
+                       IsChecked="{Binding IsEmptyDish}"/>
+            <RadioButton GroupName="DishType"
+                       Content="Готовое блюдо (100 г.)"
+                       IsChecked="{Binding IsReadyDish}"
+                       Margin="10,0,0,0"/>
+		</StackPanel>	
 	</Grid>
 </Window>
