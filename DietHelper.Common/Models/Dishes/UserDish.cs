@@ -27,7 +27,10 @@ namespace DietHelper.Common.Models.Dishes
 
         public bool IsDeleted { get; set; } = false;
 
-        public double Quantity = 100;
+        public double Quantity
+        {
+            get => IsReadyDish ? 100 : Ingredients.Sum(i => i.Quantity);
+        }
 
         public virtual ICollection<UserDishIngredient> Ingredients { get; set; } = new List<UserDishIngredient>();
 

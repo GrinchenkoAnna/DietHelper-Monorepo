@@ -51,6 +51,8 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         private NutritionInfo nutritionFacts = new();
 
+        private NutritionInfo baseNutritionForReadyDish;
+
         public double Calories
         {
             get => NutritionFacts.Calories;
@@ -79,17 +81,19 @@ namespace DietHelper.ViewModels.Dishes
         private double quantity;
         [ObservableProperty]
         private string formattedQuantity;
-        partial void OnQuantityChanged(double value) => UpdateTotalQuantity();
+
+        partial void OnQuantityChanged(double value)
+        {
+            if (IsReadyDish) RecalculateForReadyDish();
+            else UpdateTotalQuantity();
+        }
+
         private void UpdateTotalQuantity()
         {
-            if (IsReadyDish)
+            if (!IsReadyDish)
             {
-                Quantity = 100;
-                FormattedQuantity = $"{Quantity} г";
-                return;
+                Quantity = Ingredients.Sum(ingredient => ingredient.Quantity);
             }
-
-            Quantity = Ingredients.Sum(ingredient => ingredient.Quantity);
             FormattedQuantity = $"{Quantity} г";
         }
 
@@ -102,6 +106,13 @@ namespace DietHelper.ViewModels.Dishes
 
         private async void Recalculate()
         {
+            if (IsReadyDish)
+            {
+                RecalculateForReadyDish();
+                UpdateTotalQuantity();
+                return;
+            }
+
             if (Ingredients.Count == 0 || IsReadyDish)
             {
                 UpdateTotalQuantity();
@@ -172,6 +183,21 @@ namespace DietHelper.ViewModels.Dishes
             }
         }
 
+        private void RecalculateForReadyDish()
+        {
+            if (!IsReadyDish) return;
+
+            var factor = Quantity / 100.0;
+
+            NutritionFacts = new NutritionInfo()
+            {
+                Calories = baseNutritionForReadyDish.Calories * factor,
+                Protein = baseNutritionForReadyDish.Protein * factor,
+                Fat = baseNutritionForReadyDish.Fat * factor,
+                Carbs = baseNutritionForReadyDish.Carbs * factor
+            };
+        }
+
         public UserDishViewModel() { }
 
         public UserDishViewModel(UserDish userDish, NutritionCalculator calculator, ApiService apiService, bool isManual = false)
@@ -184,6 +210,17 @@ namespace DietHelper.ViewModels.Dishes
             Id = userDish.Id;
             UserId = userDish.UserId;
             Name = userDish.Name ?? string.Empty;
+
+            if (userDish.IsReadyDish)
+            {
+                baseNutritionForReadyDish = new NutritionInfo()
+                {
+                    Calories = userDish.NutritionFacts?.Calories ?? 0,
+                    Protein = userDish.NutritionFacts?.Protein ?? 0,
+                    Fat = userDish.NutritionFacts?.Fat ?? 0,
+                    Carbs = userDish.NutritionFacts?.Carbs ?? 0
+                };
+            }
 
             NutritionFacts = new NutritionInfo()
             {
@@ -254,12 +291,6 @@ namespace DietHelper.ViewModels.Dishes
         {
             ingredient.PropertyChanged -= OnIngredientPropertyChanged;
             ingredient.PropertyChanged += OnIngredientPropertyChanged;
-        }
-
-        private void SetupIngredientSubscriptions()
-        {
-            foreach (var ingredient in Ingredients)
-                SetupIngredientSubscription(ingredient);
         }
 
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -28,6 +28,7 @@ namespace DietHelper.ViewModels.Dishes
         private string? name;
 
         [ObservableProperty]
+        [Range(0.1, double.MaxValue, ErrorMessage = "Количество должно быть больше 0")]
         private double quantity = 100;
 
         [ObservableProperty]
