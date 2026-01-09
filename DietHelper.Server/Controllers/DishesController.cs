@@ -146,6 +146,30 @@ namespace DietHelper.Server.Controllers
             }
         }
 
+        [HttpDelete("{userId}/{dishId}")]
+        public async Task<ActionResult> RemoveUserDish(int userId, int dishId)
+        {
+            try
+            {
+                var userDish = await _dbContext.UserDishes
+                    .Include(d => d.Ingredients)
+                    .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dishId && !d.IsDeleted);
+                if (userDish == null) return NotFound();
+
+                userDish.IsDeleted = true;
+
+                foreach (var ingredient in userDish.Ingredients)
+                    ingredient.IsDeleted = true;
+
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"[DishesController]: {ex.Message}");
+            }
+        }
+
         [HttpDelete("{userId}/{dishId}/ingredients/{ingredientId}")]
         public async Task<ActionResult> RemoveUserDishIngredient(int userId, int dishId, int ingredientId)
         {

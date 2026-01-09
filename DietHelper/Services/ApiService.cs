@@ -224,7 +224,18 @@ namespace DietHelper.Services
 
         public async Task DeleteDishAsync(int id)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.DeleteAsync($"dishes/{_currentUserId}/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Server error response: {errorContent}");
+                Debug.WriteLine($"Status: {response.StatusCode}");
+
+                throw new HttpRequestException(
+                    $"Server returned {response.StatusCode}: {errorContent}",
+                    null, response.StatusCode);
+            }
         }
 
         public async Task<int?> AddUserDishIngredientAsync(int dishId, UserDishIngredient userDishIngredient)
