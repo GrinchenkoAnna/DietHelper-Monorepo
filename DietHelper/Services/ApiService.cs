@@ -161,7 +161,18 @@ namespace DietHelper.Services
 
         public async Task DeleteUserProductAsync(int id)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.DeleteAsync($"products/{_currentUserId}/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Server error response: {errorContent}");
+                Debug.WriteLine($"Status: {response.StatusCode}");
+
+                throw new HttpRequestException(
+                    $"Server returned {response.StatusCode}: {errorContent}",
+                    null, response.StatusCode);
+            }
         }
         #endregion
 
@@ -215,13 +226,6 @@ namespace DietHelper.Services
             return await response.Content.ReadFromJsonAsync<UserDish>();
         }
 
-        //public async Task UpdateUserDishAsync(UserDish newUserDish)
-        //{
-        //    var response = await _httpClient.PutAsync($"dishes/{_currentUserId}/{newUserDish}");
-
-        //    response.EnsureSuccessStatusCode();
-        //}
-
         public async Task DeleteDishAsync(int id)
         {
             var response = await _httpClient.DeleteAsync($"dishes/{_currentUserId}/{id}");
@@ -265,7 +269,18 @@ namespace DietHelper.Services
         public async Task<bool> RemoveUserDishIngredientAsync(int dishId, int ingredientId)
         {
             var response = await _httpClient.DeleteAsync($"dishes/{_currentUserId}/{dishId}/ingredients/{ingredientId}");
-            
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Server error response: {errorContent}");
+                Debug.WriteLine($"Status: {response.StatusCode}");
+
+                throw new HttpRequestException(
+                    $"Server returned {response.StatusCode}: {errorContent}",
+                    null, response.StatusCode);
+            }
+
             return response.IsSuccessStatusCode;
         }
         #endregion

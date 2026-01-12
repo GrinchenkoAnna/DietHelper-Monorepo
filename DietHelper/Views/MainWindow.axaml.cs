@@ -75,7 +75,7 @@ namespace DietHelper.Views
 
                     foreach (var userDish in mainWindowViewModel.UserDishes)
                     {
-                        var ingredientToRemove = userDish.Ingredients.FirstOrDefault(i => i.Id == m.Value);
+                        var ingredientToRemove = userDish.Ingredients.FirstOrDefault(i => i.UserProductId == m.Value);
 
                         if (ingredientToRemove is not null)
                             userDish.Ingredients.Remove(ingredientToRemove);

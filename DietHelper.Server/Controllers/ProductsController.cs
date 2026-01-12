@@ -94,7 +94,7 @@ namespace DietHelper.Server.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
             if (baseProduct is null)
-                return NotFound($"[ProductsController]: BaseProduct with id = {userProduct.BaseProductId} not found");            
+                return NotFound($"[ProductsController]: BaseProduct with id = {userProduct.BaseProductId} not found");
 
             userProduct.IsDeleted = false;
 
@@ -113,7 +113,32 @@ namespace DietHelper.Server.Controllers
             return Ok(baseProduct);
         }
 
-        
+        [HttpDelete("{userId}/{userProductId}")]
+        public async Task<ActionResult> DeleteUserProduct(int userId, int userProductId)
+        {
+            try
+            {
+                var userProduct = await _dbContext.UserProducts
+                .FirstOrDefaultAsync(up => up.UserId == userId && up.Id == userProductId && !up.IsDeleted);
+                if (userProduct is null) return NotFound();
+
+                var ingredients = await _dbContext.UserDishIngredients
+                    .Where(udi => udi.UserProductId == userProductId && !udi.IsDeleted)
+                    .ToListAsync();
+
+                foreach (var ingredient in ingredients)
+                    ingredient.IsDeleted = true;
+
+                userProduct.IsDeleted = true;
+
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"[ProductsController]: {ex.Message}");
+            }
+        }        
 
         [HttpGet("ping")]
         public ActionResult<string> Ping()
