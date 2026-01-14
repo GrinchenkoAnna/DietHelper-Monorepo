@@ -1,27 +1,18 @@
-﻿using DietHelper.Common.Models.Dishes;
-using DietHelper.Common.Models.Products;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DietHelper.Common.Models
 {
-    public class User
+    public class User : IdentityUser<int>
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        //[Key]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //public int Id { get; set; }
 
-        public string PasswordHash { get; set; } = string.Empty;
+        //public string PasswordHash { get; set; } = string.Empty;
 
-        public string? Name { get; set; }
+        //public string? Name { get; set; }
 
-        //public virtual ICollection<UserProduct> Products { get; set; } = new List<UserProduct>();
-
-        //public virtual ICollection<UserDish> Dishes { get; set; } = new List<UserDish>();
     }
 }

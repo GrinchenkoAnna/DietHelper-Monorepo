@@ -41,17 +41,17 @@ namespace DietHelper.Common.Data
             base.OnModelCreating(modelBuilder);
 
             //новое
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.HasKey(u => u.Id);
-                entity.Property(u => u.PasswordHash).IsRequired();
-                entity.Property(u => u.Name);
+            //modelBuilder.Entity<User>(entity =>
+            //{
+            //    entity.HasKey(u => u.Id);
+            //    entity.Property(u => u.PasswordHash).IsRequired();
+            //    entity.Property(u => u.Name);
 
-                //entity.HasMany(u => u.Dishes)
-                //    .WithOne(ud => ud.User)
-                //    .HasForeignKey(ud => ud.UserId)
-                //    .OnDelete(DeleteBehavior.Cascade);
-            });
+            //    //entity.HasMany(u => u.Dishes)
+            //    //    .WithOne(ud => ud.User)
+            //    //    .HasForeignKey(ud => ud.UserId)
+            //    //    .OnDelete(DeleteBehavior.Cascade);
+            //});
 
             modelBuilder.Entity<BaseProduct>(entity =>
             {
@@ -76,10 +76,12 @@ namespace DietHelper.Common.Data
                 entity.Property(up => up.UserId);
                 entity.Property(up => up.BaseProductId);
 
-                entity.HasOne(up => up.User)
-                    .WithMany()
-                    .HasForeignKey(up => up.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                //entity.HasOne(up => up.User)
+                //    .WithMany()
+                //    .HasForeignKey(up => up.UserId)
+                //    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(up => up.UserId);
 
                 entity.HasOne(up => up.BaseProduct)
                     .WithMany()
