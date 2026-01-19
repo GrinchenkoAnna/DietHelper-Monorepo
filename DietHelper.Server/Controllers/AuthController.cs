@@ -127,7 +127,7 @@ namespace DietHelper.Server.Controllers
         [HttpPost("logout")]
         public ActionResult Logout()
         {
-            throw new NotImplementedException();
+            return Ok(new { message = "Вы успешно вышли из DietHelper" });
         }
     }
 }

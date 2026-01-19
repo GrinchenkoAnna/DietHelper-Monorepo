@@ -1,12 +1,10 @@
 ﻿using DietHelper.Common.Models;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
-using DietHelper.ViewModels.Dishes;
+using DietHelper.Server.DTO.Auth;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -16,21 +14,148 @@ using System.Threading.Tasks;
 
 namespace DietHelper.Services
 {
+    public class SessionData
+    {
+        public string Token { get; set; }
+        public int UserId { get; set; }
+        public string? UserName { get; set; }
+    }
+
     public class ApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly int _currentUserId; 
+        private int _currentUserId = 1; //временно
+        private string? _currentUserName;
 
-        public ApiService() 
+        private string? Token { get; set; }        
+        public bool IsAuthenticated => !string.IsNullOrEmpty(Token);
+
+        public event Action? AuthStateChanged;
+
+        public ApiService()
         {
-            _currentUserId = 1; //временно
-
             _httpClient = new HttpClient()
             {
                 BaseAddress = new Uri("http://localhost:5119/api/")
             };
         }
-        
+
+        #region Authorization
+        private void SetToken(string token, int userId, string? userName)
+        {
+            Token = token;
+            _currentUserId = userId;
+            _currentUserName = userName;
+
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            SaveSession();
+
+            AuthStateChanged?.Invoke();
+        }
+
+        private void SaveSession()
+        {
+            if (string.IsNullOrEmpty(Token))
+            {
+                Debug.WriteLine($"[ApiService]: token is null");
+                return;
+            }
+
+            var sessionData = new SessionData()
+            {
+                Token = Token,
+                UserId = _currentUserId,
+                UserName = _currentUserName
+            };
+
+            // куда-то записать токен (пока без защиты)
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private void LoadSavedSession()
+        {
+            // откуда-то достать токен
+
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private void EndSession()
+        {
+            Token = null;
+            _currentUserId = -1;
+            _currentUserName = null;            
+
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+
+            // откуда-то стереть токен
+
+            AuthStateChanged?.Invoke();
+        }
+
+        public async Task<AuthResponseDto?> RegisterAsync()
+        {
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return new AuthResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public async Task<AuthResponseDto?> LoginAsync()
+        {
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return new AuthResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public async void LogoutAsync()
+        {
+            await _httpClient.PostAsync("auth/logout", null);
+            EndSession();            
+        }
+        #endregion
+
         public async Task<bool> CheckServerConnectionAsync()
         {
             try
@@ -112,7 +237,7 @@ namespace DietHelper.Services
         {
             var json = JsonSerializer.Serialize(newUserProduct, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            
+
             var response = await _httpClient.PostAsync("products/user", content);
 
             if (!response.IsSuccessStatusCode)
@@ -152,7 +277,7 @@ namespace DietHelper.Services
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<BaseProduct>();
-        }        
+        }
 
         public async Task DeleteUserProductAsync(int id)
         {
