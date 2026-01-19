@@ -52,17 +52,12 @@ namespace DietHelper.Services
             };
         }
 
-        public async Task<int> GetUserId()
-        {
-            return _currentUserId;
-        }
-
         #region Products
         public async Task<List<UserProduct>?> GetUserProductsAsync()
         {
             try
             {
-                var response = await _httpClient.GetAsync($"products/{_currentUserId}");
+                var response = await _httpClient.GetAsync($"products");
 
                 if (response.StatusCode == HttpStatusCode.NotFound) return null;
 
@@ -102,7 +97,7 @@ namespace DietHelper.Services
 
         public async Task<UserProduct> GetUserProductAsync(int userProductId)
         {
-            var response = await _httpClient.GetAsync($"products/{_currentUserId}/{userProductId}");
+            var response = await _httpClient.GetAsync($"products/{userProductId}");
 
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
 
@@ -161,7 +156,7 @@ namespace DietHelper.Services
 
         public async Task DeleteUserProductAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"products/{_currentUserId}/{id}");
+            var response = await _httpClient.DeleteAsync($"products/{id}");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -179,7 +174,7 @@ namespace DietHelper.Services
         #region Dishes
         public async Task<List<UserDish>> GetUserDishesAsync()
         {
-            var response = await _httpClient.GetAsync($"dishes/{_currentUserId}");
+            var response = await _httpClient.GetAsync($"dishes");
 
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
 
@@ -192,7 +187,7 @@ namespace DietHelper.Services
 
         public async Task<UserDish> GetUserDishAsync(int id)
         {
-            var response = await _httpClient.GetAsync($"dishes/{_currentUserId}/{id}");
+            var response = await _httpClient.GetAsync($"dishes/{id}");
 
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
 
@@ -208,7 +203,7 @@ namespace DietHelper.Services
             var json = JsonSerializer.Serialize(newUserDish, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"dishes/{_currentUserId}", content);
+            var response = await _httpClient.PostAsync($"dishes", content);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -228,7 +223,7 @@ namespace DietHelper.Services
 
         public async Task DeleteDishAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"dishes/{_currentUserId}/{id}");
+            var response = await _httpClient.DeleteAsync($"dishes/{id}");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -254,7 +249,7 @@ namespace DietHelper.Services
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(
-                $"dishes/{_currentUserId}/{dishId}/ingredients",
+                $"dishes/{dishId}/ingredients",
                 content);
 
             if (response.IsSuccessStatusCode)
@@ -268,7 +263,7 @@ namespace DietHelper.Services
 
         public async Task<bool> RemoveUserDishIngredientAsync(int dishId, int ingredientId)
         {
-            var response = await _httpClient.DeleteAsync($"dishes/{_currentUserId}/{dishId}/ingredients/{ingredientId}");
+            var response = await _httpClient.DeleteAsync($"dishes/{dishId}/ingredients/{ingredientId}");
 
             if (!response.IsSuccessStatusCode)
             {
