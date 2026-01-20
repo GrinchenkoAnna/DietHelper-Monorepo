@@ -1,7 +1,7 @@
-﻿using DietHelper.Common.Models;
+﻿using DietHelper.Common.DTO;
+using DietHelper.Common.Models;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
-using DietHelper.Server.DTO.Auth;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using System;
 using System.Collections.Generic;
@@ -65,7 +65,6 @@ namespace DietHelper.Services
                 return;
             }
 
-            // куда-то сохранить токен (пока без защиты)
             try
             {
                 var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -84,8 +83,6 @@ namespace DietHelper.Services
 
         private void LoadSavedSession()
         {
-            // откуда-то достать токен (пока без защиты)
-            // записать токен в заголовок
             try
             {
                 var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -113,7 +110,6 @@ namespace DietHelper.Services
 
             _httpClient.DefaultRequestHeaders.Authorization = null;
 
-            // откуда-то стереть токен
             try
             {
                 var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -129,11 +125,28 @@ namespace DietHelper.Services
             AuthStateChanged?.Invoke();
         }
 
-        public async Task<AuthResponseDto?> RegisterAsync()
+        public async Task<AuthResponseDto?> RegisterAsync(RegisterDto registerDto)
         {
             try
             {
+                var response = await _httpClient.PostAsJsonAsync("auth/register", registerDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                    if (!string.IsNullOrEmpty(authResponse.Token))
+                    {
+                        SetToken(new SessionData
+                        {
+                            Token = authResponse.Token,
+                            UserId = authResponse.UserId,
+                            UserName = authResponse.UserName
+                        });
+                        
+                        return authResponse;
+                    }
+                }
 
+                return await response.Content.ReadFromJsonAsync<AuthResponseDto>();
             }
             catch (Exception ex)
             {
@@ -143,16 +156,28 @@ namespace DietHelper.Services
                     IsSuccess = false,
                     Message = ex.Message
                 };
-            }
-
-            throw new NotImplementedException();
+            }            
         }
 
-        public async Task<AuthResponseDto?> LoginAsync()
+        public async Task<AuthResponseDto?> LoginAsync(LoginDto loginDto)
         {
             try
             {
+                var response = await _httpClient.PostAsJsonAsync("auth/login", loginDto);
+                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                if (!string.IsNullOrEmpty(authResponse.Token))
+                {
+                    SetToken(new SessionData
+                    {
+                        Token = authResponse.Token,
+                        UserId = authResponse.UserId,
+                        UserName = authResponse.UserName
+                    });
 
+                    return authResponse;
+                }
+
+                return await response.Content.ReadFromJsonAsync<AuthResponseDto>();
             }
             catch (Exception ex)
             {
@@ -163,8 +188,6 @@ namespace DietHelper.Services
                     Message = ex.Message
                 };
             }
-
-            throw new NotImplementedException();
         }
 
         public async void LogoutAsync()

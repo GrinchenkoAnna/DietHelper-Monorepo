@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace DietHelper.Server.DTO.Auth
+namespace DietHelper.Common.DTO
 {
     public class AuthResponseDto
     {

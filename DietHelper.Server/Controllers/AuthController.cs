@@ -1,5 +1,5 @@
-﻿using DietHelper.Common.Models;
-using DietHelper.Server.DTO.Auth;
+﻿using DietHelper.Common.DTO;
+using DietHelper.Common.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
