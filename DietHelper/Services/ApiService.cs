@@ -2,9 +2,11 @@
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
 using DietHelper.Server.DTO.Auth;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -16,7 +18,7 @@ namespace DietHelper.Services
 {
     public class SessionData
     {
-        public string Token { get; set; }
+        public string? Token { get; set; }
         public int UserId { get; set; }
         public string? UserName { get; set; }
     }
@@ -24,11 +26,14 @@ namespace DietHelper.Services
     public class ApiService
     {
         private readonly HttpClient _httpClient;
-        private int _currentUserId = 1; //временно
-        private string? _currentUserName;
-
-        private string? Token { get; set; }        
-        public bool IsAuthenticated => !string.IsNullOrEmpty(Token);
+        private SessionData CurrentSessionData { get; set; } = new SessionData()
+        {
+            Token = null,
+            UserId = -1,
+            UserName = null
+        };
+    
+        public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentSessionData.Token);
 
         public event Action? AuthStateChanged;
 
@@ -41,13 +46,11 @@ namespace DietHelper.Services
         }
 
         #region Authorization
-        private void SetToken(string token, int userId, string? userName)
+        private void SetToken(SessionData sessionData)
         {
-            Token = token;
-            _currentUserId = userId;
-            _currentUserName = userName;
+            CurrentSessionData = sessionData;
 
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", CurrentSessionData.Token);
 
             SaveSession();
 
@@ -56,57 +59,72 @@ namespace DietHelper.Services
 
         private void SaveSession()
         {
-            if (string.IsNullOrEmpty(Token))
+            if (string.IsNullOrEmpty(CurrentSessionData.Token))
             {
                 Debug.WriteLine($"[ApiService]: token is null");
                 return;
             }
 
-            var sessionData = new SessionData()
-            {
-                Token = Token,
-                UserId = _currentUserId,
-                UserName = _currentUserName
-            };
-
-            // куда-то записать токен (пока без защиты)
+            // куда-то сохранить токен (пока без защиты)
             try
             {
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var folderPath = Path.Combine(appDataPath, "DietHelper");
+                Directory.CreateDirectory(folderPath);
 
+                var filePath = Path.Combine(folderPath, "session.json");
+                var json = JsonSerializer.Serialize(CurrentSessionData);
+                File.WriteAllText(filePath, json);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[ApiService]: {ex.Message}");
             }
-
-            throw new NotImplementedException();
         }
 
         private void LoadSavedSession()
         {
-            // откуда-то достать токен
-
+            // откуда-то достать токен (пока без защиты)
+            // записать токен в заголовок
             try
             {
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
 
+                if (File.Exists(filePath))
+                {
+                    var json = File.ReadAllText(filePath);
+                    var sessionData = JsonSerializer.Deserialize<SessionData>(json);
+                    if (sessionData is not null && !string.IsNullOrEmpty(sessionData.Token))
+                        SetToken(sessionData);
+                }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[ApiService]: {ex.Message}");
             }
-
-            throw new NotImplementedException();
         }
 
         private void EndSession()
         {
-            Token = null;
-            _currentUserId = -1;
-            _currentUserName = null;            
+            CurrentSessionData.Token = null;
+            CurrentSessionData.UserId = -1;
+            CurrentSessionData.UserName = null;            
 
             _httpClient.DefaultRequestHeaders.Authorization = null;
 
             // откуда-то стереть токен
+            try
+            {
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
+
+                if (File.Exists(filePath)) File.Delete(filePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+            }            
 
             AuthStateChanged?.Invoke();
         }
@@ -173,7 +191,7 @@ namespace DietHelper.Services
         {
             return new User() //заглушка
             {
-                Id = _currentUserId
+                Id = CurrentSessionData.UserId
             };
         }
 
