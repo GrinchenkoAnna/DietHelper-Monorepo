@@ -221,6 +221,8 @@ namespace DietHelper.Services
         #region Products
         public async Task<List<UserProduct>?> GetUserProductsAsync()
         {
+            if (!IsAuthenticated) return null;
+
             try
             {
                 var response = await _httpClient.GetAsync($"products");
@@ -242,6 +244,8 @@ namespace DietHelper.Services
 
         public async Task<List<BaseProduct>?> GetBaseProductsAsync()
         {
+            if (!IsAuthenticated) return null;
+
             try
             {
                 var response = await _httpClient.GetAsync($"products/base");
@@ -261,8 +265,10 @@ namespace DietHelper.Services
             }
         }
 
-        public async Task<UserProduct> GetUserProductAsync(int userProductId)
+        public async Task<UserProduct?> GetUserProductAsync(int userProductId)
         {
+            if (!IsAuthenticated) return null;
+
             var response = await _httpClient.GetAsync($"products/{userProductId}");
 
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
@@ -274,8 +280,10 @@ namespace DietHelper.Services
             return userProduct;
         }
 
-        public async Task<UserProduct> AddUserProductAsync(UserProduct newUserProduct)
+        public async Task<UserProduct?> AddUserProductAsync(UserProduct newUserProduct)
         {
+            if (!IsAuthenticated) return null;
+
             var json = JsonSerializer.Serialize(newUserProduct, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -322,6 +330,8 @@ namespace DietHelper.Services
 
         public async Task DeleteUserProductAsync(int id)
         {
+            if (!IsAuthenticated) return;
+
             var response = await _httpClient.DeleteAsync($"products/{id}");
 
             if (!response.IsSuccessStatusCode)
@@ -338,8 +348,10 @@ namespace DietHelper.Services
         #endregion
 
         #region Dishes
-        public async Task<List<UserDish>> GetUserDishesAsync()
+        public async Task<List<UserDish>?> GetUserDishesAsync()
         {
+            if (!IsAuthenticated) return null;
+
             var response = await _httpClient.GetAsync($"dishes");
 
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
@@ -351,8 +363,10 @@ namespace DietHelper.Services
             return UserDishes;
         }
 
-        public async Task<UserDish> GetUserDishAsync(int id)
+        public async Task<UserDish?> GetUserDishAsync(int id)
         {
+            if (!IsAuthenticated) return null;
+
             var response = await _httpClient.GetAsync($"dishes/{id}");
 
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
@@ -364,8 +378,10 @@ namespace DietHelper.Services
             return UserDish;
         }
 
-        public async Task<UserDish> AddUserDishAsync(UserDish newUserDish)
+        public async Task<UserDish?> AddUserDishAsync(UserDish newUserDish)
         {
+            if (!IsAuthenticated) return null;
+
             var json = JsonSerializer.Serialize(newUserDish, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -389,6 +405,8 @@ namespace DietHelper.Services
 
         public async Task DeleteDishAsync(int id)
         {
+            if (!IsAuthenticated) return;
+
             var response = await _httpClient.DeleteAsync($"dishes/{id}");
 
             if (!response.IsSuccessStatusCode)
@@ -405,6 +423,8 @@ namespace DietHelper.Services
 
         public async Task<int?> AddUserDishIngredientAsync(int dishId, UserDishIngredient userDishIngredient)
         {
+            if (!IsAuthenticated) return null;
+
             var request = new
             {
                 UserProductId = userDishIngredient.UserProductId,
@@ -429,6 +449,8 @@ namespace DietHelper.Services
 
         public async Task<bool> RemoveUserDishIngredientAsync(int dishId, int ingredientId)
         {
+            if (!IsAuthenticated) return false;
+
             var response = await _httpClient.DeleteAsync($"dishes/{dishId}/ingredients/{ingredientId}");
 
             if (!response.IsSuccessStatusCode)

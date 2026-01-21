@@ -27,25 +27,31 @@ namespace DietHelper.ViewModels.Products
         {
             var userProducts = await _apiService.GetUserProductsAsync();
 
-            foreach (var userProduct in userProducts)
+            if (userProducts is not null)
             {
-                if (userProduct.Id > 0)
+                foreach (var userProduct in userProducts)
                 {
-                    UserSearchResults.Add(new UserProductViewModel(userProduct));
-                    AllUserItems.Add(new UserProductViewModel(userProduct));
+                    if (userProduct.Id > 0)
+                    {
+                        UserSearchResults.Add(new UserProductViewModel(userProduct));
+                        AllUserItems.Add(new UserProductViewModel(userProduct));
+                    }
                 }
             }
-
+            
             var baseProducts = await _apiService.GetBaseProductsAsync();
 
-            foreach (var baseProduct in baseProducts)
+            if (baseProducts is not null)
             {
-                if (baseProduct.Id > 0)
+                foreach (var baseProduct in baseProducts)
                 {
-                    BaseSearchResults.Add(new BaseProductViewModel(baseProduct));
-                    AllBaseItems.Add(new BaseProductViewModel(baseProduct));
+                    if (baseProduct.Id > 0)
+                    {
+                        BaseSearchResults.Add(new BaseProductViewModel(baseProduct));
+                        AllBaseItems.Add(new BaseProductViewModel(baseProduct));
+                    }
                 }
-            }
+            }            
         }
 
         protected override async Task DoSearch(string? term)

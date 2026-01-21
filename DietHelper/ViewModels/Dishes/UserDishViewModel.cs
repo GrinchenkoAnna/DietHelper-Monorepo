@@ -143,14 +143,17 @@ namespace DietHelper.ViewModels.Dishes
 
                 var userProduct = await _apiService.GetUserProductAsync(ingredient.UserProductId);
 
-                var userProductViewModel = new UserProductViewModel(userProduct)
+                if (userProduct is not null)
                 {
-                    Quantity = ingredient.Quantity
-                };
+                    var userProductViewModel = new UserProductViewModel(userProduct)
+                    {
+                        Quantity = ingredient.Quantity
+                    };
 
-                userProductViewModel.ProductChanged += OnDisplayProductChanged;
+                    userProductViewModel.ProductChanged += OnDisplayProductChanged;
 
-                DisplayedIngredients.Add(userProductViewModel);
+                    DisplayedIngredients.Add(userProductViewModel);
+                }                
             }
         }
         private async void OnDisplayProductChanged(object? sender, EventArgs e)

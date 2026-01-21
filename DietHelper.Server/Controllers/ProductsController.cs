@@ -2,6 +2,7 @@
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.UserSecrets;
@@ -11,6 +12,7 @@ using static DietHelper.Server.Controllers.DishesController;
 
 namespace DietHelper.Server.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : Controller
