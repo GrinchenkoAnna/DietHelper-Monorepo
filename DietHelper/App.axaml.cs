@@ -9,6 +9,7 @@ using DietHelper.ViewModels.Base;
 using DietHelper.ViewModels.Dishes;
 using DietHelper.ViewModels.Products;
 using DietHelper.Views;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Globalization;
@@ -34,6 +35,7 @@ namespace DietHelper
 
             services.AddSingleton<NutritionCalculator>();
             services.AddSingleton<ApiService>();
+            services.AddSingleton<INavigationService, NavigationService>();
 
             services.AddTransient<ViewModelBase>();
             services.AddTransient<UserDishViewModel>();
@@ -41,6 +43,9 @@ namespace DietHelper
             services.AddTransient<AddProductViewModel>();
             services.AddTransient<AddUserDishViewModel>();
             services.AddTransient<AddUserDishIngredientViewModel>();
+            services.AddTransient<AuthViewModel>();
+
+            services.AddSingleton<MainWindow>();
 
             _serviceProvider = services.BuildServiceProvider();
 
@@ -51,10 +56,40 @@ namespace DietHelper
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
-                desktop.MainWindow = new MainWindow()
+
+                var navigationService = _serviceProvider.GetRequiredService<INavigationService>() as NavigationService;
+
+                var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+                desktop.MainWindow = mainWindow;
+
+                if (navigationService is not null)
                 {
-                    DataContext = _serviceProvider.GetRequiredService<MainWindowViewModel>()
-                };
+                    navigationService.NavigationRequested += (sender, viewModelType) =>
+                    {
+                        if (viewModelType == typeof(AuthViewModel) || viewModelType.Name == nameof(AuthViewModel))
+                        {
+                            mainWindow.DataContext = _serviceProvider!.GetRequiredService<AuthViewModel>();
+                        }
+                        else if (viewModelType == typeof(MainWindowViewModel) || viewModelType.Name == nameof(MainWindowViewModel))
+                        {
+                            mainWindow.DataContext = _serviceProvider!.GetRequiredService<MainWindowViewModel>();
+                        }
+                    };
+                }
+
+                var apiService = _serviceProvider.GetRequiredService<ApiService>();
+                if (navigationService is not null)
+                {
+                    if (apiService.IsAuthenticated) navigationService.NavigateToMainAsync();
+                    else navigationService.NavigateToLoginAsync();
+                }
+                else // не уверена
+                    desktop.MainWindow.DataContext = _serviceProvider!.GetRequiredService<MainWindowViewModel>();
+
+                //desktop.MainWindow = new MainWindow()
+                //{
+                //    DataContext = _serviceProvider.GetRequiredService<MainWindowViewModel>()
+                //};
             }
 
             base.OnFrameworkInitializationCompleted();
