@@ -21,6 +21,7 @@ namespace DietHelper.ViewModels
     public partial class MainWindowViewModel : ViewModelBase
     {
         private readonly ApiService _apiService;
+        private readonly INavigationService _navigationService;
 
         private ObservableCollection<UserProductViewModel> _userProducts = [];
 
@@ -71,54 +72,6 @@ namespace DietHelper.ViewModels
                 UpdateTotals();
             }
         }
-
-        //private ObservableCollection<ProductViewModel> _products = [];
-        //public ObservableCollection<ProductViewModel> Products
-        //{
-        //    get => _products;
-        //    set
-        //    {
-        //        if (_products is not null)
-        //        {
-        //            _products.CollectionChanged -= OnProductsCollectionChanged;
-        //            UnsubscribeFromProducts(_products);
-        //        }
-
-        //        SetProperty(ref _products, value);
-
-        //        if (_products is not null)
-        //        {
-        //            _products.CollectionChanged += OnProductsCollectionChanged; 
-        //            SubscribeToProducts(_products);
-        //        }
-
-        //        UpdateTotals();
-        //    }
-        //}
-
-        //private ObservableCollection<DishViewModel> _dishes = [];
-        //public ObservableCollection<DishViewModel> Dishes
-        //{
-        //    get => _dishes;
-        //    set
-        //    {
-        //        if (_dishes is not null)
-        //        {
-        //            _dishes.CollectionChanged -= OnDishesCollectionChanged;
-        //            UnsubscribeFromDishes(_dishes);
-        //        }
-
-        //        SetProperty(ref _dishes, value);
-
-        //        if (_dishes is not null)
-        //        {
-        //            _dishes.CollectionChanged += OnDishesCollectionChanged;
-        //            SubscribeToDishes(_dishes);
-        //        }
-
-        //        UpdateTotals();
-        //    }
-        //}
 
         private void SubscribeToUserProducts(IEnumerable<UserProductViewModel> userProducts)
         {
@@ -175,7 +128,7 @@ namespace DietHelper.ViewModels
             UpdateTotals();
         }
 
-        private async Task LoadMocksFromServerAsync()
+        private async Task LoadDataFromServerAsync()
         {
             try
             {
@@ -194,7 +147,7 @@ namespace DietHelper.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка загрузки данных с сервера: {ex.Message}");
+                Debug.WriteLine($"[MainWindowWiewModel]: {ex.Message}");
             }
         }
 
@@ -202,7 +155,7 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                await LoadMocksFromServerAsync();
+                await LoadDataFromServerAsync();
             }
             catch (Exception ex)
             {
@@ -210,11 +163,12 @@ namespace DietHelper.ViewModels
             }
         }
 
-        public MainWindowViewModel() : this(new ApiService()) { }
+        public MainWindowViewModel() : this(new ApiService(), null) { }
 
-        public MainWindowViewModel(ApiService apiService) : base(apiService)
+        public MainWindowViewModel(ApiService apiService, INavigationService navigationService) : base(apiService)
         {
             _apiService = apiService;
+            _navigationService = navigationService;
             InitializeAsync(); //для отладки
 
             int products = UserProducts.Count;
@@ -297,6 +251,20 @@ namespace DietHelper.ViewModels
         private void RemoveDish(UserDishViewModel userDish)
         {
             UserDishes.Remove(userDish);
+        }
+
+        [RelayCommand]
+        private async Task Logout()
+        {
+            try
+            {
+                await _apiService.LogoutAsync();
+                await _navigationService.NavigateToLoginAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindowViewModel]: {ex.Message}");
+            }
         }
     }
 }
