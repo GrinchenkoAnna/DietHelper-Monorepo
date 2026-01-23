@@ -190,7 +190,9 @@ namespace DietHelper.Services
             }
         }
 
-        public async void LogoutAsync()
+        public async 
+        Task
+LogoutAsync()
         {
             await _httpClient.PostAsync("auth/logout", null);
             EndSession();            

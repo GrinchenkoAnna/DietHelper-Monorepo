@@ -1,11 +1,13 @@
 ﻿using DietHelper.Common.Models;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DietHelper.Common.Data
 {
-    public class DietHelperDbContext : DbContext
+    public class DietHelperDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         //клиент
         public DietHelperDbContext()
@@ -13,7 +15,7 @@ namespace DietHelper.Common.Data
         }
 
         //сервер
-        public DietHelperDbContext(DbContextOptions options) : base(options)
+        public DietHelperDbContext(DbContextOptions<DietHelperDbContext> options) : base(options)
         {
         }
 
@@ -30,7 +32,7 @@ namespace DietHelper.Common.Data
         public DbSet<DishIngredient> DishIngredients { get; set; }
 
         //новые таблицы
-        public DbSet<User> Users { get; set; }
+        //public DbSet<User> Users { get; set; }
         public DbSet<BaseProduct> BaseProducts { get; set; }
         public DbSet<UserProduct> UserProducts { get; set; }
         public DbSet<UserDish> UserDishes { get; set; }
@@ -76,10 +78,10 @@ namespace DietHelper.Common.Data
                 entity.Property(up => up.UserId);
                 entity.Property(up => up.BaseProductId);
 
-                //entity.HasOne(up => up.User)
-                //    .WithMany()
-                //    .HasForeignKey(up => up.UserId)
-                //    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(up => up.User)
+                    .WithMany()
+                    .HasForeignKey(up => up.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasIndex(up => up.UserId);
 
