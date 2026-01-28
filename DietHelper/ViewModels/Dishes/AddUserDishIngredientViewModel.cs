@@ -136,7 +136,7 @@ namespace DietHelper.ViewModels.Dishes
             {
                 var userProduct = new UserProduct()
                 {
-                    UserId = GetCurrentUserId(),
+                    UserId = await GetCurrentUserId(),
                     BaseProductId = SelectedBaseItem.Id,
                     CustomNutrition = new NutritionInfo()
                     {

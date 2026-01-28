@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:DietHelper.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DietHelper.Views.AuthView"
+             x:DataType="vm:AuthViewModel">
+  
+    <StackPanel>
+        <ToggleSwitch Content="Новый пользователь"
+                      IsChecked="{Binding IsNewUser, Mode=TwoWay}"
+                      IsEnabled="True"
+                      OnContent="Да"
+                      OffContent="Нет"/>
+
+		<TextBlock Text="Логин: "/>
+        <TextBox Text="{Binding UserName}" 
+                 Watermark="Введите логин"/>
+
+        <TextBlock Text="Пароль: "/>
+        <TextBox Text="{Binding Password}" 
+                 Watermark="Введите пароль"
+                 PasswordChar="*"/>
+
+        <TextBlock Text="Подтвердите пароль: "/>
+        <TextBox Text="{Binding ConfirmPassword}" 
+                 Watermark="Подтвердите пароль"
+                 PasswordChar="*"
+                 IsEnabled="{Binding IsNewUser}"
+                 IsVisible="{Binding IsNewUser}"/>
+
+        <Button Content="Зарегистрироваться"
+                Command="{Binding RegisterCommand}" 
+                IsEnabled="{Binding IsNewUser}"
+                IsVisible="{Binding IsNewUser}"/>
+
+        <Button Content="Войти"
+                Command="{Binding LoginCommand}" 
+                IsEnabled="{Binding !IsNewUser}"
+                IsVisible="{Binding !IsNewUser}"/>
+
+        <Button Content="Очистить форму"
+                Command="{Binding ResetCommand}" />
+
+    </StackPanel>
+
+</UserControl>

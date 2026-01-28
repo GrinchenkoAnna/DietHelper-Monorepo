@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using DietHelper.Common.DTO;
 using DietHelper.Services;
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,6 +29,9 @@ namespace DietHelper.ViewModels
         [ObservableProperty]
         private string message = string.Empty;
 
+        [ObservableProperty]
+        private bool isNewUser = false;
+
         public AuthViewModel(ApiService apiService, INavigationService navigationService)
         {
             _apiService = apiService;
@@ -40,6 +44,8 @@ namespace DietHelper.ViewModels
         [RelayCommand]
         private async Task Login()
         {
+            if (IsNewUser) return;
+
             Reset();
 
             if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Password))
@@ -77,6 +83,8 @@ namespace DietHelper.ViewModels
         [RelayCommand]
         private async Task Register()
         {
+            if (!IsNewUser) return;
+
             Reset();
 
             if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Password))

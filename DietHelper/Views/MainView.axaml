@@ -1,0 +1,108 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:DietHelper.ViewModels"
+             xmlns:products="clr-namespace:DietHelper.Views.Products"
+             xmlns:dishes="clr-namespace:DietHelper.Views.Dishes"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DietHelper.Views.MainView"
+             x:Name="root"
+             x:DataType="vm:MainWindowViewModel">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <ListBox ItemsSource="{Binding UserProducts}" Margin="0 10 0 10" x:Name="UserProductsList">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:Products.UserProductViewModel">
+                            <StackPanel Orientation="Horizontal">
+                                <products:UserProductView DataContext="{Binding}" />
+                                <Button Content="-" Margin="10 0 0 0"
+                                        Command="{Binding DataContext.RemoveUserProductCommand, ElementName=root}"
+                                        CommandParameter="{Binding}"
+                                        VerticalAlignment="Top"
+                                        HorizontalAlignment="Right"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Button Content="+ продукт" Margin="5 0 5 5"
+                        Command="{Binding AddUserProductCommand}"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"/>
+
+                <ListBox ItemsSource="{Binding UserDishes}" Margin="0 10 0 10" x:Name="UserDishesList">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:Dishes.UserDishViewModel">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <dishes:UserDishView DataContext="{Binding}" />
+                                    <Button Content="-" Margin="10 0 0 0"
+                                            Command="{Binding DataContext.RemoveDishCommand, ElementName=root}"
+                                            CommandParameter="{Binding}"
+                                            VerticalAlignment="Top"
+                                            HorizontalAlignment="Right"/>
+                                </StackPanel>
+                                <Button Content="+ ингредиент" 
+                                        HorizontalContentAlignment="Center"
+                                        HorizontalAlignment="Stretch" 
+                                        Command="{Binding AddDishIngredientCommand}"
+                                        IsEnabled="{Binding CanAddIngredients}"
+                                        IsVisible="{Binding CanAddIngredients}"
+                                        Margin="8 5 -8 0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Button Content="+ блюдо" Margin="5 0 5 5"
+                        Command="{Binding AddDishCommand}"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" Padding="10" Margin="10"
+                BorderThickness="1" BorderBrush="#D0D0D0">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="К: " />
+                    <TextBlock Text="{Binding TotalNutrition.FormattedCalories}"
+                               FontWeight="Bold" Width="100"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Б: " />
+                    <TextBlock Text="{Binding TotalNutrition.FormattedProtein}"
+                               FontWeight="Bold" Width="100"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Ж: " />
+                    <TextBlock Text="{Binding TotalNutrition.FormattedFat}"
+                               FontWeight="Bold" Width="100"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="У: " />
+                    <TextBlock Text="{Binding TotalNutrition.FormattedCarbs}"
+                               FontWeight="Bold" Width="100"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Вес: " />
+                    <TextBlock Text="{Binding FormattedTotalQuantity}"
+                               FontWeight="Bold" Width="100"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

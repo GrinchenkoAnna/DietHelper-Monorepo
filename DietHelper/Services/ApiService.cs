@@ -190,9 +190,7 @@ namespace DietHelper.Services
             }
         }
 
-        public async 
-        Task
-LogoutAsync()
+        public async Task LogoutAsync()
         {
             await _httpClient.PostAsync("auth/logout", null);
             EndSession();            
@@ -214,7 +212,7 @@ LogoutAsync()
 
         public async Task<User> GetUserAsync()
         {
-            return new User() //заглушка
+            return new User()
             {
                 Id = CurrentSessionData.UserId
             };

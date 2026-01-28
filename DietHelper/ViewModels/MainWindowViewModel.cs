@@ -169,7 +169,7 @@ namespace DietHelper.ViewModels
         {
             _apiService = apiService;
             _navigationService = navigationService;
-            InitializeAsync(); //для отладки
+            InitializeAsync();
 
             int products = UserProducts.Count;
             int Dishes = UserDishes.Count;

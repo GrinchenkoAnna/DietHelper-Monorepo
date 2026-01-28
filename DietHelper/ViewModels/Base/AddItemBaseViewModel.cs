@@ -52,7 +52,7 @@ namespace DietHelper.ViewModels.Base
             {
                 var userProduct = new UserProduct()
                 {
-                    UserId = GetCurrentUserId(),
+                    UserId = await GetCurrentUserId(),
                     BaseProductId = createdBaseProduct.Id,
                     CustomNutrition = new NutritionInfo()
                     {
