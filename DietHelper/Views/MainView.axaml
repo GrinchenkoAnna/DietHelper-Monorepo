@@ -11,11 +11,16 @@
              x:DataType="vm:MainWindowViewModel">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+        <Button Grid.Row="0" Content="Выйти"
+                Margin="5, 5, 0, 0"
+                Command="{Binding LogoutCommand}"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <ListBox ItemsSource="{Binding UserProducts}" Margin="0 10 0 10" x:Name="UserProductsList">
                     <ListBox.ItemTemplate>
@@ -23,7 +28,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <products:UserProductView DataContext="{Binding}" />
                                 <Button Content="-" Margin="10 0 0 0"
-                                        Command="{Binding DataContext.RemoveUserProductCommand, ElementName=root}"
+                                        Command="{Binding $parent[UserControl].DataContext.RemoveUserProductCommand}"
                                         CommandParameter="{Binding}"
                                         VerticalAlignment="Top"
                                         HorizontalAlignment="Right"/>
@@ -45,7 +50,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <dishes:UserDishView DataContext="{Binding}" />
                                     <Button Content="-" Margin="10 0 0 0"
-                                            Command="{Binding DataContext.RemoveDishCommand, ElementName=root}"
+                                            Command="{Binding $parent[UserControl].DataContext.RemoveDishCommand}"
                                             CommandParameter="{Binding}"
                                             VerticalAlignment="Top"
                                             HorizontalAlignment="Right"/>
@@ -70,7 +75,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Border Grid.Row="1" Padding="10" Margin="10"
+        <Border Grid.Row="2" Padding="10" Margin="10"
                 BorderThickness="1" BorderBrush="#D0D0D0">
             <StackPanel Orientation="Horizontal">
                 <StackPanel Orientation="Horizontal">

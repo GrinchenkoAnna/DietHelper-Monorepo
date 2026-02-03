@@ -8,6 +8,8 @@ namespace DietHelper.Services
 {
     public interface INavigationService
     {
+        public event EventHandler<Type>? NavigationRequested;
+
         Task NavigateToLoginAsync();
 
         Task NavigateToMainAsync();
