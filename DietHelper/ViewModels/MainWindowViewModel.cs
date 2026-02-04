@@ -21,7 +21,7 @@ namespace DietHelper.ViewModels
     public partial class MainWindowViewModel : ViewModelBase
     {
         private readonly ApiService _apiService;
-        private readonly INavigationService _navigationService;
+        //private readonly INavigationService _navigationService;
 
         private ObservableCollection<UserProductViewModel> _userProducts = [];
 
@@ -163,12 +163,12 @@ namespace DietHelper.ViewModels
             }
         }
 
-        public MainWindowViewModel() : this(new ApiService(), null) { }
+        //public MainWindowViewModel() : this(new ApiService(), null) { }
 
-        public MainWindowViewModel(ApiService apiService, INavigationService navigationService) : base(apiService)
+        public MainWindowViewModel(ApiService apiService) : base(apiService)
         {
             _apiService = apiService;
-            _navigationService = navigationService;
+            //_navigationService = navigationService;
             InitializeAsync();
 
             int products = UserProducts.Count;
@@ -254,12 +254,11 @@ namespace DietHelper.ViewModels
         }
 
         [RelayCommand]
-        private async Task Logout()
+        private void Logout()
         {
             try
             {
-                await _apiService.LogoutAsync();
-                await _navigationService.NavigateToLoginAsync();
+                _apiService.Logout();
             }
             catch (Exception ex)
             {

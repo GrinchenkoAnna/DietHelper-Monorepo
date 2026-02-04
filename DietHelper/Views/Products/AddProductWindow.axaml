@@ -7,7 +7,7 @@
         xmlns:manual="clr-namespace:DietHelper.Views"
         mc:Ignorable="d"
         x:Class="DietHelper.Views.Products.AddProductWindow"
-        Title="Добавить продукт" Height="800" Width="900"
+        Title="Добавить продукт" Height="600" Width="900"
         x:DataType="vm:AddProductViewModel"
         WindowStartupLocation="CenterScreen">
 

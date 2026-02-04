@@ -11,14 +11,15 @@ using DietHelper.Views.Products;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DietHelper.Views
 {
     public partial class MainWindow : Window
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly INavigationService _navigationService;
         private readonly ApiService _apiService;
 
         public MainWindow(IServiceProvider serviceProvider)
@@ -26,54 +27,88 @@ namespace DietHelper.Views
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
-            _navigationService = serviceProvider.GetRequiredService<INavigationService>();
             _apiService = serviceProvider.GetRequiredService<ApiService>();
 
+            Debug.WriteLine($"[MainWindow] Constructor called. ApiService hash: {_apiService.GetHashCode()}");
+
             _apiService.AuthStateChanged += OnAuthStateChanged;
-            _navigationService.NavigationRequested += OnNavigationRequested;
 
             NavigateBaseOnAuthState();
         }
 
-        private void OnAuthStateChanged()
+        private async void OnAuthStateChanged()
         {
-            Dispatcher.UIThread.InvokeAsync(() =>
+            try
             {
-                NavigateBaseOnAuthState();
-            });
+                await Dispatcher.UIThread.InvokeAsync(() => 
+                {
+                    try
+                    {
+                        NavigateBaseOnAuthState();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[MainWindow] ERROR in NavigateBaseOnAuthState: {ex.Message}");
+                    }                    
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindow] ERROR in OnAuthStateChanged: {ex.Message}");
+            }            
         }
 
         private void NavigateBaseOnAuthState()
         {
-            if (_apiService.IsAuthenticated) _navigationService.NavigateToMainAsync();
-            else _navigationService.NavigateToLoginAsync();            
+            try
+            {
+                var currentContentType = MainContent.Content?.GetType().Name ?? "null";
+
+                if (_apiService.IsAuthenticated)
+                {
+                    if (currentContentType == "MainView") return;
+
+                    var mainView = new MainView();
+                    var viewModel = _serviceProvider.GetRequiredService<MainWindowViewModel>();
+
+                    if (viewModel == null) return;
+
+                    mainView.DataContext = viewModel;
+                    MainContent.Content = mainView;
+
+                    SetupMessaging();
+                }
+                else
+                {
+                    MainContent.Content = null;
+
+                    if (currentContentType == "AuthView") return;
+
+                    var authView = new AuthView();
+                    var viewModel = _serviceProvider.GetRequiredService<AuthViewModel>();
+
+                    if (viewModel == null) return;
+
+                    authView.DataContext = viewModel;
+                    MainContent.Content = authView;
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    var authView = new AuthView();
+                    var viewModel = _serviceProvider.GetRequiredService<AuthViewModel>();
+                    authView.DataContext = viewModel;
+                    MainContent.Content = authView;
+                }
+                catch (Exception inEx)
+                {
+                    Debug.WriteLine($"[MainWindow]: {inEx.Message}");
+                }
+            }
         }
 
-        private void OnNavigationRequested(object? sender, Type viewModel)
-        {
-            if (viewModel == typeof(AuthViewModel))
-            {
-                var authView = new AuthView()
-                {
-                    DataContext = _serviceProvider.GetRequiredService<AuthViewModel>()
-                };
-                MainContent = authView;
-
-                WeakReferenceMessenger.Default.UnregisterAll(this);
-            }
-            else if (viewModel == typeof(MainWindowViewModel))
-            {
-                var mainView = new MainView()
-                {
-                    DataContext = _serviceProvider.GetRequiredService<MainWindowViewModel>()
-                };
-                MainContent = mainView;
-
-                SetupMessaging();
-            }
-        }        
-
-        //подписки на сообщения
         private void SetupMessaging()
         {
            WeakReferenceMessenger.Default.Register<MainWindow, AddBaseProductMessage>(this, static (w, m) =>
@@ -156,7 +191,6 @@ namespace DietHelper.Views
             base.OnClosed(e);
 
             _apiService.AuthStateChanged -= OnAuthStateChanged;
-            _navigationService.NavigationRequested -= OnNavigationRequested;
 
             WeakReferenceMessenger.Default.UnregisterAll(this);
         }

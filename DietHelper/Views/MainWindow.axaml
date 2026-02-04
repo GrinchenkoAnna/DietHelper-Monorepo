@@ -12,11 +12,6 @@
         x:DataType="vm:MainWindowViewModel"
         WindowStartupLocation="CenterScreen">
 
-    <Window.DataContext>
-        <vm:MainWindowViewModel />
-    </Window.DataContext>
+    <ContentControl x:Name="MainContent" />
 
-    <ContentControl x:Name="MainContent">
-		
-    </ContentControl>
 </Window>

@@ -14,6 +14,8 @@
                       OnContent="Да"
                       OffContent="Нет"/>
 
+        <TextBlock Text="{Binding Message}" Foreground="Red"/>
+
 		<TextBlock Text="Логин: "/>
         <TextBox Text="{Binding UserName}" 
                  Watermark="Введите логин"/>

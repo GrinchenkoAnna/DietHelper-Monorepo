@@ -1,8 +1,8 @@
-﻿using DietHelper.Common.DTO;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using DietHelper.Common.DTO;
 using DietHelper.Common.Models;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,17 +32,21 @@ namespace DietHelper.Services
             UserId = -1,
             UserName = null
         };
-    
+
         public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentSessionData.Token);
 
         public event Action? AuthStateChanged;
 
         public ApiService()
         {
+            Debug.WriteLine($"[ApiService] Создан новый экземпляр. HashCode: {GetHashCode()}");
+
             _httpClient = new HttpClient()
             {
                 BaseAddress = new Uri("http://localhost:5119/api/")
             };
+
+            LoadSavedSession();
         }
 
         #region Authorization
@@ -106,7 +110,7 @@ namespace DietHelper.Services
         {
             CurrentSessionData.Token = null;
             CurrentSessionData.UserId = -1;
-            CurrentSessionData.UserName = null;            
+            CurrentSessionData.UserName = null;
 
             _httpClient.DefaultRequestHeaders.Authorization = null;
 
@@ -120,7 +124,7 @@ namespace DietHelper.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"[ApiService]: {ex.Message}");
-            }            
+            }
 
             AuthStateChanged?.Invoke();
         }
@@ -141,7 +145,7 @@ namespace DietHelper.Services
                             UserId = authResponse.UserId,
                             UserName = authResponse.UserName
                         });
-                        
+
                         return authResponse;
                     }
                 }
@@ -156,7 +160,7 @@ namespace DietHelper.Services
                     IsSuccess = false,
                     Message = ex.Message
                 };
-            }            
+            }
         }
 
         public async Task<AuthResponseDto?> LoginAsync(LoginDto loginDto)
@@ -190,10 +194,11 @@ namespace DietHelper.Services
             }
         }
 
-        public async Task LogoutAsync()
+        public void Logout()
         {
-            await _httpClient.PostAsync("auth/logout", null);
-            EndSession();            
+            EndSession();
+
+            Debug.WriteLine("--->" + CurrentSessionData.Token);
         }
         #endregion
 

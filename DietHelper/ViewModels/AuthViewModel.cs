@@ -15,7 +15,7 @@ namespace DietHelper.ViewModels
     public partial class AuthViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
-        private readonly INavigationService _navigationService;
+        //private readonly INavigationService _navigationService;
 
         [ObservableProperty]
         private string userName = string.Empty;
@@ -32,21 +32,21 @@ namespace DietHelper.ViewModels
         [ObservableProperty]
         private bool isNewUser = false;
 
-        public AuthViewModel(ApiService apiService, INavigationService navigationService)
+        public AuthViewModel(ApiService apiService)
         {
             _apiService = apiService;
-            _navigationService = navigationService;
+            //_navigationService = navigationService;
 
-            if (_apiService.IsAuthenticated)
-                _ = _navigationService.NavigateToMainAsync();
+            //if (_apiService.IsAuthenticated)
+            //_ = _navigationService.NavigateToMainAsync();
+
+            Message = "Авторизуйтесь в системе";
         }
 
         [RelayCommand]
         private async Task Login()
         {
             if (IsNewUser) return;
-
-            Reset();
 
             if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Password))
                 Message = "Введите логин и пароль";
@@ -62,8 +62,9 @@ namespace DietHelper.ViewModels
                 if (result!.IsSuccess)
                 {
                     Message = "Авторизация прошла успешно";
-                    await _navigationService.NavigateToMainAsync();
+                    //await _navigationService.NavigateToMainAsync();
                 }
+                else Message = "Неверный логин или пароль";
             }
             catch (Exception ex)
             {
@@ -84,8 +85,6 @@ namespace DietHelper.ViewModels
         private async Task Register()
         {
             if (!IsNewUser) return;
-
-            Reset();
 
             if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Password))
                 Message = "Введите логин и пароль";
@@ -108,7 +107,7 @@ namespace DietHelper.ViewModels
                 if (result!.IsSuccess)
                 {
                     Message = "Регистрация прошла успешно";
-                    await _navigationService.NavigateToLoginAsync();
+                    //await _navigationService.NavigateToLoginAsync();
                 }
             }
             catch (Exception ex)
@@ -124,7 +123,7 @@ namespace DietHelper.ViewModels
             UserName = string.Empty;
             Password = string.Empty;
             ConfirmPassword = string.Empty;
-            Message = string.Empty;
+            Message = "Авторизуйтесь в системе";
         }
     }
 }
