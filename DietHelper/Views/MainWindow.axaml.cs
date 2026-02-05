@@ -10,10 +10,8 @@ using DietHelper.Views.Dishes;
 using DietHelper.Views.Products;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace DietHelper.Views
 {
@@ -31,6 +29,7 @@ namespace DietHelper.Views
 
             Debug.WriteLine($"[MainWindow] Constructor called. ApiService hash: {_apiService.GetHashCode()}");
 
+            _apiService.AuthStateChanged -= OnAuthStateChanged;
             _apiService.AuthStateChanged += OnAuthStateChanged;
 
             NavigateBaseOnAuthState();
@@ -40,7 +39,7 @@ namespace DietHelper.Views
         {
             try
             {
-                await Dispatcher.UIThread.InvokeAsync(() => 
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     try
                     {
@@ -49,13 +48,13 @@ namespace DietHelper.Views
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"[MainWindow] ERROR in NavigateBaseOnAuthState: {ex.Message}");
-                    }                    
+                    }
                 });
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[MainWindow] ERROR in OnAuthStateChanged: {ex.Message}");
-            }            
+            }
         }
 
         private void NavigateBaseOnAuthState()
@@ -67,6 +66,9 @@ namespace DietHelper.Views
                 if (_apiService.IsAuthenticated)
                 {
                     if (currentContentType == "MainView") return;
+
+                    WeakReferenceMessenger.Default.UnregisterAll(this);
+                    MainContent.Content = null;
 
                     var mainView = new MainView();
                     var viewModel = _serviceProvider.GetRequiredService<MainWindowViewModel>();
@@ -80,9 +82,8 @@ namespace DietHelper.Views
                 }
                 else
                 {
-                    MainContent.Content = null;
-
                     if (currentContentType == "AuthView") return;
+                    MainContent.Content = null;
 
                     var authView = new AuthView();
                     var viewModel = _serviceProvider.GetRequiredService<AuthViewModel>();
@@ -111,16 +112,16 @@ namespace DietHelper.Views
 
         private void SetupMessaging()
         {
-           WeakReferenceMessenger.Default.Register<MainWindow, AddBaseProductMessage>(this, static (w, m) =>
-            {
-                var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
+            WeakReferenceMessenger.Default.Register<MainWindow, AddBaseProductMessage>(this, static (w, m) =>
+             {
+                 var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
 
-                var dialog = new AddProductWindow
-                {
-                    DataContext = viewModel
-                };
-                m.Reply(dialog.ShowDialog<BaseProductViewModel?>(w));
-            });
+                 var dialog = new AddProductWindow
+                 {
+                     DataContext = viewModel
+                 };
+                 m.Reply(dialog.ShowDialog<BaseProductViewModel?>(w));
+             });
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddUserProductMessage>(this, static (w, m) =>
             {

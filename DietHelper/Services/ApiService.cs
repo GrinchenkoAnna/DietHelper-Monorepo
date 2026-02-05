@@ -99,6 +99,10 @@ namespace DietHelper.Services
                     if (sessionData is not null && !string.IsNullOrEmpty(sessionData.Token))
                         SetToken(sessionData);
                 }
+                else
+                {
+                    //послать серверу запрос на авторизацию? 
+                }
             }
             catch (Exception ex)
             {
@@ -197,8 +201,6 @@ namespace DietHelper.Services
         public void Logout()
         {
             EndSession();
-
-            Debug.WriteLine("--->" + CurrentSessionData.Token);
         }
         #endregion
 

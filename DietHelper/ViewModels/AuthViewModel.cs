@@ -35,10 +35,6 @@ namespace DietHelper.ViewModels
         public AuthViewModel(ApiService apiService)
         {
             _apiService = apiService;
-            //_navigationService = navigationService;
-
-            //if (_apiService.IsAuthenticated)
-            //_ = _navigationService.NavigateToMainAsync();
 
             Message = "Авторизуйтесь в системе";
         }
@@ -59,11 +55,7 @@ namespace DietHelper.ViewModels
                         UserName = UserName,
                         Password = Password
                     });
-                if (result!.IsSuccess)
-                {
-                    Message = "Авторизация прошла успешно";
-                    //await _navigationService.NavigateToMainAsync();
-                }
+                if (result!.IsSuccess) Message = "Авторизация прошла успешно";
                 else Message = "Неверный логин или пароль";
             }
             catch (Exception ex)
