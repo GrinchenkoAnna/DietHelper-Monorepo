@@ -26,34 +26,33 @@ namespace DietHelper.Common.Data
                 optionsBuilder.UseNpgsql("Host=localhost;Database=nutrition;Username=postgres;Password=p5t9R_1g7!;Port=5432");
         }
 
-        //старые таблицы
+        //старые таблицы - разобрать, как убрать без последствий (не приоритет сейчас)
         public DbSet<Product> Products { get; set; }
         public DbSet<Dish> Dishes { get; set; }
         public DbSet<DishIngredient> DishIngredients { get; set; }
 
         //новые таблицы
-        //public DbSet<User> Users { get; set; }
         public DbSet<BaseProduct> BaseProducts { get; set; }
         public DbSet<UserProduct> UserProducts { get; set; }
         public DbSet<UserDish> UserDishes { get; set; }
         public DbSet<UserDishIngredient> UserDishIngredients { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            //новое
-            //modelBuilder.Entity<User>(entity =>
-            //{
-            //    entity.HasKey(u => u.Id);
-            //    entity.Property(u => u.PasswordHash).IsRequired();
-            //    entity.Property(u => u.Name);
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasOne(rt => rt.User)
+                    .WithMany()
+                    .HasForeignKey(rt => rt.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            //    //entity.HasMany(u => u.Dishes)
-            //    //    .WithOne(ud => ud.User)
-            //    //    .HasForeignKey(ud => ud.UserId)
-            //    //    .OnDelete(DeleteBehavior.Cascade);
-            //});
+                entity.HasIndex(rt => rt.Token).IsUnique();
+
+                entity.HasIndex(rt => rt.UserId);
+            });
 
             modelBuilder.Entity<BaseProduct>(entity =>
             {
@@ -154,61 +153,6 @@ namespace DietHelper.Common.Data
             modelBuilder.Entity<Product>().ToTable("Products", t => t.ExcludeFromMigrations());
             modelBuilder.Entity<Dish>().ToTable("Dishes", t => t.ExcludeFromMigrations());
             modelBuilder.Entity<DishIngredient>().ToTable("DishIngredients", t => t.ExcludeFromMigrations());
-
-            ////Product
-            //modelBuilder.Entity<Product>(entity =>
-            //{
-            //    entity.HasKey(p => p.Id);
-            //    entity.Property(p => p.Name).IsRequired();
-
-            //    //NutritionInfo
-            //    entity.OwnsOne(p => p.NutritionFacts, nutrition =>
-            //    {
-            //        nutrition.Property(n => n.Calories).HasColumnName("Calories");
-            //        nutrition.Property(n => n.Protein).HasColumnName("Protein");
-            //        nutrition.Property(n => n.Fat).HasColumnName("Fat");
-            //        nutrition.Property(n => n.Carbs).HasColumnName("Carbs");
-            //    });
-
-            //    //связь с DishIngredients
-            //    entity.HasMany(p => p.DishIngredients)
-            //    .WithOne(di => di.Ingredient)
-            //    .HasForeignKey(di => di.ProductId)
-            //    .OnDelete(DeleteBehavior.Restrict);
-            //});
-
-            ////Dish
-            //modelBuilder.Entity<Dish>(entity =>
-            //{
-            //    entity.HasKey(d => d.Id);
-            //    entity.Property(d => d.Name).IsRequired();
-
-            //    //NutritionInfo
-            //    entity.OwnsOne(d => d.NutritionFacts, nutrition =>
-            //    {
-            //        nutrition.Property(n => n.Calories).HasColumnName("Calories");
-            //        nutrition.Property(n => n.Protein).HasColumnName("Protein");
-            //        nutrition.Property(n => n.Fat).HasColumnName("Fat");
-            //        nutrition.Property(n => n.Carbs).HasColumnName("Carbs");
-            //    });
-
-            //    //связь с DishIngredients
-            //    entity.HasMany(d => d.Ingredients)
-            //    .WithOne(di => di.Dish)
-            //    .HasForeignKey(di => di.DishId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-            //});
-
-            ////DishIngredient
-            //modelBuilder.Entity<DishIngredient>(entity =>
-            //{
-            //    entity.HasKey(di => di.Id);
-
-            //    entity.Property(di => di.Quantity).IsRequired();
-
-            //    //убрать дублирование
-            //    entity.HasIndex(di => new { di.DishId, di.ProductId }).IsUnique();
-            //});
         }
     }
 }
