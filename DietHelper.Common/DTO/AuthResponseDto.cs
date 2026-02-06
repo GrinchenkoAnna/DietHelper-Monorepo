@@ -11,8 +11,11 @@ namespace DietHelper.Common.DTO
         [JsonPropertyName("message")]
         public string? Message { get; set; }
 
-        [JsonPropertyName("token")]
-        public string? Token { get; set; }
+        [JsonPropertyName("accessToken")]
+        public string? AccessToken { get; set; }
+        
+        [JsonPropertyName("refreshToken")]
+        public string? RefreshToken { get; set; }
 
         [JsonPropertyName("userId")]
         public int UserId { get; set; }
@@ -20,7 +23,10 @@ namespace DietHelper.Common.DTO
         [JsonPropertyName("userName")]
         public string? UserName { get; set; }
 
-        [JsonPropertyName("tokenExpiry")]
-        public DateTime TokenExpiry { get; set; }
+        [JsonPropertyName("accessTokenExpiry")]
+        public DateTime AccessTokenExpiry { get; set; }
+
+        [JsonPropertyName("refreshTokenExpiry")]
+        public DateTime RefreshTokenExpiry { get; set; }
     }
 }

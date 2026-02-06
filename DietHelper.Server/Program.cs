@@ -1,5 +1,6 @@
 using DietHelper.Common.Data;
 using DietHelper.Common.Models;
+using DietHelper.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,8 @@ builder.Services.AddDbContext<DietHelperDbContext>(options =>
     options.UseNpgsql(connectionString);
 }
 );
+
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {

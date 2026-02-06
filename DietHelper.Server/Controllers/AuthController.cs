@@ -1,11 +1,13 @@
 ﻿using DietHelper.Common.DTO;
 using DietHelper.Common.Models;
+using DietHelper.Server.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DietHelper.Server.Controllers
 {
@@ -15,19 +17,21 @@ namespace DietHelper.Server.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
 
-        public AuthController(UserManager<User> userManager, IConfiguration configuration)
+        public AuthController(UserManager<User> userManager, IConfiguration configuration, ITokenService tokenService)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto registerDto)
+        public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto request)
         {
             try
             {
-                var exitingUser = await _userManager.FindByNameAsync(registerDto.UserName);
+                var exitingUser = await _userManager.FindByNameAsync(request.UserName);
                 if (exitingUser is not null)
                     return BadRequest(new AuthResponseDto()
                     {
@@ -35,8 +39,8 @@ namespace DietHelper.Server.Controllers
                         IsSuccess = false
                     });
 
-                var newUser = new User { UserName = registerDto.UserName };
-                var result = await _userManager.CreateAsync(newUser, registerDto.Password); //Identity хеширует пароль
+                var newUser = new User { UserName = request.UserName };
+                var result = await _userManager.CreateAsync(newUser, request.Password); //Identity хеширует пароль
 
                 if (!result.Succeeded)
                     return BadRequest(new AuthResponseDto()
@@ -45,16 +49,17 @@ namespace DietHelper.Server.Controllers
                         IsSuccess = false
                     });
 
-                var token = GenerateJwtToken(newUser);
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(exitingUser);
+                var refreshToken = await _tokenService.GenerateRefreshTokenAsync(exitingUser);
 
                 return Ok(new AuthResponseDto()
                 {
                     IsSuccess = true,
                     Message = "Регистрация прошла успешно",
-                    Token = token,
-                    UserId = newUser.Id,
-                    UserName = newUser.UserName,
-                    TokenExpiry = DateTime.UtcNow.AddHours(2)
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    UserId = exitingUser.Id,
+                    UserName = exitingUser.UserName
                 });
             }
             catch (Exception ex)
@@ -63,34 +68,12 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        private string GenerateJwtToken(User user)
-        {
-            var claims = new List<Claim>()
-            {
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.UniqueName, user.UserName!)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JwtSettings:Issuer"],
-                audience: _configuration["JwtSettings:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: creds
-                );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
         [HttpPost("login")]
-        public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto loginDto)
+        public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto request)
         {
             try
             {
-                var exitingUser = await _userManager.FindByNameAsync(loginDto.UserName);
+                var exitingUser = await _userManager.FindByNameAsync(request.UserName);
                 if (exitingUser is null)
                     return Unauthorized(new AuthResponseDto()
                     {
@@ -98,7 +81,7 @@ namespace DietHelper.Server.Controllers
                         IsSuccess = false
                     });
 
-                var isPasswordCorrect = await _userManager.CheckPasswordAsync(exitingUser, loginDto.Password);
+                var isPasswordCorrect = await _userManager.CheckPasswordAsync(exitingUser, request.Password);
                 if (!isPasswordCorrect)
                     return Unauthorized(new AuthResponseDto()
                     {
@@ -106,16 +89,17 @@ namespace DietHelper.Server.Controllers
                         IsSuccess = false
                     });
 
-                var token = GenerateJwtToken(exitingUser);
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(exitingUser);
+                var refreshToken = await _tokenService.GenerateRefreshTokenAsync(exitingUser);
 
                 return Ok(new AuthResponseDto()
                 {
                     IsSuccess = true,
                     Message = "Регистрация прошла успешно",
-                    Token = token,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
                     UserId = exitingUser.Id,
-                    UserName = exitingUser.UserName,
-                    TokenExpiry = DateTime.UtcNow.AddHours(2)
+                    UserName = exitingUser.UserName
                 });
             }
             catch (Exception ex)
@@ -124,10 +108,46 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        [HttpPost("logout")]
-        public ActionResult Logout()
+        [HttpPost("refresh")]
+        public async Task<ActionResult<AuthResponseDto>> Refresh([FromBody] RefreshRequestDto request)
         {
-            return Ok(new { message = "Вы успешно вышли из DietHelper" });
+            if (!await _tokenService.IsRefreshTokenValidAsync(request.RefreshToken))
+                return Unauthorized(new AuthResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = "Недействительный или отозванный токен"
+                });
+
+            var refreshToken = await _tokenService.GetRefreshTokenAsync(request.RefreshToken);
+            if (refreshToken is null)
+                return Unauthorized(new AuthResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = "Токен не найден"
+                });
+
+            var newRefreshToken = await _tokenService.GenerateRefreshTokenAsync(refreshToken.User);
+            await _tokenService.RevokeRefreshTokenAsync(refreshToken.Token);
+
+            var newAccessToken = await _tokenService.GenerateAccessTokenAsync(refreshToken.User);
+
+            return Ok(new AuthResponseDto()
+            {
+                IsSuccess = true,
+                RefreshToken = newRefreshToken,
+                AccessToken = newAccessToken,
+                UserId = refreshToken.UserId,
+                UserName = refreshToken.User.UserName
+            });
+        }
+
+        [HttpPost("logout")]
+        public async Task<ActionResult> Logout([FromBody] LogoutDto request)
+        {
+            if (!string.IsNullOrEmpty(request.RefreshToken))
+                await _tokenService.RevokeRefreshTokenAsync(request.RefreshToken);
+
+            return Ok("Вы успешно вышли из DietHelper");
         }
     }
 }
