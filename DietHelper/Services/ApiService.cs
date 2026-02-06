@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using DietHelper.Common.DTO;
+﻿using DietHelper.Common.DTO;
 using DietHelper.Common.Models;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
@@ -18,9 +17,15 @@ namespace DietHelper.Services
 {
     public class SessionData
     {
-        public string? Token { get; set; }
+        public string? AccessToken { get; set; }
+        public string? RefreshToken { get; set; }
+        
         public int UserId { get; set; }
         public string? UserName { get; set; }
+
+        // возможно, не нужны
+        public DateTime? AccessTokenExpiry { get; set; }
+        public DateTime? RefreshTokenExpiry { get; set; }
     }
 
     public class ApiService
@@ -28,12 +33,13 @@ namespace DietHelper.Services
         private readonly HttpClient _httpClient;
         private SessionData CurrentSessionData { get; set; } = new SessionData()
         {
-            Token = null,
+            AccessToken = null,
+            RefreshToken = null,
             UserId = -1,
             UserName = null
         };
 
-        public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentSessionData.Token);
+        public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentSessionData.AccessToken);
 
         public event Action? AuthStateChanged;
 
@@ -50,11 +56,12 @@ namespace DietHelper.Services
         }
 
         #region Authorization
-        private void SetToken(SessionData sessionData)
+        private void SetTokens(SessionData sessionData)
         {
             CurrentSessionData = sessionData;
 
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", CurrentSessionData.Token);
+            if (!string.IsNullOrEmpty(CurrentSessionData.AccessToken))
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", CurrentSessionData.AccessToken);
 
             SaveSession();
 
@@ -63,7 +70,7 @@ namespace DietHelper.Services
 
         private void SaveSession()
         {
-            if (string.IsNullOrEmpty(CurrentSessionData.Token))
+            if (string.IsNullOrEmpty(CurrentSessionData.AccessToken))
             {
                 Debug.WriteLine($"[ApiService]: token is null");
                 return;
@@ -96,42 +103,17 @@ namespace DietHelper.Services
                 {
                     var json = File.ReadAllText(filePath);
                     var sessionData = JsonSerializer.Deserialize<SessionData>(json);
-                    if (sessionData is not null && !string.IsNullOrEmpty(sessionData.Token))
-                        SetToken(sessionData);
-                }
-                else
-                {
-                    //послать серверу запрос на авторизацию? 
+                    if (sessionData is not null && 
+                        !string.IsNullOrEmpty(sessionData.AccessToken) &&
+                        !string.IsNullOrEmpty(sessionData.RefreshToken))
+                        SetTokens(sessionData);
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[ApiService]: {ex.Message}");
             }
-        }
-
-        private void EndSession()
-        {
-            CurrentSessionData.Token = null;
-            CurrentSessionData.UserId = -1;
-            CurrentSessionData.UserName = null;
-
-            _httpClient.DefaultRequestHeaders.Authorization = null;
-
-            try
-            {
-                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                var filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
-
-                if (File.Exists(filePath)) File.Delete(filePath);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[ApiService]: {ex.Message}");
-            }
-
-            AuthStateChanged?.Invoke();
-        }
+        }        
 
         public async Task<AuthResponseDto?> RegisterAsync(RegisterDto registerDto)
         {
@@ -141,11 +123,14 @@ namespace DietHelper.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-                    if (!string.IsNullOrEmpty(authResponse.Token))
+                    if (authResponse is not null && authResponse.IsSuccess &&
+                        !string.IsNullOrEmpty(authResponse.AccessToken) &&
+                        !string.IsNullOrEmpty(authResponse.RefreshToken))
                     {
-                        SetToken(new SessionData
+                        SetTokens(new SessionData
                         {
-                            Token = authResponse.Token,
+                            AccessToken = authResponse.AccessToken,
+                            RefreshToken = authResponse.RefreshToken,
                             UserId = authResponse.UserId,
                             UserName = authResponse.UserName
                         });
@@ -173,11 +158,14 @@ namespace DietHelper.Services
             {
                 var response = await _httpClient.PostAsJsonAsync("auth/login", loginDto);
                 var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-                if (!string.IsNullOrEmpty(authResponse.Token))
+                if (authResponse is not null && authResponse.IsSuccess &&
+                    !string.IsNullOrEmpty(authResponse.AccessToken) &&
+                    !string.IsNullOrEmpty(authResponse.RefreshToken))
                 {
-                    SetToken(new SessionData
+                    SetTokens(new SessionData
                     {
-                        Token = authResponse.Token,
+                        AccessToken = authResponse.AccessToken,
+                        RefreshToken = authResponse.RefreshToken,
                         UserId = authResponse.UserId,
                         UserName = authResponse.UserName
                     });
@@ -198,9 +186,49 @@ namespace DietHelper.Services
             }
         }
 
-        public void Logout()
+        // удаление токенов на клиенте
+        private void EndSession()
         {
+            CurrentSessionData.AccessToken = null;
+            CurrentSessionData.RefreshToken = null;
+            CurrentSessionData.UserId = -1;
+            CurrentSessionData.UserName = null;
+
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+
+            try
+            {
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
+
+                if (File.Exists(filePath)) File.Delete(filePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+            }
+
+            AuthStateChanged?.Invoke();
+        }
+
+        public async Task Logout()
+        {
+            var refreshTokenToRevoke = CurrentSessionData.RefreshToken;
+
             EndSession();
+
+            // отзыв токенов на сервере
+            if (!string.IsNullOrEmpty(refreshTokenToRevoke))
+            {
+                try
+                {
+                    var response = await _httpClient.PostAsJsonAsync("auth/logout", new { RefreshToken = refreshTokenToRevoke });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[ApiService]: {ex.Message}");
+                }
+            }
         }
         #endregion
 
