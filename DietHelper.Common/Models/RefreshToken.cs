@@ -18,17 +18,16 @@ namespace DietHelper.Common.Models
         public int UserId { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
         public DateTime ExpiresAt {  get; set; }
 
-        [Required]
         public DateTime? RevokedAt { get; set; }
 
         // не знаю, нужно или нет
         public User User { get; set; } = null!;
-        public bool IsExpired => DateTime.Now >= ExpiresAt;
+        public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
         public bool IsRevoked => RevokedAt != null;
         public bool IsActive => !IsRevoked && !IsExpired;
     }
