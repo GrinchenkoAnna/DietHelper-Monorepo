@@ -49,8 +49,8 @@ namespace DietHelper.Server.Controllers
                         IsSuccess = false
                     });
 
-                var accessToken = await _tokenService.GenerateAccessTokenAsync(exitingUser);
-                var refreshToken = await _tokenService.GenerateRefreshTokenAsync(exitingUser);
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(newUser);
+                var refreshToken = await _tokenService.GenerateRefreshTokenAsync(newUser);
 
                 return Ok(new AuthResponseDto()
                 {
@@ -58,8 +58,8 @@ namespace DietHelper.Server.Controllers
                     Message = "Регистрация прошла успешно",
                     AccessToken = accessToken,
                     RefreshToken = refreshToken,
-                    UserId = exitingUser.Id,
-                    UserName = exitingUser.UserName
+                    UserId = newUser.Id,
+                    UserName = newUser.UserName
                 });
             }
             catch (Exception ex)

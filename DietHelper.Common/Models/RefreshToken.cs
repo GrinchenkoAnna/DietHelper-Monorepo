@@ -25,7 +25,6 @@ namespace DietHelper.Common.Models
 
         public DateTime? RevokedAt { get; set; }
 
-        // не знаю, нужно или нет
         public User User { get; set; } = null!;
         public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
         public bool IsRevoked => RevokedAt != null;

@@ -1,0 +1,270 @@
+﻿using DietHelper.Common.DTO;
+using DietHelper.Common.Models;
+using DietHelper.Data;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace DietHelper.Services
+{
+    public partial class ApiService
+    {
+        private readonly HttpClient _httpClient;
+        private SessionData CurrentSessionData { get; set; } = new SessionData()
+        {
+            AccessToken = null,
+            RefreshToken = null,
+            UserId = -1,
+            UserName = null
+        };
+
+        public bool IsAuthenticated => !string.IsNullOrEmpty(CurrentSessionData.AccessToken);
+
+        public event Action? AuthStateChanged;
+
+        public ApiService()
+        {
+            Debug.WriteLine($"[ApiService] Создан новый экземпляр. HashCode: {GetHashCode()}");
+
+            _httpClient = new HttpClient()
+            {
+                BaseAddress = new Uri("http://localhost:5119/api/")
+            };
+
+            LoadSavedSession();
+        }
+
+        #region Authorization
+        private void SetTokens(SessionData sessionData)
+        {
+            CurrentSessionData = sessionData;
+
+            if (!string.IsNullOrEmpty(CurrentSessionData.AccessToken))
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", CurrentSessionData.AccessToken);
+
+            SaveSession();
+
+            AuthStateChanged?.Invoke();
+        }
+
+        private void SaveSession()
+        {
+            if (string.IsNullOrEmpty(CurrentSessionData.AccessToken))
+            {
+                Debug.WriteLine($"[ApiService]: token is null");
+                return;
+            }
+
+            try
+            {
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var folderPath = Path.Combine(appDataPath, "DietHelper");
+                Directory.CreateDirectory(folderPath);
+
+                var filePath = Path.Combine(folderPath, "session.json");
+                var json = JsonSerializer.Serialize(CurrentSessionData);
+                File.WriteAllText(filePath, json);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+            }
+        }
+
+        private void LoadSavedSession()
+        {
+            try
+            {
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
+
+                if (File.Exists(filePath))
+                {
+                    var json = File.ReadAllText(filePath);
+                    var sessionData = JsonSerializer.Deserialize<SessionData>(json);
+                    if (sessionData is not null &&
+                        !string.IsNullOrEmpty(sessionData.AccessToken) &&
+                        !string.IsNullOrEmpty(sessionData.RefreshToken))
+                        SetTokens(sessionData);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+            }
+        }
+
+        public async Task<AuthResponseDto?> RegisterAsync(RegisterDto registerDto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("auth/register", registerDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                    if (authResponse is not null && authResponse.IsSuccess &&
+                        !string.IsNullOrEmpty(authResponse.AccessToken) &&
+                        !string.IsNullOrEmpty(authResponse.RefreshToken))
+                    {
+                        SetTokens(new SessionData
+                        {
+                            AccessToken = authResponse.AccessToken,
+                            RefreshToken = authResponse.RefreshToken,
+                            UserId = authResponse.UserId,
+                            UserName = authResponse.UserName
+                        });
+
+                        return authResponse;
+                    }
+                }
+
+                return await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return new AuthResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<AuthResponseDto?> LoginAsync(LoginDto loginDto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("auth/login", loginDto);
+                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                if (authResponse is not null && authResponse.IsSuccess &&
+                    !string.IsNullOrEmpty(authResponse.AccessToken) &&
+                    !string.IsNullOrEmpty(authResponse.RefreshToken))
+                {
+                    SetTokens(new SessionData
+                    {
+                        AccessToken = authResponse.AccessToken,
+                        RefreshToken = authResponse.RefreshToken,
+                        UserId = authResponse.UserId,
+                        UserName = authResponse.UserName
+                    });
+
+                    return authResponse;
+                }
+
+                return await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return new AuthResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        private async Task<bool> RefreshTokensAsync()
+        {
+            if (string.IsNullOrEmpty(CurrentSessionData.RefreshToken)) return false;
+
+            var response = await _httpClient.PostAsJsonAsync("auth/refresh", new { RefreshToken = CurrentSessionData.RefreshToken });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                if (authResponse is not null)
+                {
+                    SetTokens(new SessionData
+                    {
+                        AccessToken = authResponse.AccessToken,
+                        RefreshToken = authResponse.RefreshToken,
+                        UserId = authResponse.UserId,
+                        UserName = authResponse.UserName
+                    });
+
+                    return true;
+                }
+            }
+
+            EndSession();
+            // что-то еще сделать?
+            return false;
+        }
+
+        // удаление токенов на клиенте
+        private void EndSession()
+        {
+            CurrentSessionData.AccessToken = null;
+            CurrentSessionData.RefreshToken = null;
+            CurrentSessionData.UserId = -1;
+            CurrentSessionData.UserName = null;
+
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+
+            try
+            {
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
+
+                if (File.Exists(filePath)) File.Delete(filePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+            }
+
+            AuthStateChanged?.Invoke();
+        }
+
+        public async Task Logout()
+        {
+            var refreshTokenToRevoke = CurrentSessionData.RefreshToken;
+
+            EndSession();
+
+            // отзыв токенов на сервере
+            if (!string.IsNullOrEmpty(refreshTokenToRevoke))
+            {
+                try
+                {
+                    var response = await _httpClient.PostAsJsonAsync("auth/logout", new { RefreshToken = refreshTokenToRevoke });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[ApiService]: {ex.Message}");
+                }
+            }
+        }
+        #endregion
+
+        public async Task<bool> CheckServerConnectionAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("health");
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<User> GetUserAsync()
+        {
+            return new User()
+            {
+                Id = CurrentSessionData.UserId
+            };
+        }
+    }
+}
