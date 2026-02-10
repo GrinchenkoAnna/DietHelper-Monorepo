@@ -14,10 +14,9 @@ namespace DietHelper.Services
 {
     public partial class ApiService
     {
-        #region Dishes
         public async Task<List<UserDish>?> GetUserDishesAsync()
         {
-            if (!IsAuthenticated) return null;
+            if (!IsAuthenticated) LoadSavedSession();
 
             var response = await _httpClient.GetAsync($"dishes");
 
@@ -36,7 +35,7 @@ namespace DietHelper.Services
 
         public async Task<UserDish?> GetUserDishAsync(int id)
         {
-            if (!IsAuthenticated) return null;
+            if (!IsAuthenticated) LoadSavedSession();
 
             var response = await _httpClient.GetAsync($"dishes/{id}");
 
@@ -55,7 +54,7 @@ namespace DietHelper.Services
 
         public async Task<UserDish?> AddUserDishAsync(UserDish newUserDish)
         {
-            if (!IsAuthenticated) return null;
+            if (!IsAuthenticated) LoadSavedSession();
 
             var json = JsonSerializer.Serialize(newUserDish, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -86,7 +85,7 @@ namespace DietHelper.Services
 
         public async Task DeleteDishAsync(int id)
         {
-            if (!IsAuthenticated) return;
+            if (!IsAuthenticated) LoadSavedSession();
 
             var response = await _httpClient.DeleteAsync($"dishes/{id}");
 
@@ -110,7 +109,7 @@ namespace DietHelper.Services
 
         public async Task<int?> AddUserDishIngredientAsync(int dishId, UserDishIngredient userDishIngredient)
         {
-            if (!IsAuthenticated) return null;
+            if (!IsAuthenticated) LoadSavedSession();
 
             var request = new
             {
@@ -143,7 +142,7 @@ namespace DietHelper.Services
 
         public async Task<bool> RemoveUserDishIngredientAsync(int dishId, int ingredientId)
         {
-            if (!IsAuthenticated) return false;
+            if (!IsAuthenticated) LoadSavedSession();
 
             var response = await _httpClient.DeleteAsync($"dishes/{dishId}/ingredients/{ingredientId}");
 
@@ -166,7 +165,5 @@ namespace DietHelper.Services
 
             return response.IsSuccessStatusCode;
         }
-        #endregion
-
     }
 }
