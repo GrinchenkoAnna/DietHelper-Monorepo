@@ -53,18 +53,18 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserDish>> GetUserDish(int id)
+        [HttpGet("{userDishId}")]
+        public async Task<ActionResult<UserDish>> GetUserDish(int userDishId)
         {
             try
             {
                 var userId = GetCurrentUser();
 
                 var dish = await _dbContext.UserDishes
-                    .Include(d => d.Ingredients)
+                    .Include(ud => ud.Ingredients)
                     .ThenInclude(i => i.UserProduct)
                     .ThenInclude(up => up.BaseProduct)
-                    .FirstOrDefaultAsync(d => d.Id == id && d.UserId == userId && !d.IsDeleted);
+                    .FirstOrDefaultAsync(ud => ud.Id == userDishId && ud.UserId == userId && !ud.IsDeleted);
 
                 if (dish == null) return NotFound();
                 return Ok(dish);

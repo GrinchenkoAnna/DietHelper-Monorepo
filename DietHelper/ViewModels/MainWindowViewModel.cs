@@ -21,7 +21,6 @@ namespace DietHelper.ViewModels
     public partial class MainWindowViewModel : ViewModelBase
     {
         private readonly ApiService _apiService;
-        //private readonly INavigationService _navigationService;
 
         private ObservableCollection<UserProductViewModel> _userProducts = [];
 
@@ -128,6 +127,8 @@ namespace DietHelper.ViewModels
             UpdateTotals();
         }
 
+        // загружается только 1 продукт или блюдо для примера и отладки
+        // после реализации истории и навигации по датам - загружать список продуктов или блюд за указанную дату
         private async Task LoadDataFromServerAsync()
         {
             try
@@ -163,12 +164,10 @@ namespace DietHelper.ViewModels
             }
         }
 
-        //public MainWindowViewModel() : this(new ApiService(), null) { }
 
         public MainWindowViewModel(ApiService apiService) : base(apiService)
         {
             _apiService = apiService;
-            //_navigationService = navigationService;
             InitializeAsync();
 
             int products = UserProducts.Count;

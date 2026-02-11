@@ -29,7 +29,6 @@ namespace DietHelper.Services
                     if (await RefreshTokensAsync())
                         response = await _httpClient.GetAsync($"products");
                 }
-                else return null;
 
                 var userProducts = await response.Content.ReadFromJsonAsync<List<UserProduct>>();
 
@@ -56,7 +55,6 @@ namespace DietHelper.Services
                     if (await RefreshTokensAsync())
                         response = await _httpClient.GetAsync($"products/base");
                 }
-                else return null;
 
                 var baseProducts = await response.Content.ReadFromJsonAsync<List<BaseProduct>>();
 
@@ -88,27 +86,12 @@ namespace DietHelper.Services
 
                 if (await RefreshTokensAsync())
                 {
-                    Debug.WriteLine($"[GetUserProductAsync] Token refreshed, retrying...");
-
                     response = await _httpClient.GetAsync($"products/{userProductId}");
-                    if (response.StatusCode == HttpStatusCode.Unauthorized)
-                    {
-                        Debug.WriteLine($"[GetUserProductAsync] Second request also 401!");
-                        return null;
-                    }
+                    if (response.StatusCode == HttpStatusCode.Unauthorized) return null;
                 }
             }
-            else
-            {
-                Debug.WriteLine($"[GetUserProductAsync] Refresh failed");
-                return null;
-            }
 
-            if (!response.IsSuccessStatusCode)
-            {
-                Debug.WriteLine($"[GetUserProductAsync] Final status: {response.StatusCode}");
-                return null;
-            }
+            if (!response.IsSuccessStatusCode) return null;
 
             var userProduct = await response.Content.ReadFromJsonAsync<UserProduct>();
 

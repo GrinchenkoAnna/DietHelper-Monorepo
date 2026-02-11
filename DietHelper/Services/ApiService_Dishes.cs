@@ -26,7 +26,6 @@ namespace DietHelper.Services
                 if (await RefreshTokensAsync())
                     response = await _httpClient.GetAsync($"dishes");
             }
-            else return null;
 
             var userDishes = await response.Content.ReadFromJsonAsync<List<UserDish>>();
 
@@ -45,7 +44,6 @@ namespace DietHelper.Services
                 if (await RefreshTokensAsync())
                     response = await _httpClient.GetAsync($"dishes/{id}");
             }
-            else return null;
 
             var UserDish = await response.Content.ReadFromJsonAsync<UserDish>();
 

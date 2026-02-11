@@ -53,16 +53,16 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserProduct>> GetUserProduct(int id)
+        [HttpGet("{userProductId}")]
+        public async Task<ActionResult<UserProduct>> GetUserProduct(int userProductId)
         {
             try
             {
                 var userId = GetCurrentUser();
 
                 var product = await _dbContext.UserProducts
-                    .Include(p => p.BaseProduct)
-                    .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId && !p.IsDeleted);
+                    .Include(up => up.BaseProduct)
+                    .FirstOrDefaultAsync(up => up.Id == userProductId && up.UserId == userId && !up.IsDeleted);
 
                 if (product == null) return NotFound();
                 return Ok(product);
