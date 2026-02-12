@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -65,7 +66,7 @@ namespace DietHelper.Services
         {
             if (string.IsNullOrEmpty(CurrentSessionData.AccessToken))
             {
-                Debug.WriteLine($"[ApiService]: token is null");
+                Debug.WriteLine($"[ApiService]: token is null, session not saved");
                 return;
             }
 
@@ -74,9 +75,12 @@ namespace DietHelper.Services
                 var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 var folderPath = Path.Combine(appDataPath, "DietHelper");
                 Directory.CreateDirectory(folderPath);
+                var filePath = Path.Combine(folderPath, "session.dat");
 
-                var filePath = Path.Combine(folderPath, "session.json");
                 var json = JsonSerializer.Serialize(CurrentSessionData);
+                var planeBytes = Encoding.UTF8.GetBytes(json);
+                var encryptedBytes = ProtectedData.Protect(planeBytes, null, DataProtectionScope.CurrentUser);
+
                 File.WriteAllText(filePath, json);
             }
             catch (Exception ex)
@@ -90,17 +94,51 @@ namespace DietHelper.Services
             try
             {
                 var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var filePath = Path.Combine(appDataPath, "DietHelper", "session.dat");
+
+                if (!File.Exists(filePath)) return;
+
+                var encryptedBytes = File.ReadAllBytes(filePath);
+                var plainBytes = ProtectedData.Unprotect(encryptedBytes, null, DataProtectionScope.CurrentUser);
+                var json = Encoding.UTF8.GetString(plainBytes);
+
+                var sessionData = JsonSerializer.Deserialize<SessionData>(json);
+                if (sessionData is not null &&
+                    !string.IsNullOrEmpty(sessionData.AccessToken) &&
+                    !string.IsNullOrEmpty(sessionData.RefreshToken))
+                    SetTokens(sessionData);
+
+            }
+            catch (CryptographicException)
+            {
+                Debug.WriteLine($"[ApiService]: Failed to decrypt session file");
+                LoadLegacySession();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+            }
+        }
+
+        private void LoadLegacySession()
+        {
+            try
+            {
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 var filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
 
-                if (File.Exists(filePath))
+                if (!File.Exists(filePath)) return;
+
+                var json = File.ReadAllText(filePath);
+                var sessionData = JsonSerializer.Deserialize<SessionData>(json);
+                if (sessionData is not null &&
+                    !string.IsNullOrEmpty(sessionData.AccessToken) &&
+                    !string.IsNullOrEmpty(sessionData.RefreshToken))
                 {
-                    var json = File.ReadAllText(filePath);
-                    var sessionData = JsonSerializer.Deserialize<SessionData>(json);
-                    if (sessionData is not null &&
-                        !string.IsNullOrEmpty(sessionData.AccessToken) &&
-                        !string.IsNullOrEmpty(sessionData.RefreshToken))
-                        SetTokens(sessionData);
+                    SetTokens(sessionData); //-> SaveSession с зашифрованной версией, старый файл не нужен
+                    File.Delete(filePath);
                 }
+                    
             }
             catch (Exception ex)
             {
@@ -227,8 +265,10 @@ namespace DietHelper.Services
             try
             {
                 var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                var filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
+                var filePath = Path.Combine(appDataPath, "DietHelper", "session.dat");
+                if (File.Exists(filePath)) File.Delete(filePath);
 
+                filePath = Path.Combine(appDataPath, "DietHelper", "session.json");
                 if (File.Exists(filePath)) File.Delete(filePath);
             }
             catch (Exception ex)
