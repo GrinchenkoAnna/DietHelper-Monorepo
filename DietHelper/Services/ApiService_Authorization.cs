@@ -81,7 +81,7 @@ namespace DietHelper.Services
                 var planeBytes = Encoding.UTF8.GetBytes(json);
                 var encryptedBytes = ProtectedData.Protect(planeBytes, null, DataProtectionScope.CurrentUser);
 
-                File.WriteAllText(filePath, json);
+                File.WriteAllBytes(filePath, encryptedBytes);
             }
             catch (Exception ex)
             {
