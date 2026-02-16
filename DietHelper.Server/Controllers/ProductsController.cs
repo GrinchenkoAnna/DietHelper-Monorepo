@@ -2,14 +2,17 @@
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.UserSecrets;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using static DietHelper.Server.Controllers.DishesController;
 
 namespace DietHelper.Server.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : Controller
@@ -21,11 +24,22 @@ namespace DietHelper.Server.Controllers
             _dbContext = dbContext;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<List<UserProduct>>> GetUserProducts(int userId)
+        private int GetCurrentUser()
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userClaim is null || !int.TryParse(userClaim, out int userId))
+                throw new UnauthorizedAccessException("User ID not found");
+
+            return userId;
+        }
+
+        [HttpGet()]
+        public async Task<ActionResult<List<UserProduct>>> GetUserProducts()
         {
             try
             {
+                var userId = GetCurrentUser();
+
                 var products = await _dbContext.UserProducts
                     .Include(p => p.BaseProduct)
                     .Where(p => p.UserId == userId && !p.IsDeleted)
@@ -39,14 +53,16 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        [HttpGet("{userId}/{id}")]
-        public async Task<ActionResult<UserProduct>> GetUserProduct(int userId, int id)
+        [HttpGet("{userProductId}")]
+        public async Task<ActionResult<UserProduct>> GetUserProduct(int userProductId)
         {
             try
             {
+                var userId = GetCurrentUser();
+
                 var product = await _dbContext.UserProducts
-                    .Include(p => p.BaseProduct)
-                    .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId && !p.IsDeleted);
+                    .Include(up => up.BaseProduct)
+                    .FirstOrDefaultAsync(up => up.Id == userProductId && up.UserId == userId && !up.IsDeleted);
 
                 if (product == null) return NotFound();
                 return Ok(product);
@@ -113,11 +129,13 @@ namespace DietHelper.Server.Controllers
             return Ok(baseProduct);
         }
 
-        [HttpDelete("{userId}/{userProductId}")]
-        public async Task<ActionResult> DeleteUserProduct(int userId, int userProductId)
+        [HttpDelete("{userProductId}")]
+        public async Task<ActionResult> DeleteUserProduct(int userProductId)
         {
             try
             {
+                var userId = GetCurrentUser();
+
                 var userProduct = await _dbContext.UserProducts
                 .FirstOrDefaultAsync(up => up.UserId == userId && up.Id == userProductId && !up.IsDeleted);
                 if (userProduct is null) return NotFound();

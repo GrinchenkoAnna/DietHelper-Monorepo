@@ -1,0 +1,111 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:DietHelper.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="DietHelper.Views.AuthView"
+             x:DataType="vm:AuthViewModel">
+
+    <Border Margin="20"
+            Padding="20"
+            Background="{DynamicResource ThemeBackgroundBrush}"
+            BorderBrush="#696969"
+            BorderThickness="1"
+            CornerRadius="8"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,45,45,Auto"
+              ColumnDefinitions="Auto,*"
+              MinWidth="400">
+
+            <!-- Переключатель -->
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                       VerticalAlignment="Center"
+                       Text="Новый пользователь?"
+                       Margin="0,0,10,10"/>
+            <ToggleSwitch Grid.Row="0" Grid.Column="1"
+                          VerticalAlignment="Center"
+                          IsChecked="{Binding IsNewUser, Mode=TwoWay}"
+                          OnContent="Да" OffContent="Нет"
+                          Margin="0,0,0,10"/>
+
+            <!-- Сообщение -->
+            <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
+                       VerticalAlignment="Center"
+                       Text="{Binding Message}"
+                       Foreground="Red"
+                       Margin="0,0,0,10"
+                       TextWrapping="Wrap"/>
+
+            <!-- Логин -->
+            <TextBlock Grid.Row="2" Grid.Column="0"
+                       VerticalAlignment="Center"
+                       Text="Логин:"
+                       Margin="0,5,0,5"/>
+            <TextBox Grid.Row="2" Grid.Column="1"
+                     Margin="0,5,0,5"
+                     VerticalAlignment="Center"
+                     Text="{Binding UserName}" 
+                     Watermark="Введите логин"/>
+
+            <!-- Пароль -->
+            <TextBlock Grid.Row="3" Grid.Column="0"
+                       Margin="0,5,0,5"
+                       VerticalAlignment="Center"
+                       Text="Пароль:"/>
+            <TextBox Grid.Row="3" Grid.Column="1"
+                     Margin="0,5,0,5"
+                     VerticalAlignment="Center"
+                     Text="{Binding Password}"
+                     Watermark="Введите пароль"
+                     PasswordChar="*"/>
+
+            <!-- Подтверждение пароля -->
+            <TextBlock Grid.Row="4" Grid.Column="0"
+                       Margin="0,5,0,5"
+                       VerticalAlignment="Center"
+                       Text="Подтвердите пароль:"
+                       IsVisible="{Binding IsNewUser}"/>
+            <TextBox Grid.Row="4" Grid.Column="1"
+                     Margin="0,5,0,5"
+                     VerticalAlignment="Center"
+                     Text="{Binding ConfirmPassword}"
+                     Watermark="Подтвердите пароль"
+                     PasswordChar="*"
+                     IsEnabled="{Binding IsNewUser}"
+                     IsVisible="{Binding IsNewUser}"/>
+
+            <!-- Кнопка "Зарегистрироваться" -->
+            <Button Grid.Row="5" Grid.ColumnSpan="2"
+                    Margin="0,5,0,5"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    Content="Зарегистрироваться"
+                    Command="{Binding RegisterCommand}"
+                    HorizontalContentAlignment="Center"
+                    IsEnabled="{Binding IsNewUser}"
+                    IsVisible="{Binding IsNewUser}" />
+
+            <!-- Кнопка "Войти" -->
+            <Button Grid.Row="5" Grid.ColumnSpan="2"
+                    Margin="0,5,0,5"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    Content="Войти"
+                    HorizontalContentAlignment="Center"
+                    Command="{Binding LoginCommand}"
+                    IsEnabled="{Binding !IsNewUser}"
+                    IsVisible="{Binding !IsNewUser}"/>
+
+            <!-- Очистить форму -->
+            <Button Grid.Row="6" Grid.ColumnSpan="2"
+                    Content="Очистить форму"
+                    Command="{Binding ResetCommand}"
+                    HorizontalContentAlignment="Center"
+                    Margin="0,5,0,0"
+                    HorizontalAlignment="Stretch"/>
+        </Grid>
+    </Border>
+</UserControl>

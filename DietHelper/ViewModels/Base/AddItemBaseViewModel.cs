@@ -30,9 +30,9 @@ namespace DietHelper.ViewModels.Base
         [ObservableProperty] private double manualFat;
         [ObservableProperty] private double manualCarbs;
         
-        protected abstract Task<TModel> CreateNewUserItem();
+        protected abstract Task<TModel?> CreateNewUserItem();
 
-        protected async Task<UserProduct> CreateProductAsync()
+        protected async Task<UserProduct?> CreateProductAsync()
         {
             var baseProduct = new BaseProduct()
             {
@@ -48,21 +48,25 @@ namespace DietHelper.ViewModels.Base
             };
             var createdBaseProduct = await _apiService.AddProductAsync(baseProduct);
 
-            var userProduct = new UserProduct()
+            if (createdBaseProduct is not null)
             {
-                UserId = GetCurrentUserId(),
-                BaseProductId = createdBaseProduct.Id,
-                CustomNutrition = new NutritionInfo()
+                var userProduct = new UserProduct()
                 {
-                    Calories = ManualCalories,
-                    Protein = ManualProtein,
-                    Fat = ManualFat,
-                    Carbs = ManualCarbs
-                },
-                IsDeleted = false
-            };
+                    UserId = await GetCurrentUserId(),
+                    BaseProductId = createdBaseProduct.Id,
+                    CustomNutrition = new NutritionInfo()
+                    {
+                        Calories = ManualCalories,
+                        Protein = ManualProtein,
+                        Fat = ManualFat,
+                        Carbs = ManualCarbs
+                    },
+                    IsDeleted = false
+                };
 
-            return await _apiService.AddUserProductAsync(userProduct);
+                return await _apiService.AddUserProductAsync(userProduct);
+            }
+            return null;
         }
 
         protected void ClearManualEntries()

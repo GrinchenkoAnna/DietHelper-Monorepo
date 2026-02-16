@@ -3,116 +3,15 @@
         xmlns:vm="using:DietHelper.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:products="clr-namespace:DietHelper.Views.Products"
-        xmlns:dishes="clr-namespace:DietHelper.Views.Dishes"
+        xmlns:views="using:DietHelper.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="DietHelper.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="DietHelper"
         x:Name="root"
+        x:DataType="vm:MainWindowViewModel"
         WindowStartupLocation="CenterScreen">
 
-	<Window.DataContext>
-		<vm:MainWindowViewModel />
-	</Window.DataContext>
+    <ContentControl x:Name="MainContent" />
 
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="*" />
-			<RowDefinition Height="Auto" />
-		</Grid.RowDefinitions>
-
-		<ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-			<StackPanel>
-				<ListBox ItemsSource="{Binding UserProducts}" Margin="0 10 0 10">
-					<ListBox.ItemTemplate>
-						<DataTemplate>
-							<StackPanel Orientation="Horizontal">
-								<products:UserProductView/>
-								<Button Content="-" Margin="10 0 0 0"
-										Command="{Binding $parent[Window].DataContext.RemoveUserProductCommand}"
-										CommandParameter="{Binding}"
-										VerticalAlignment="Top" 
-										HorizontalAlignment="Right"/>
-							</StackPanel>
-						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
-
-				<Button Content="+ продукт" Margin="5 0 5 5"
-						Command="{Binding $parent[Window].DataContext.AddUserProductCommand}"
-						VerticalAlignment="Bottom"
-						HorizontalAlignment="Stretch"
-						HorizontalContentAlignment="Center"/>
-
-				<ListBox ItemsSource="{Binding UserDishes}" Margin="0 10 0 10">
-					<ListBox.ItemTemplate>
-						<DataTemplate>
-							<StackPanel >
-								<StackPanel Orientation="Horizontal">
-									<dishes:UserDishView/>
-									<Button Content="-" Margin="10 0 0 0"
-											Command="{Binding $parent[Window].DataContext.RemoveDishCommand}"
-											CommandParameter="{Binding}"
-											VerticalAlignment="Top"
-											HorizontalAlignment="Right"/>
-								</StackPanel>
-								<Button Content="+ ингредиент" 
-										HorizontalContentAlignment="Center"
-										HorizontalAlignment="Stretch" 
-										Command="{Binding AddDishIngredientCommand}"
-										IsEnabled="{Binding CanAddIngredients}"
-										IsVisible="{Binding CanAddIngredients}"
-										Margin="8 5 -8 0"/>
-							</StackPanel>
-						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
-
-				<Button Content="+ блюдо" Margin="5 0 5 5"
-						Command="{Binding $parent[Window].DataContext.AddDishCommand}"
-						VerticalAlignment="Bottom"
-						HorizontalAlignment="Stretch"
-						HorizontalContentAlignment="Center"/>
-			</StackPanel>
-		</ScrollViewer>
-
-		<Border Grid.Row="1" Padding="10" Margin="10"
-               BorderThickness="1" BorderBrush="#D0D0D0">
-			<StackPanel Orientation="Horizontal">
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="К: " />
-					<TextBlock Text="{Binding TotalNutrition.FormattedCalories}"
-                              FontWeight="Bold" Width="100"/>
-				</StackPanel>
-
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Б: " />
-					<TextBlock Text="{Binding TotalNutrition.FormattedProtein}"
-                              FontWeight="Bold" Width="100"/>
-				</StackPanel>
-
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Ж: " />
-					<TextBlock Text="{Binding TotalNutrition.FormattedFat}"
-                              FontWeight="Bold" Width="100"/>
-				</StackPanel>
-
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="У: " />
-					<TextBlock Text="{Binding TotalNutrition.FormattedCarbs}"
-							   FontWeight="Bold"
-							   Width="100"/>
-				</StackPanel>
-
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Вес: " />
-					<TextBlock Text="{Binding FormattedTotalQuantity}"
-							   FontWeight="Bold"
-							   Width="100"/>
-				</StackPanel>
-			</StackPanel>
-		</Border>
-	</Grid>
 </Window>

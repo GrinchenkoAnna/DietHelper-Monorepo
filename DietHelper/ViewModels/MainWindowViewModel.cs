@@ -72,54 +72,6 @@ namespace DietHelper.ViewModels
             }
         }
 
-        //private ObservableCollection<ProductViewModel> _products = [];
-        //public ObservableCollection<ProductViewModel> Products
-        //{
-        //    get => _products;
-        //    set
-        //    {
-        //        if (_products is not null)
-        //        {
-        //            _products.CollectionChanged -= OnProductsCollectionChanged;
-        //            UnsubscribeFromProducts(_products);
-        //        }
-
-        //        SetProperty(ref _products, value);
-
-        //        if (_products is not null)
-        //        {
-        //            _products.CollectionChanged += OnProductsCollectionChanged; 
-        //            SubscribeToProducts(_products);
-        //        }
-
-        //        UpdateTotals();
-        //    }
-        //}
-
-        //private ObservableCollection<DishViewModel> _dishes = [];
-        //public ObservableCollection<DishViewModel> Dishes
-        //{
-        //    get => _dishes;
-        //    set
-        //    {
-        //        if (_dishes is not null)
-        //        {
-        //            _dishes.CollectionChanged -= OnDishesCollectionChanged;
-        //            UnsubscribeFromDishes(_dishes);
-        //        }
-
-        //        SetProperty(ref _dishes, value);
-
-        //        if (_dishes is not null)
-        //        {
-        //            _dishes.CollectionChanged += OnDishesCollectionChanged;
-        //            SubscribeToDishes(_dishes);
-        //        }
-
-        //        UpdateTotals();
-        //    }
-        //}
-
         private void SubscribeToUserProducts(IEnumerable<UserProductViewModel> userProducts)
         {
             foreach (var userProduct in userProducts)
@@ -175,7 +127,9 @@ namespace DietHelper.ViewModels
             UpdateTotals();
         }
 
-        private async Task LoadMocksFromServerAsync()
+        // загружается только 1 продукт или блюдо для примера и отладки
+        // после реализации истории и навигации по датам - загружать список продуктов или блюд за указанную дату
+        private async Task LoadDataFromServerAsync()
         {
             try
             {
@@ -194,7 +148,7 @@ namespace DietHelper.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка загрузки данных с сервера: {ex.Message}");
+                Debug.WriteLine($"[MainWindowWiewModel]: {ex.Message}");
             }
         }
 
@@ -202,7 +156,7 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                await LoadMocksFromServerAsync();
+                await LoadDataFromServerAsync();
             }
             catch (Exception ex)
             {
@@ -210,12 +164,11 @@ namespace DietHelper.ViewModels
             }
         }
 
-        public MainWindowViewModel() : this(new ApiService()) { }
 
         public MainWindowViewModel(ApiService apiService) : base(apiService)
         {
             _apiService = apiService;
-            InitializeAsync(); //для отладки
+            InitializeAsync();
 
             int products = UserProducts.Count;
             int Dishes = UserDishes.Count;
@@ -297,6 +250,19 @@ namespace DietHelper.ViewModels
         private void RemoveDish(UserDishViewModel userDish)
         {
             UserDishes.Remove(userDish);
+        }
+
+        [RelayCommand]
+        private void Logout()
+        {
+            try
+            {
+                _apiService.Logout();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindowViewModel]: {ex.Message}");
+            }
         }
     }
 }

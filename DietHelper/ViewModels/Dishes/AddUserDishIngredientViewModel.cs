@@ -32,25 +32,31 @@ namespace DietHelper.ViewModels.Dishes
         {
             var userProducts = await _apiService.GetUserProductsAsync();
 
-            foreach (var userProduct in userProducts)
+            if (userProducts is not null)
             {
-                if (userProduct.Id > 0)
+                foreach (var userProduct in userProducts)
                 {
-                    UserSearchResults.Add(new UserProductViewModel(userProduct));
-                    AllUserItems.Add(new UserProductViewModel(userProduct));
+                    if (userProduct.Id > 0)
+                    {
+                        UserSearchResults.Add(new UserProductViewModel(userProduct));
+                        AllUserItems.Add(new UserProductViewModel(userProduct));
+                    }
                 }
             }
 
             var baseProducts = await _apiService.GetBaseProductsAsync();
 
-            foreach (var baseProduct in baseProducts)
+            if (baseProducts is not null)
             {
-                if (baseProduct.Id > 0)
+                foreach (var baseProduct in baseProducts)
                 {
-                    BaseSearchResults.Add(new BaseProductViewModel(baseProduct));
-                    AllBaseItems.Add(new BaseProductViewModel(baseProduct));
+                    if (baseProduct.Id > 0)
+                    {
+                        BaseSearchResults.Add(new BaseProductViewModel(baseProduct));
+                        AllBaseItems.Add(new BaseProductViewModel(baseProduct));
+                    }
                 }
-            }
+            }            
         }
 
         protected override async Task DoSearch(string? term)
@@ -95,7 +101,7 @@ namespace DietHelper.ViewModels.Dishes
             IsBusy = false;
         }
 
-        protected override async Task<UserProduct> CreateNewUserItem()
+        protected override async Task<UserProduct?> CreateNewUserItem()
         {
             return await CreateProductAsync();
         }
@@ -130,7 +136,7 @@ namespace DietHelper.ViewModels.Dishes
             {
                 var userProduct = new UserProduct()
                 {
-                    UserId = GetCurrentUserId(),
+                    UserId = await GetCurrentUserId(),
                     BaseProductId = SelectedBaseItem.Id,
                     CustomNutrition = new NutritionInfo()
                     {
@@ -141,23 +147,26 @@ namespace DietHelper.ViewModels.Dishes
                     }
                 };
                 var createdUserProduct = await _apiService.AddUserProductAsync(userProduct);
-                var userProductViewModel = new UserProductViewModel(createdUserProduct);
-
-                var userDishIngredient = new UserDishIngredientViewModel()
+                if (createdUserProduct is not null)
                 {
-                    UserProductId = createdUserProduct.Id,
-                    Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
-                    Quantity = SelectedBaseItem.Quantity,
-                    CurrentNutrition = new NutritionInfo()
-                    {
-                        Calories = SelectedBaseItem.Calories * (Quantity / 100),
-                        Protein = SelectedBaseItem.Protein * (Quantity / 100),
-                        Fat = SelectedBaseItem.Fat * (Quantity / 100),
-                        Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
-                    }
-                };
+                    var userProductViewModel = new UserProductViewModel(createdUserProduct);
 
-                WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userDishIngredient));
+                    var userDishIngredient = new UserDishIngredientViewModel()
+                    {
+                        UserProductId = createdUserProduct.Id,
+                        Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
+                        Quantity = SelectedBaseItem.Quantity,
+                        CurrentNutrition = new NutritionInfo()
+                        {
+                            Calories = SelectedBaseItem.Calories * (Quantity / 100),
+                            Protein = SelectedBaseItem.Protein * (Quantity / 100),
+                            Fat = SelectedBaseItem.Fat * (Quantity / 100),
+                            Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
+                        }
+                    };
+
+                    WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userDishIngredient));
+                }                
             }
             catch (Exception ex)
             {
@@ -171,23 +180,27 @@ namespace DietHelper.ViewModels.Dishes
 
             var newProduct = await CreateNewUserItem();
 
-            var userIngredient = new UserDishIngredientViewModel
+            if (newProduct is not null)
             {
-                UserProductId = newProduct.Id,
-                Name = ManualName!,
-                Quantity = Quantity,
-                CurrentNutrition = new NutritionInfo()
+                var userIngredient = new UserDishIngredientViewModel
                 {
-                    Calories = ManualCalories * (Quantity / 100),
-                    Protein = ManualProtein * (Quantity / 100),
-                    Fat = ManualFat * (Quantity / 100),
-                    Carbs = ManualCarbs * (Quantity / 100)
-                }
-            };
+                    UserProductId = newProduct.Id,
+                    Name = ManualName!,
+                    Quantity = Quantity,
+                    CurrentNutrition = new NutritionInfo()
+                    {
+                        Calories = ManualCalories * (Quantity / 100),
+                        Protein = ManualProtein * (Quantity / 100),
+                        Fat = ManualFat * (Quantity / 100),
+                        Carbs = ManualCarbs * (Quantity / 100)
+                    }
+                };
 
+                ClearManualEntries();
+
+                WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userIngredient));
+            }
             ClearManualEntries();
-
-            WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userIngredient));
         }
 
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)

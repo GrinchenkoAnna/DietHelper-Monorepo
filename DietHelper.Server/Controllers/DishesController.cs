@@ -1,12 +1,16 @@
 ﻿using DietHelper.Common.Data;
+using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using System.Security.Claims;
 
 namespace DietHelper.Server.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class DishesController : Controller
@@ -18,11 +22,22 @@ namespace DietHelper.Server.Controllers
             _dbContext = dbContext;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<List<UserDish>>> GetUserDishes(int userId)
+        private int GetCurrentUser()
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userClaim is null || !int.TryParse(userClaim, out int userId))
+                throw new UnauthorizedAccessException("User ID not found");
+
+            return userId;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<UserDish>>> GetUserDishes()
         {
             try
             {
+                var userId = GetCurrentUser();
+
                 var dishes = await _dbContext.UserDishes
                     .Include(d => d.Ingredients)
                     .ThenInclude(i => i.UserProduct)
@@ -38,16 +53,18 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        [HttpGet("{userId}/{id}")]
-        public async Task<ActionResult<UserDish>> GetUserDish(int userId, int id)
+        [HttpGet("{userDishId}")]
+        public async Task<ActionResult<UserDish>> GetUserDish(int userDishId)
         {
             try
             {
+                var userId = GetCurrentUser();
+
                 var dish = await _dbContext.UserDishes
-                    .Include(d => d.Ingredients)
+                    .Include(ud => ud.Ingredients)
                     .ThenInclude(i => i.UserProduct)
                     .ThenInclude(up => up.BaseProduct)
-                    .FirstOrDefaultAsync(d => d.Id == id && d.UserId == userId && !d.IsDeleted);
+                    .FirstOrDefaultAsync(ud => ud.Id == userDishId && ud.UserId == userId && !ud.IsDeleted);
 
                 if (dish == null) return NotFound();
                 return Ok(dish);
@@ -64,35 +81,45 @@ namespace DietHelper.Server.Controllers
             public double Quantity { get; set; }
         }
 
-        [HttpPost("{userId}")]
-        public async Task<ActionResult> AddUserDish(int userId, [FromBody] UserDish userDish)
+        [HttpPost]
+        public async Task<ActionResult> AddUserDish([FromBody] UserDish userDish)
         {
-            if (userDish == null) return BadRequest("Request is null");
+            try
+            {
+                var userId = GetCurrentUser();
 
-            userDish.UserId = userId;
+                if (userDish == null) return BadRequest("Request is null");
 
-            if (string.IsNullOrWhiteSpace(userDish.Name))
-                return BadRequest("Dish name is required");
+                userDish.UserId = userId;
 
-            userDish.Ingredients ??= new List<UserDishIngredient>();
-            userDish.IsReadyDish = userDish.IsReadyDish;
-            userDish.IsDeleted = false;
+                if (string.IsNullOrWhiteSpace(userDish.Name))
+                    return BadRequest("Dish name is required");
 
-            _dbContext.UserDishes.Add(userDish);
-            await _dbContext.SaveChangesAsync();
+                userDish.Ingredients ??= new List<UserDishIngredient>();
+                userDish.IsReadyDish = userDish.IsReadyDish;
+                userDish.IsDeleted = false;
 
-            return Ok(userDish);
+                _dbContext.UserDishes.Add(userDish);
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(userDish);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"[DishesController]: {ex.Message}");
+            }           
         }
 
 
-        [HttpPost("{userId}/{dishId}/ingredients")]
+        [HttpPost("{dishId}/ingredients")]
         public async Task<ActionResult> AddUserDishIngredient(
-            int userId,
             int dishId,
             [FromBody] AddIngredientRequest request)
         {
             try
             {
+                var userId = GetCurrentUser();
+
                 var userDish = await _dbContext.UserDishes
                     .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dishId);
                 if (userDish is null)
@@ -146,11 +173,13 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        [HttpDelete("{userId}/{dishId}")]
-        public async Task<ActionResult> RemoveUserDish(int userId, int dishId)
+        [HttpDelete("{dishId}")]
+        public async Task<ActionResult> RemoveUserDish(int dishId)
         {
             try
             {
+                int userId = GetCurrentUser();
+
                 var userDish = await _dbContext.UserDishes
                     .Include(d => d.Ingredients)
                     .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dishId && !d.IsDeleted);
@@ -170,11 +199,13 @@ namespace DietHelper.Server.Controllers
             }
         }
 
-        [HttpDelete("{userId}/{dishId}/ingredients/{ingredientId}")]
-        public async Task<ActionResult> RemoveUserDishIngredient(int userId, int dishId, int ingredientId)
+        [HttpDelete("{dishId}/ingredients/{ingredientId}")]
+        public async Task<ActionResult> RemoveUserDishIngredient(int dishId, int ingredientId)
         {
             try
             {
+                var userId = GetCurrentUser();
+
                 var userDishIngredient = await _dbContext.UserDishIngredients
                     .FirstOrDefaultAsync(udi => udi.UserDishId == dishId && udi.Id == ingredientId && !udi.IsDeleted);
 

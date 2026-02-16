@@ -77,14 +77,17 @@ namespace DietHelper.ViewModels.Dishes
         {
             var dishes = await _apiService.GetUserDishesAsync();
 
-            foreach (var dish in dishes)
+            if (dishes is not null)
             {
-                if (dish.Id > 0)
+                foreach (var dish in dishes)
                 {
-                    UserSearchResults.Add(new UserDishViewModel(dish, _nutritionCalculator, _apiService));
-                    AllUserItems.Add(new UserDishViewModel(dish, _nutritionCalculator, _apiService));
+                    if (dish.Id > 0)
+                    {
+                        UserSearchResults.Add(new UserDishViewModel(dish, _nutritionCalculator, _apiService));
+                        AllUserItems.Add(new UserDishViewModel(dish, _nutritionCalculator, _apiService));
+                    }
                 }
-            }
+            }            
         }
 
         protected override void AddUserItem()
@@ -95,7 +98,7 @@ namespace DietHelper.ViewModels.Dishes
             }
         }
 
-        protected override async Task<UserDish> CreateNewUserItem()
+        protected override async Task<UserDish?> CreateNewUserItem()
         {
             User user = await GetCurrentUser();
 
@@ -123,9 +126,12 @@ namespace DietHelper.ViewModels.Dishes
 
             var newUserDish = await CreateNewUserItem();
 
-            ClearManualEntries();
+            if (newUserDish is not null)
+            {
+                ClearManualEntries();
 
-            WeakReferenceMessenger.Default.Send(new AddUserDishClosedMessage(new UserDishViewModel(newUserDish, _nutritionCalculator, _apiService)));
+                WeakReferenceMessenger.Default.Send(new AddUserDishClosedMessage(new UserDishViewModel(newUserDish, _nutritionCalculator, _apiService)));
+            }            
         }
 
         protected override async void DeleteItemFromDatabase(UserDishViewModel userDishViewModel)

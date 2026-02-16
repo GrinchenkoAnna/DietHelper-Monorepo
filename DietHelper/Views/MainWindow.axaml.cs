@@ -1,6 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Models.Messages;
+using DietHelper.Services;
 using DietHelper.ViewModels;
 using DietHelper.ViewModels.Dishes;
 using DietHelper.ViewModels.Products;
@@ -8,6 +10,7 @@ using DietHelper.Views.Dishes;
 using DietHelper.Views.Products;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DietHelper.Views
@@ -15,26 +18,115 @@ namespace DietHelper.Views
     public partial class MainWindow : Window
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly ApiService _apiService;
 
-        public MainWindow()
+        public MainWindow(IServiceProvider serviceProvider)
         {
             InitializeComponent();
 
-            WeakReferenceMessenger.Default.Register<MainWindow, AddBaseProductMessage>(this, static (w, m) =>
-            {
-                var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
+            _serviceProvider = serviceProvider;
+            _apiService = serviceProvider.GetRequiredService<ApiService>();
 
-                var dialog = new AddProductWindow
+            Debug.WriteLine($"[MainWindow] Constructor called. ApiService hash: {_apiService.GetHashCode()}");
+
+            _apiService.AuthStateChanged -= OnAuthStateChanged;
+            _apiService.AuthStateChanged += OnAuthStateChanged;
+
+            NavigateBaseOnAuthState();
+        }
+
+        private async void OnAuthStateChanged()
+        {
+            try
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    DataContext = viewModel
-                };
-                m.Reply(dialog.ShowDialog<BaseProductViewModel?>(w));
-            });
+                    try
+                    {
+                        NavigateBaseOnAuthState();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[MainWindow] ERROR in NavigateBaseOnAuthState: {ex.Message}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindow] ERROR in OnAuthStateChanged: {ex.Message}");
+            }
+        }
+
+        private void NavigateBaseOnAuthState()
+        {
+            try
+            {
+                var currentContentType = MainContent.Content?.GetType().Name ?? "null";
+
+                if (_apiService.IsAuthenticated)
+                {
+                    if (currentContentType == "MainView") return;
+
+                    WeakReferenceMessenger.Default.UnregisterAll(this);
+                    MainContent.Content = null;
+
+                    var mainView = new MainView();
+                    var viewModel = _serviceProvider.GetRequiredService<MainWindowViewModel>();
+
+                    if (viewModel == null) return;
+
+                    mainView.DataContext = viewModel;
+                    MainContent.Content = mainView;
+
+                    SetupMessaging();
+                }
+                else
+                {
+                    if (currentContentType == "AuthView") return;
+                    MainContent.Content = null;
+
+                    var authView = new AuthView();
+                    var viewModel = _serviceProvider.GetRequiredService<AuthViewModel>();
+
+                    if (viewModel == null) return;
+
+                    authView.DataContext = viewModel;
+                    MainContent.Content = authView;
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    var authView = new AuthView();
+                    var viewModel = _serviceProvider.GetRequiredService<AuthViewModel>();
+                    authView.DataContext = viewModel;
+                    MainContent.Content = authView;
+                }
+                catch (Exception inEx)
+                {
+                    Debug.WriteLine($"[MainWindow]: {inEx.Message}");
+                }
+            }
+        }
+
+        private void SetupMessaging()
+        {
+            WeakReferenceMessenger.Default.Register<MainWindow, AddBaseProductMessage>(this, static (w, m) =>
+             {
+                 var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
+
+                 var dialog = new AddProductWindow
+                 {
+                     DataContext = viewModel
+                 };
+                 m.Reply(dialog.ShowDialog<BaseProductViewModel?>(w));
+             });
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddUserProductMessage>(this, static (w, m) =>
             {
                 var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
-                
+
                 var dialog = new AddProductWindow
                 {
                     DataContext = viewModel
@@ -70,7 +162,7 @@ namespace DietHelper.Views
                 {
                     var userProductToRemove = mainWindowViewModel.UserProducts.FirstOrDefault(p => p.Id == m.Value);
 
-                    if (userProductToRemove is not null) 
+                    if (userProductToRemove is not null)
                         mainWindowViewModel.UserProducts.Remove(userProductToRemove);
 
                     foreach (var userDish in mainWindowViewModel.UserDishes)
@@ -89,10 +181,19 @@ namespace DietHelper.Views
                 {
                     var userDishToRemove = mainWindowViewModel.UserDishes.FirstOrDefault(d => d.Id == m.Value);
 
-                    if (userDishToRemove is not null) 
+                    if (userDishToRemove is not null)
                         mainWindowViewModel.UserDishes.Remove(userDishToRemove);
                 }
             });
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            _apiService.AuthStateChanged -= OnAuthStateChanged;
+
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
     }
 }

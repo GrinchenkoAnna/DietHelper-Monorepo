@@ -13,21 +13,15 @@ namespace DietHelper.ViewModels
             _apiService = apiService;
         }
 
-        protected virtual int GetCurrentUserId()
+        protected virtual async Task<int> GetCurrentUserId()
         {
-            //временная заглушка
-            return 1;
+            var user = await _apiService.GetUserAsync();
+            return user.Id;
         }
 
         protected virtual async Task<User> GetCurrentUser()
         {
-            //return await _apiService.GetCurrentUser();
-            //временная заглушка
-            return new User() 
-            { 
-                Id = GetCurrentUserId(), 
-                Name = "System User" 
-            };
+            return await _apiService.GetUserAsync();
         }
     }
 }
