@@ -1,10 +1,7 @@
 ﻿using DietHelper.Common.Models.Products;
-using DietHelper.Data;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -21,15 +18,7 @@ namespace DietHelper.Services
 
             try
             {
-                var response = await _httpClient.GetAsync($"products");
-
-                if (response.StatusCode == HttpStatusCode.NotFound) return null;
-                else if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    if (await RefreshTokensAsync())
-                        response = await _httpClient.GetAsync($"products");
-                }
-
+                var response = await SendRequestAsync(() => _httpClient.GetAsync($"products"), true);
                 var userProducts = await response.Content.ReadFromJsonAsync<List<UserProduct>>();
 
                 return userProducts;
@@ -47,15 +36,7 @@ namespace DietHelper.Services
 
             try
             {
-                var response = await _httpClient.GetAsync($"products/base");
-
-                if (response.StatusCode == HttpStatusCode.NotFound) return null;
-                else if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    if (await RefreshTokensAsync())
-                        response = await _httpClient.GetAsync($"products/base");
-                }
-
+                var response = await SendRequestAsync(() => _httpClient.GetAsync($"products/base"), true);
                 var baseProducts = await response.Content.ReadFromJsonAsync<List<BaseProduct>>();
 
                 return baseProducts;
@@ -71,31 +52,18 @@ namespace DietHelper.Services
         {
             if (!IsAuthenticated) LoadSavedSession();
 
-            Debug.WriteLine($"[GetUserProductAsync] IsAuthenticated: {IsAuthenticated}");
-            Debug.WriteLine($"[GetUserProductAsync] Token exists: {!string.IsNullOrEmpty(CurrentSessionData.AccessToken)}");
-            Debug.WriteLine($"[GetUserProductAsync] Token: {CurrentSessionData.AccessToken}");
-
-            var response = await _httpClient.GetAsync($"products/{userProductId}");
-
-            Debug.WriteLine($"[GetUserProductAsync] Response Status: {response.StatusCode}");
-
-            if (response.StatusCode == HttpStatusCode.NotFound) return null;
-            else if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                Debug.WriteLine($"[GetUserProductAsync] First request 401, refreshing token...");
+                var response = await SendRequestAsync(() => _httpClient.GetAsync($"products/{userProductId}"), true);
+                var userProduct = await response.Content.ReadFromJsonAsync<UserProduct>();
 
-                if (await RefreshTokensAsync())
-                {
-                    response = await _httpClient.GetAsync($"products/{userProductId}");
-                    if (response.StatusCode == HttpStatusCode.Unauthorized) return null;
-                }
+                return userProduct;
             }
-
-            if (!response.IsSuccessStatusCode) return null;
-
-            var userProduct = await response.Content.ReadFromJsonAsync<UserProduct>();
-
-            return userProduct;
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return null;
+            }
         }
 
         public async Task<UserProduct> AddUserProductAsync(UserProduct newUserProduct)
@@ -105,95 +73,49 @@ namespace DietHelper.Services
             var json = JsonSerializer.Serialize(newUserProduct, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("products/user", content);
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                if (await RefreshTokensAsync())
-                    response = await _httpClient.PostAsync("products/user", content);
+                var response = await SendRequestAsync(() => _httpClient.PostAsync($"products/user", content), false);
+                return await response!.Content.ReadFromJsonAsync<UserProduct>();
             }
-
-            if (!response.IsSuccessStatusCode)
+            catch (Exception ex)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Server error response: {errorContent}");
-                Debug.WriteLine($"Status: {response.StatusCode}");
-
-                throw new HttpRequestException(
-                    $"Server returned {response.StatusCode}: {errorContent}",
-                    null, response.StatusCode);
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                throw; // обработать далее?
             }
-
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadFromJsonAsync<UserProduct>();
         }
 
         public async Task<BaseProduct> AddProductAsync<BaseProduct>(BaseProduct newBaseProduct)
         {
-            if (!IsAuthenticated)
-            {
-                LoadSavedSession();
-                if (!IsAuthenticated)
-                    throw new UnauthorizedAccessException("User not authenticated");
-            }
+            if (!IsAuthenticated) LoadSavedSession();
 
             var json = JsonSerializer.Serialize(newBaseProduct, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("products/base", content);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Server error response: {errorContent}");
-                Debug.WriteLine($"Status: {response.StatusCode}");
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    Debug.WriteLine("Token expired or invalid. Attempting refresh...");
-                    if (await RefreshTokensAsync())
-                    {
-                        if (!string.IsNullOrEmpty(CurrentSessionData.AccessToken))
-                            _httpClient.DefaultRequestHeaders.Authorization =
-                                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", CurrentSessionData.AccessToken);
-                        response = await _httpClient.PostAsync("products/base", content);
-                    }
-                    else throw new UnauthorizedAccessException("Authentication failed");
-                }
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new HttpRequestException(
-                        $"Server returned {response.StatusCode}: {errorContent}",
-                        null, response.StatusCode);
-                }
+                var response = await SendRequestAsync(() => _httpClient.PostAsync("products/base", content), false);
+                return await response!.Content.ReadFromJsonAsync<BaseProduct>();
             }
-
-            return await response.Content.ReadFromJsonAsync<BaseProduct>();
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                throw; // обработать далее?
+            }
         }
 
         public async Task DeleteUserProductAsync(int id)
         {
             if (!IsAuthenticated) LoadSavedSession();
 
-            var response = await _httpClient.DeleteAsync($"products/{id}");
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                if (await RefreshTokensAsync())
-                    response = await _httpClient.DeleteAsync($"products/{id}");
+                await SendRequestAsync(() => _httpClient.DeleteAsync($"products/{id}"), false);
             }
-
-            if (!response.IsSuccessStatusCode)
+            catch (Exception ex)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Server error response: {errorContent}");
-                Debug.WriteLine($"Status: {response.StatusCode}");
-
-                throw new HttpRequestException(
-                    $"Server returned {response.StatusCode}: {errorContent}",
-                    null, response.StatusCode);
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                throw; // обработать далее?
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using DietHelper.Common.Models.Dishes;
+using DietHelper.Common.Models.Products;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -18,36 +20,36 @@ namespace DietHelper.Services
         {
             if (!IsAuthenticated) LoadSavedSession();
 
-            var response = await _httpClient.GetAsync($"dishes");
-
-            if (response.StatusCode == HttpStatusCode.NotFound) return null;
-            else if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                if (await RefreshTokensAsync())
-                    response = await _httpClient.GetAsync($"dishes");
+                var response = await SendRequestAsync(() => _httpClient.GetAsync($"dishes"), true);
+                var userDishes = await response.Content.ReadFromJsonAsync<List<UserDish>>();
+
+                return userDishes;
             }
-
-            var userDishes = await response.Content.ReadFromJsonAsync<List<UserDish>>();
-
-            return userDishes;
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return null;
+            }            
         }
 
-        public async Task<UserDish?> GetUserDishAsync(int id)
+        public async Task<UserDish?> GetUserDishAsync(int userDishId)
         {
             if (!IsAuthenticated) LoadSavedSession();
 
-            var response = await _httpClient.GetAsync($"dishes/{id}");
-
-            if (response.StatusCode == HttpStatusCode.NotFound) return null;
-            else if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                if (await RefreshTokensAsync())
-                    response = await _httpClient.GetAsync($"dishes/{id}");
+                var response = await SendRequestAsync(() => _httpClient.GetAsync($"dishes/{userDishId}"), true);
+                var UserDish = await response.Content.ReadFromJsonAsync<UserDish>();
+
+                return UserDish;
             }
-
-            var UserDish = await response.Content.ReadFromJsonAsync<UserDish>();
-
-            return UserDish;
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return null;
+            }            
         }
 
         public async Task<UserDish?> AddUserDishAsync(UserDish newUserDish)
@@ -57,51 +59,30 @@ namespace DietHelper.Services
             var json = JsonSerializer.Serialize(newUserDish, new JsonSerializerOptions { WriteIndented = true });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("dishes", content);
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                if (await RefreshTokensAsync())
-                    response = await _httpClient.PostAsync("dishes", content);
+                var response = await SendRequestAsync(() => _httpClient.PostAsync("dishes", content), false);
+                return await response!.Content.ReadFromJsonAsync<UserDish>();
             }
-
-            if (!response.IsSuccessStatusCode)
+            catch (Exception ex)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Server error response: {errorContent}");
-                Debug.WriteLine($"Status: {response.StatusCode}");
-
-                throw new HttpRequestException(
-                    $"Server returned {response.StatusCode}: {errorContent}",
-                    null, response.StatusCode);
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                throw; // обработать далее?
             }
-
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadFromJsonAsync<UserDish>();
         }
 
         public async Task DeleteDishAsync(int id)
         {
             if (!IsAuthenticated) LoadSavedSession();
 
-            var response = await _httpClient.DeleteAsync($"dishes/{id}");
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                if (await RefreshTokensAsync())
-                    response = await _httpClient.DeleteAsync($"dishes/{id}");
+                await SendRequestAsync(() => _httpClient.DeleteAsync($"dishes/{id}"), false);
             }
-
-            if (!response.IsSuccessStatusCode)
+            catch (Exception ex)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Server error response: {errorContent}");
-                Debug.WriteLine($"Status: {response.StatusCode}");
-
-                throw new HttpRequestException(
-                    $"Server returned {response.StatusCode}: {errorContent}",
-                    null, response.StatusCode);
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                throw; // обработать далее?
             }
         }
 
@@ -114,54 +95,38 @@ namespace DietHelper.Services
                 UserProductId = userDishIngredient.UserProductId,
                 Quantity = userDishIngredient.Quantity
             };
-
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(
-                $"dishes/{dishId}/ingredients",
-                content);
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                if (await RefreshTokensAsync())
-                    response = await _httpClient.PostAsync($"dishes/{dishId}/ingredients",
-                                                            content);
-            }
+                var response = await SendRequestAsync(() => _httpClient.PostAsync($"dishes/{dishId}/ingredients", content), false);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (int.TryParse(responseContent, out var ingredientId))
-                    return ingredientId;
+                var responseContent = await response!.Content.ReadAsStringAsync();
+                int.TryParse(responseContent, out int ingredientId);
+                return ingredientId;
             }
-            return null;
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                throw; // обработать далее?
+            }            
         }
 
         public async Task<bool> RemoveUserDishIngredientAsync(int dishId, int ingredientId)
         {
             if (!IsAuthenticated) LoadSavedSession();
 
-            var response = await _httpClient.DeleteAsync($"dishes/{dishId}/ingredients/{ingredientId}");
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            try
             {
-                if (await RefreshTokensAsync())
-                    response = await _httpClient.DeleteAsync($"dishes/{dishId}/ingredients/{ingredientId}");
+                var response = await SendRequestAsync(() => _httpClient.DeleteAsync($"dishes/{dishId}/ingredients/{ingredientId}"), false);
+                return response!.IsSuccessStatusCode;
             }
-
-            if (!response.IsSuccessStatusCode)
+            catch (Exception ex)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Server error response: {errorContent}");
-                Debug.WriteLine($"Status: {response.StatusCode}");
-
-                throw new HttpRequestException(
-                    $"Server returned {response.StatusCode}: {errorContent}",
-                    null, response.StatusCode);
-            }
-
-            return response.IsSuccessStatusCode;
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                throw; // обработать далее?
+            }            
         }
     }
 }

@@ -225,31 +225,41 @@ namespace DietHelper.Services
                 return false;
             }
 
-            var response = await _httpClient.PostAsJsonAsync("auth/refresh", new { RefreshToken = CurrentSessionData.RefreshToken });
+            _httpClient.DefaultRequestHeaders.Authorization = null;
 
-            if (response.IsSuccessStatusCode)
+            try
             {
-                Debug.WriteLine("[RefreshTokensAsync] Refresh successful");
+                var response = await _httpClient.PostAsJsonAsync("auth/refresh", new { RefreshToken = CurrentSessionData.RefreshToken });
 
-                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-                if (authResponse is not null)
+                if (response.IsSuccessStatusCode)
                 {
-                    SetTokens(new SessionData
+                    Debug.WriteLine("[RefreshTokensAsync] Refresh successful");
+
+                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                    if (authResponse is not null)
                     {
-                        AccessToken = authResponse.AccessToken,
-                        RefreshToken = authResponse.RefreshToken,
-                        UserId = authResponse.UserId,
-                        UserName = authResponse.UserName
-                    });
+                        SetTokens(new SessionData
+                        {
+                            AccessToken = authResponse.AccessToken,
+                            RefreshToken = authResponse.RefreshToken,
+                            UserId = authResponse.UserId,
+                            UserName = authResponse.UserName
+                        });
 
-                    return true;
+                        return true;
+                    }
                 }
-            }
 
-            Debug.WriteLine($"[RefreshTokensAsync] Refresh failed: {response.StatusCode}");
-            EndSession();
-            // что-то еще сделать?
-            return false;
+                Debug.WriteLine($"[RefreshTokensAsync] Refresh failed: {response.StatusCode}");
+                EndSession();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[RefreshTokensAsync]: {ex.Message}");
+                EndSession();
+                return false;
+            }
         }
 
         // удаление токенов на клиенте
