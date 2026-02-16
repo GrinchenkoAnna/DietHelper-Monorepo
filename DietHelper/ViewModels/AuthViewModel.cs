@@ -15,7 +15,6 @@ namespace DietHelper.ViewModels
     public partial class AuthViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
-        //private readonly INavigationService _navigationService;
 
         [ObservableProperty]
         private string userName = string.Empty;
