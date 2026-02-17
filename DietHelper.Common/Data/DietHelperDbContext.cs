@@ -1,5 +1,6 @@
 ﻿using DietHelper.Common.Models;
 using DietHelper.Common.Models.Dishes;
+using DietHelper.Common.Models.MealEntries;
 using DietHelper.Common.Models.Products;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -31,7 +32,9 @@ namespace DietHelper.Common.Data
         public DbSet<UserProduct> UserProducts { get; set; }
         public DbSet<UserDish> UserDishes { get; set; }
         public DbSet<UserDishIngredient> UserDishIngredients { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; } 
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<UserMealEntry> UserMealEntries { get; set; }
+        public DbSet<UserMealEntryIngredient> UserMealEntryIngredients { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,7 +56,7 @@ namespace DietHelper.Common.Data
             {
                 entity.HasKey(bp => bp.Id);
                 entity.Property(bp => bp.Name).IsRequired();
-                
+
                 entity.OwnsOne(bp => bp.NutritionFacts, nutrition =>
                 {
                     nutrition.Property(n => n.Calories).HasColumnName("Calories");
@@ -93,24 +96,22 @@ namespace DietHelper.Common.Data
                     nutrition.Property(n => n.Carbs).HasColumnName("CustomCarbs");
                 });
 
-                //нужен отдельный индекс для BaseProductId?
                 entity.HasIndex(up => new { up.UserId, up.BaseProductId }).IsUnique();
                 entity.HasQueryFilter(up => !up.IsDeleted);
             });
 
-            //Dish
             modelBuilder.Entity<UserDish>(entity =>
             {
-                entity.HasKey(d => d.Id);
-                entity.Property(d => d.UserId).IsRequired();
-                entity.Property(d => d.Name).IsRequired();
-                entity.Property(d => d.IsReadyDish).HasDefaultValue(false);
+                entity.HasKey(ud => ud.Id);
+                entity.Property(ud => ud.UserId).IsRequired();
+                entity.Property(ud => ud.Name).IsRequired();
+                entity.Property(ud => ud.IsReadyDish).HasDefaultValue(false);
 
                 entity.HasOne<User>()
                     .WithMany()
                     .HasForeignKey(ud => ud.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 entity.OwnsOne(ud => ud.NutritionFacts, nutrition =>
                 {
                     nutrition.Property(n => n.Calories).HasColumnName("Calories");
@@ -142,6 +143,58 @@ namespace DietHelper.Common.Data
                 entity.HasIndex(udi => new { udi.UserDishId, udi.UserProductId }).IsUnique();
 
                 entity.HasQueryFilter(udi => !udi.IsDeleted);
+            });
+
+            modelBuilder.Entity<UserMealEntry>(entity =>
+            {
+                entity.HasKey(ume => ume.Id);
+                entity.Property(ume => ume.Date).IsRequired();
+
+                entity.OwnsOne(ume => ume.TotalNutrition, nutrition =>
+                {
+                    nutrition.Property(n => n.Calories).HasColumnName("TotalCalories");
+                    nutrition.Property(n => n.Protein).HasColumnName("TotalProtein");
+                    nutrition.Property(n => n.Fat).HasColumnName("TotalFat");
+                    nutrition.Property(n => n.Carbs).HasColumnName("TotalCarbs");
+                });
+
+                entity.HasOne(ume => ume.User)
+                    .WithMany()
+                    .HasForeignKey(ume => ume.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ume => ume.UserDish)
+                    .WithMany()
+                    .HasForeignKey(ume => ume.UserDishId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(ume => new { ume.UserId, ume.Date });
+            });
+
+            modelBuilder.Entity<UserMealEntryIngredient>(entity =>
+            {
+                entity.HasKey(umei => umei.Id);
+                entity.Property(umei => umei.ProductNameSnapshot).IsRequired();
+
+                entity.OwnsOne(umei => umei.ProductNutritionInfoSnapshot, nutrition =>
+                {
+                    nutrition.Property(n => n.Calories).HasColumnName("CaloriesSnapshot");
+                    nutrition.Property(n => n.Protein).HasColumnName("ProteinSnapshot");
+                    nutrition.Property(n => n.Fat).HasColumnName("FatSnapshot");
+                    nutrition.Property(n => n.Carbs).HasColumnName("CarbsSnapshot");
+                });
+
+                entity.HasOne(umei => umei.UserMealEntry)
+                    .WithMany(umei => umei.Ingredients)
+                    .HasForeignKey(umei => umei.UserMealEntryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(umei => umei.UserProduct)
+                    .WithMany()
+                    .HasForeignKey(umei => umei.UserProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(umei => umei.UserMealEntryId);
             });
         }
     }

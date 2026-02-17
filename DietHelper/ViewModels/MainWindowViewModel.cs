@@ -22,6 +22,9 @@ namespace DietHelper.ViewModels
     {
         private readonly ApiService _apiService;
 
+        [ObservableProperty]
+        private DateTime selectedDate = DateTime.Today;
+
         private ObservableCollection<UserProductViewModel> _userProducts = [];
 
         public ObservableCollection<UserProductViewModel> UserProducts
