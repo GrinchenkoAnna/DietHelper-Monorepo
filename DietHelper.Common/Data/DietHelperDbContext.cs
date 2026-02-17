@@ -26,11 +26,6 @@ namespace DietHelper.Common.Data
                 optionsBuilder.UseNpgsql("Host=localhost;Database=nutrition;Username=postgres;Password=p5t9R_1g7!;Port=5432");
         }
 
-        //старые таблицы - разобрать, как убрать без последствий (не приоритет сейчас)
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Dish> Dishes { get; set; }
-        public DbSet<DishIngredient> DishIngredients { get; set; }
-
         //новые таблицы
         public DbSet<BaseProduct> BaseProducts { get; set; }
         public DbSet<UserProduct> UserProducts { get; set; }
@@ -148,11 +143,6 @@ namespace DietHelper.Common.Data
 
                 entity.HasQueryFilter(udi => !udi.IsDeleted);
             });
-
-            //старое
-            modelBuilder.Entity<Product>().ToTable("Products", t => t.ExcludeFromMigrations());
-            modelBuilder.Entity<Dish>().ToTable("Dishes", t => t.ExcludeFromMigrations());
-            modelBuilder.Entity<DishIngredient>().ToTable("DishIngredients", t => t.ExcludeFromMigrations());
         }
     }
 }
