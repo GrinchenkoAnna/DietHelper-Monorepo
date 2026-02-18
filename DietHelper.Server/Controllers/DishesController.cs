@@ -22,7 +22,7 @@ namespace DietHelper.Server.Controllers
             _dbContext = dbContext;
         }
 
-        private int GetCurrentUser()
+        private int GetCurrentUserId()
         {
             var userClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userClaim is null || !int.TryParse(userClaim, out int userId))
@@ -36,7 +36,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                var userId = GetCurrentUser();
+                var userId = GetCurrentUserId();
 
                 var dishes = await _dbContext.UserDishes
                     .Include(d => d.Ingredients)
@@ -58,7 +58,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                var userId = GetCurrentUser();
+                var userId = GetCurrentUserId();
 
                 var dish = await _dbContext.UserDishes
                     .Include(ud => ud.Ingredients)
@@ -86,7 +86,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                var userId = GetCurrentUser();
+                var userId = GetCurrentUserId();
 
                 if (userDish == null) return BadRequest("Request is null");
 
@@ -118,7 +118,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                var userId = GetCurrentUser();
+                var userId = GetCurrentUserId();
 
                 var userDish = await _dbContext.UserDishes
                     .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dishId);
@@ -178,7 +178,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                int userId = GetCurrentUser();
+                int userId = GetCurrentUserId();
 
                 var userDish = await _dbContext.UserDishes
                     .Include(d => d.Ingredients)
@@ -204,7 +204,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                var userId = GetCurrentUser();
+                var userId = GetCurrentUserId();
 
                 var userDishIngredient = await _dbContext.UserDishIngredients
                     .FirstOrDefaultAsync(udi => udi.UserDishId == dishId && udi.Id == ingredientId && !udi.IsDeleted);

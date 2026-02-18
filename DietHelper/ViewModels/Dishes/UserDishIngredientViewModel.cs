@@ -34,6 +34,12 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         private NutritionInfo currentNutrition = new();
 
+        [ObservableProperty]
+        private string productNameSnapshot = string.Empty;
+
+        [ObservableProperty]
+        private NutritionInfo productNutritionInfoSnapshot = new();
+
         public UserDishIngredientViewModel() {}
 
         public UserDishIngredientViewModel(UserDishIngredient userDishIngredient)

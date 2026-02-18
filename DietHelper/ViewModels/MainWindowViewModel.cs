@@ -256,6 +256,13 @@ namespace DietHelper.ViewModels
         }
 
         [RelayCommand]
+        private async Task SaveDay()
+        {
+
+        }
+
+
+        [RelayCommand]
         private void Logout()
         {
             try
