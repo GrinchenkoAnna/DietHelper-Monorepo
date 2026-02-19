@@ -28,13 +28,14 @@ namespace DietHelper.Services
             }
         }
 
-        public async Task<UserMealEntry?> AddUserMealEntryAsync(UserMealEntryDto newUserMealEntry)
+        public async Task<UserMealEntry?> AddUserMealEntryAsync(UserMealEntryDto request)
         {
             if (!IsAuthenticated) LoadSavedSession();
 
             try
             {
-                throw new NotImplementedException();
+                var response = await SendRequestAsync(() => _httpClient.PostAsJsonAsync("meals", request), false);
+                return await response!.Content.ReadFromJsonAsync<UserMealEntry>();
             }
             catch (Exception ex)
             {
@@ -43,13 +44,14 @@ namespace DietHelper.Services
             }
         }
 
-        public async Task UpdateUserMealEntry(int userMealEntryId, UserMealEntryDto userMealEntryDto)
+        public async Task<bool> UpdateUserMealEntry(int userMealEntryId, UserMealEntryDto request)
         {
             if (!IsAuthenticated) LoadSavedSession();
 
             try
             {
-                throw new NotImplementedException();
+                var response = await SendRequestAsync(() => _httpClient.PutAsJsonAsync($"meals/{userMealEntryId}", request), false);
+                return response!.IsSuccessStatusCode == true;
             }
             catch (Exception ex)
             {
@@ -64,7 +66,8 @@ namespace DietHelper.Services
 
             try
             {
-                throw new NotImplementedException();
+                var response = await SendRequestAsync(() => _httpClient.DeleteAsync($"meals/{userMealEntryId}"), false);
+                return response!.IsSuccessStatusCode == true;
             }
             catch (Exception ex)
             {
