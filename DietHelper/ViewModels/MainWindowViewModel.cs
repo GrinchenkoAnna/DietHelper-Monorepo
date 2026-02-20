@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.DTO;
 using DietHelper.Common.Models.Core;
-using DietHelper.Common.Models.Products;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Dishes;
@@ -26,7 +25,54 @@ namespace DietHelper.ViewModels
         [ObservableProperty]
         private DateTime selectedDate = DateTime.Today;
 
+        private DateTime _currentWeekStart;
+
+        public ObservableCollection<DateTime> WeekDays { get; } = new();
+
         private ObservableCollection<UserProductViewModel> _userProducts = [];
+
+        private static DateTime GetStartOfWeek(DateTime date)
+        {
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return date.AddDays(-1 * diff).Date;
+        }
+
+        private void UpdateWeekDays()
+        {
+            WeekDays.Clear();
+            for (int i = 0; i < 7; i++)
+                WeekDays.Add(_currentWeekStart.AddDays(i));
+        }
+
+        partial void OnSelectedDateChanged(DateTime value)
+        {
+            if (value < _currentWeekStart || value >= _currentWeekStart.AddDays(7))
+            {
+                _currentWeekStart = GetStartOfWeek(value);
+                UpdateWeekDays();
+            }
+            _ = LoadDataForDateAsync(value);
+        }
+
+        [RelayCommand]
+        private void SelectPreviousWeek()
+        {
+            _currentWeekStart = _currentWeekStart.AddDays(-7);
+            UpdateWeekDays();
+        }
+
+        [RelayCommand]
+        private void SelectNextWeek()
+        {
+            _currentWeekStart = _currentWeekStart.AddDays(+7);
+            UpdateWeekDays();
+        }
+
+        [RelayCommand]
+        private void SetSelectedDate(DateTime date)
+        {
+            SelectedDate = date;
+        }
 
         public ObservableCollection<UserProductViewModel> UserProducts
         {
@@ -223,6 +269,9 @@ namespace DietHelper.ViewModels
         {
             _apiService = apiService;
             InitializeAsync();
+
+            _currentWeekStart = GetStartOfWeek(SelectedDate);
+            UpdateWeekDays();
 
             int products = UserProducts.Count;
             int Dishes = UserDishes.Count;

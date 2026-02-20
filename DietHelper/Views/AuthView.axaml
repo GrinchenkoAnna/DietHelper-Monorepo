@@ -7,11 +7,9 @@
              x:Class="DietHelper.Views.AuthView"
              x:DataType="vm:AuthViewModel">
 
-    <Border Margin="20"
-            Padding="20"
+    <Border Margin="20" Padding="20"
             Background="{DynamicResource ThemeBackgroundBrush}"
-            BorderBrush="#696969"
-            BorderThickness="1"
+            BorderBrush="#696969" BorderThickness="1"
             CornerRadius="8"
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
