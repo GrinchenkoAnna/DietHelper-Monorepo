@@ -50,6 +50,12 @@ namespace DietHelper.ViewModels.Dishes
             Name = userDishIngredient.UserProduct.BaseProduct?.Name;
             Quantity = userDishIngredient.Quantity;
             CurrentNutrition = userDishIngredient.CurrentNutrition;
+
+            if (userDishIngredient.UserProduct is not null)
+            {
+                ProductNameSnapshot = userDishIngredient.UserProduct.BaseProduct!.Name;
+                ProductNutritionInfoSnapshot = userDishIngredient.UserProduct.CustomNutrition ?? userDishIngredient.UserProduct.BaseProduct.NutritionFacts;
+            }
         }
 
         public UserDishIngredient ToModel()

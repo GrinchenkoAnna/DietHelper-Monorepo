@@ -12,6 +12,9 @@ namespace DietHelper.ViewModels.Products
         [ObservableProperty]
         private int userId = -1;
 
+        [ObservableProperty]
+        private int mealEntryId;
+
         public UserProductViewModel()
         {
             Recalculate();

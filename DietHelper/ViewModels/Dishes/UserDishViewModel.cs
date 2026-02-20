@@ -53,6 +53,9 @@ namespace DietHelper.ViewModels.Dishes
 
         private NutritionInfo baseNutritionForReadyDish;
 
+        [ObservableProperty]
+        private int mealEntryId;
+
         public double Calories
         {
             get => NutritionFacts.Calories;
@@ -172,7 +175,6 @@ namespace DietHelper.ViewModels.Dishes
                         ingredient.Quantity = product.Quantity;
 
                         await UpdateModelAsync();
-                        //await _apiService.UpdateUserDishAsync(_model);
                     }
                 }
             }

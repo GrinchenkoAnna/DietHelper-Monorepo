@@ -43,19 +43,9 @@ namespace DietHelper.Services
         {
             CurrentSessionData = sessionData;
 
-            Debug.WriteLine($"[SetTokens] New Access Token: {!string.IsNullOrEmpty(CurrentSessionData.AccessToken)}");
-            Debug.WriteLine($"[SetTokens] Header before: {_httpClient.DefaultRequestHeaders.Authorization}");
-
             if (!string.IsNullOrEmpty(CurrentSessionData.AccessToken))
-            {
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", CurrentSessionData.AccessToken);
-                Debug.WriteLine($"[SetTokens] Header after: {_httpClient.DefaultRequestHeaders.Authorization}");
-            }
-            else
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = null;
-                Debug.WriteLine($"[SetTokens] Header cleared");
-            }
+            else _httpClient.DefaultRequestHeaders.Authorization = null;
 
             SaveSession();
 
@@ -64,11 +54,7 @@ namespace DietHelper.Services
 
         private void SaveSession()
         {
-            if (string.IsNullOrEmpty(CurrentSessionData.AccessToken))
-            {
-                Debug.WriteLine($"[ApiService]: token is null, session not saved");
-                return;
-            }
+            if (string.IsNullOrEmpty(CurrentSessionData.AccessToken)) return;
 
             try
             {

@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DietHelper.Common.DTO;
 using DietHelper.Common.Models.Core;
-using DietHelper.Common.Models.Dishes;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Dishes;
@@ -130,23 +130,73 @@ namespace DietHelper.ViewModels
             UpdateTotals();
         }
 
-        // загружается только 1 продукт или блюдо для примера и отладки
-        // после реализации истории и навигации по датам - загружать список продуктов или блюд за указанную дату
-        private async Task LoadDataFromServerAsync()
+        private async Task LoadDataForDateAsync(DateTime date)
         {
             try
             {
-                var userProduct = await _apiService.GetUserProductAsync(1);
-                if (userProduct is not null)
-                    UserProducts.Add(new UserProductViewModel(userProduct));
+                var userMealEntries = await _apiService.GetUserMealsForDate(date);
+                if (userMealEntries is null) return;
 
-                var userDish = await _apiService.GetUserDishAsync(1);
-                if (userDish is not null)
+                UserProducts.Clear();
+                UserDishes.Clear();
+
+                foreach (var userMealEntry in userMealEntries)
                 {
-                    var nutritionCalculator = new NutritionCalculator(_apiService);
+                    // отдельный продукт
+                    if (userMealEntry.UserDishId == null)
+                    {
+                        var product = userMealEntry.Ingredients.FirstOrDefault();
+                        if (product is null) continue;
 
-                    var userDishViewModel = new UserDishViewModel(userDish, nutritionCalculator, _apiService);
-                    UserDishes.Add(userDishViewModel);
+                        var productNutritionInfo = product.ProductNutritionInfoSnapshot;
+
+                        var userProduct = new UserProductViewModel()
+                        {
+                            Id = product.UserProductId,
+                            MealEntryId = product.Id,
+                            Name = product.ProductNameSnapshot,
+                            Calories = productNutritionInfo.Calories,
+                            Protein = productNutritionInfo.Protein,
+                            Fat = productNutritionInfo.Fat,
+                            Carbs = productNutritionInfo.Carbs,
+                            Quantity = (double)product.Quantity
+                        };
+
+                        UserProducts.Add(userProduct);
+                    }
+                    else // блюдо
+                    {
+                        if (userMealEntry.UserDish is null) continue;
+
+                        var userDish = new UserDishViewModel(userMealEntry.UserDish, new NutritionCalculator(_apiService), _apiService)
+                        {
+                            MealEntryId = userMealEntry.Id,
+                            Quantity = (double)userMealEntry.TotalQuantity,
+                            NutritionFacts = userMealEntry.TotalNutrition,
+                            IsReadyDish = (userMealEntry.Ingredients.Count == 0)
+                        };
+
+                        if (!userDish.IsReadyDish)
+                        {
+                            // нужно строить ингредиенты заново, потому что эта версия блюда зафиксирована и, скорее всего, не совпадает с текущей (динамичной)
+                            foreach (var ingredient in userMealEntry.Ingredients)
+                            {
+                                var dishIngredient = new UserDishIngredientViewModel()
+                                {
+                                    Id = ingredient.Id,
+                                    UserProductId = ingredient.UserProductId,
+                                    UserDishId = userDish.Id,
+                                    Name = ingredient.ProductNameSnapshot,
+                                    CurrentNutrition = ingredient.ProductNutritionInfoSnapshot,
+                                    ProductNameSnapshot = ingredient.ProductNameSnapshot,
+                                    ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot,
+                                };
+                                userDish.Ingredients.Add(dishIngredient);
+                            }
+
+                            UserDishes.Add(userDish);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -159,7 +209,7 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                await LoadDataFromServerAsync();
+                await LoadDataForDateAsync(SelectedDate);
             }
             catch (Exception ex)
             {
@@ -232,27 +282,84 @@ namespace DietHelper.ViewModels
         [RelayCommand]
         private async Task AddUserProduct()
         {
-            var userProduct = await WeakReferenceMessenger.Default.Send(new AddUserProductMessage());
-            if (userProduct is not null) UserProducts.Add(userProduct);
+            try
+            {
+                var userProduct = await WeakReferenceMessenger.Default.Send(new AddUserProductMessage());
+                if (userProduct is null) return;
+
+                var userMealEntryDto = new UserMealEntryDto()
+                {
+                    Date = SelectedDate,
+                    Ingredients = new()
+                    {
+                        new UserMealEntryIngredientDto()
+                        {
+                            UserProductId = userProduct.Id,
+                            Quantity = (decimal)userProduct.Quantity,
+                            ProductNameSnapshot = userProduct.Name!,
+                            ProductNutritionInfoSnapshot = userProduct.NutritionFacts
+                        }
+                    }
+                };
+
+                var userMealEntry = _apiService.AddUserMealEntryAsync(userMealEntryDto);
+
+                if (userMealEntry is not null)
+                    await LoadDataForDateAsync(SelectedDate);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindowWiewModel]: {ex.Message}");
+            }
         }
 
         [RelayCommand]
         private async Task RemoveUserProduct(UserProductViewModel userProduct)
         {
-            UserProducts.Remove(userProduct);
+            if (await _apiService.DeleteUserMealEntryAsync(userProduct.MealEntryId))
+                UserProducts.Remove(userProduct);
         }
 
         [RelayCommand]
         private async Task AddDish()
         {
-            var userDish = await WeakReferenceMessenger.Default.Send(new AddUserDishMessage());
-            if (userDish is not null) UserDishes.Add(userDish);
+            try
+            {
+                var userDish = await WeakReferenceMessenger.Default.Send(new AddUserDishMessage());
+                if (userDish is null) return;
+
+                var ingredients = userDish.Ingredients.Select(ingredient => new UserMealEntryIngredientDto()
+                {
+                    UserProductId = ingredient.UserProductId,
+                    Quantity = (decimal)ingredient.Quantity,
+                    ProductNameSnapshot = ingredient.ProductNameSnapshot,
+                    ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot
+                }).ToList();
+                if (ingredients is null || ingredients.Count == 0) return;
+
+                var userMealEntryDto = new UserMealEntryDto()
+                {
+                    UserDishId = userDish.Id,
+                    Date = SelectedDate,
+                    Ingredients = ingredients
+                };
+
+                var userMealEntry = _apiService.AddUserMealEntryAsync(userMealEntryDto);
+
+                if (userMealEntry is not null)
+                    await LoadDataForDateAsync(SelectedDate);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindowWiewModel]: {ex.Message}");
+            }
         }
 
         [RelayCommand]
-        private void RemoveDish(UserDishViewModel userDish)
+        private async Task RemoveDish(UserDishViewModel userDish)
         {
-            UserDishes.Remove(userDish);
+            if (await _apiService.DeleteUserMealEntryAsync(userDish.MealEntryId))
+                UserDishes.Remove(userDish);
         }
 
         [RelayCommand]
