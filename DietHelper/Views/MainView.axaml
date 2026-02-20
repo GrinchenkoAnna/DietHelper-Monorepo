@@ -16,9 +16,15 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Button Grid.Row="0" Content="Выйти"
-                Margin="5, 5, 0, 0"
-                Command="{Binding LogoutCommand}"/>
+        <DockPanel Grid.Row="0" LastChildFill="False" 
+                   HorizontalAlignment="Stretch">			
+            <Button Content="Выйти" DockPanel.Dock="Left" 
+                    Margin="5, 5, 0, 0" Command="{Binding LogoutCommand}"/>
+            <Button Content="Сохранить день" DockPanel.Dock="Right"
+                    Margin="0, 5, 5, 0" Command="{Binding SaveDayCommand}"/>
+        </DockPanel>
+
+        
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.DTO;
 using DietHelper.Common.Models.Core;
+using DietHelper.Common.Models.Products;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Dishes;
@@ -365,7 +366,63 @@ namespace DietHelper.ViewModels
         [RelayCommand]
         private async Task SaveDay()
         {
+            try
+            {
+                foreach (var userProduct in UserProducts)
+                {
+                    if (userProduct.MealEntryId > 0)
+                    {
+                        var userMealEntryProduct = new UserMealEntryDto()
+                        {
+                            Date = SelectedDate,
+                            Ingredients = new()
+                            {
+                                new UserMealEntryIngredientDto()
+                                {
+                                    UserProductId = userProduct.Id,
+                                    Quantity = (decimal)userProduct.Quantity,
+                                    ProductNameSnapshot = userProduct.Name!,
+                                    ProductNutritionInfoSnapshot = userProduct.NutritionFacts
+                                }
+                            }
+                        };
 
+                        await _apiService.UpdateUserMealEntry(userProduct.MealEntryId, userMealEntryProduct);
+                    }
+                }
+
+                foreach (var userDish in UserDishes)
+                {
+                    if (userDish.MealEntryId > 0)
+                    {
+                        var ingredients = new List<UserMealEntryIngredientDto>();
+
+                        foreach (var ingredient in userDish.Ingredients)
+                        {
+                            ingredients.Add(new UserMealEntryIngredientDto()
+                            {
+                                UserProductId = ingredient.UserProductId,
+                                Quantity = (decimal)ingredient.Quantity,
+                                ProductNameSnapshot = ingredient.ProductNameSnapshot,
+                                ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot
+                            });
+                        }
+
+                        var userMealEntryDish = new UserMealEntryDto()
+                        {
+                            UserDishId = userDish.Id,
+                            Date = SelectedDate,
+                            Ingredients = ingredients
+                        };
+
+                        await _apiService.UpdateUserMealEntry(userDish.MealEntryId, userMealEntryDish);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindowWiewModel]: {ex.Message}");
+            }
         }
 
 

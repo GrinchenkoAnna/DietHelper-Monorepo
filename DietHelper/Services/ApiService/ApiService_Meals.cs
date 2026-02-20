@@ -17,8 +17,9 @@ namespace DietHelper.Services
             try
             {
                 var response = await SendRequestAsync(() => _httpClient.GetAsync($"meals?date={date:yyyy-MM-dd}"));
-                var userMeals = await response!.Content.ReadFromJsonAsync<List<UserMealEntry>>();
+                if (response is null) return null;
 
+                var userMeals = await response.Content.ReadFromJsonAsync<List<UserMealEntry>>();
                 return userMeals;
             }
             catch (Exception ex)
