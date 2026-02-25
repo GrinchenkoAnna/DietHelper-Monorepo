@@ -31,11 +31,11 @@ namespace DietHelper.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<UserMealEntry>>> GetUserMeals([FromQuery] DateTime date)
+        public async Task<ActionResult<List<UserMealEntryDto>>> GetUserMeals([FromQuery] DateTime date)
         {
             var userId = GetCurrentUserId();
 
-            var entries = await _dbContext.UserMealEntries
+            var userMeals = await _dbContext.UserMealEntries
                 .Include(ume => ume.Ingredients.Where(i => !i.IsDeleted))
                     .ThenInclude(i => i.UserProduct)
                         .ThenInclude(up => up.BaseProduct)
@@ -45,7 +45,9 @@ namespace DietHelper.Server.Controllers
                         && !ume.IsDeleted)
                 .ToListAsync();
 
-            return Ok(entries);
+            var userMealEntryDtos = userMeals.Select(MapModelToDto).ToList();
+
+            return Ok(userMealEntryDtos);
         }
 
         private async Task<UserMealEntry?> GetUserMeal(int id)
@@ -93,15 +95,34 @@ namespace DietHelper.Server.Controllers
 
             return userMealEntry;
         }
-        
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<UserMealEntry>> UpdateUserMeal(int id, UserMealEntryDto request)
+        public async Task<ActionResult<UserMealEntryDto>> UpdateUserMeal(int id, UserMealEntryDto request)
         {
             var userId = GetCurrentUserId();
 
             if (request.Ingredients is null || request.Ingredients.Count == 0)
                 return BadRequest("Meal entry cannot be empty");
+
+            var productIds = request.Ingredients.Select(i => i.UserProductId).Distinct().ToList();
+            var existingProductIds = await _dbContext.UserProducts
+                .Where(up => productIds.Contains(up.Id) && up.UserId == userId && !up.IsDeleted)
+                .Select(up => up.Id)
+                .ToListAsync();
+            if (productIds.Count != existingProductIds.Count)
+            {
+                var missingIds = productIds.Except(existingProductIds).ToList();
+                return BadRequest($"User Products with ids {string.Join(", ", missingIds)} not found in the user with id = {userId}");
+            }
+
+            if (request.UserDishId.HasValue)
+            {
+                if (request.UserDishId <= 0) return BadRequest("UserDishId cannot be negative");
+
+                var isDishExists = await _dbContext.UserDishes
+                    .AnyAsync(ud => ud.Id == request.UserDishId && ud.UserId == userId && !ud.IsDeleted);
+                if (!isDishExists) return BadRequest($"User Dish with id {request.UserDishId} not found in the user with id = {userId}");
+            }
 
             var userMealEntry = await GetUserMeal(id);
             if (userMealEntry is null) return NotFound();
@@ -118,23 +139,43 @@ namespace DietHelper.Server.Controllers
             // полная модель со всеми связями
             userMealEntry = await GetUserMeal(userMealEntry.Id);
 
-            return Ok(userMealEntry);
+            return Ok(MapModelToDto(userMealEntry));
         }
 
         [HttpPost]
-        public async Task<ActionResult<UserMealEntry>> AddUserMeal(UserMealEntryDto request)
+        public async Task<ActionResult<UserMealEntryDto>> AddUserMeal(UserMealEntryDto request)
         {
             int userId = GetCurrentUserId();
 
             if (request is null || request.Ingredients is null || request.Ingredients.Count == 0)
                 return BadRequest("Meal entry cannot be empty");
-            
+
+            var productIds = request.Ingredients.Select(i => i.UserProductId).Distinct().ToList();
+            var existingProductIds = await _dbContext.UserProducts
+                .Where(up => productIds.Contains(up.Id) && up.UserId == userId && !up.IsDeleted)
+                .Select(up => up.Id)
+                .ToListAsync();
+            if (productIds.Count != existingProductIds.Count)
+            {
+                var missingIds = productIds.Except(existingProductIds).ToList();
+                return BadRequest($"User Products with ids {string.Join(", ", missingIds)} not found in the user with id = {userId}");
+            }
+
+            if (request.UserDishId.HasValue)
+            {
+                if (request.UserDishId <= 0) return BadRequest("UserDishId cannot be negative");
+
+                var isDishExists = await _dbContext.UserDishes
+                    .AnyAsync(ud => ud.Id == request.UserDishId && ud.UserId == userId && !ud.IsDeleted);
+                if (!isDishExists) return BadRequest($"User Dish with id {request.UserDishId} not found in the user with id = {userId}");
+            }
+
             var userMealEntry = new UserMealEntry()
             {
                 UserId = userId,
                 UserDishId = request.UserDishId,
                 Date = request.Date,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
             };
 
             userMealEntry = await AddIngredientsToUserMealEntry(userMealEntry, request);
@@ -145,7 +186,28 @@ namespace DietHelper.Server.Controllers
             // полная модель со всеми связями
             userMealEntry = await GetUserMeal(userMealEntry.Id);
 
-            return Ok(userMealEntry);
+            return Ok(MapModelToDto(userMealEntry));
+        }
+
+        private UserMealEntryDto MapModelToDto(UserMealEntry userMealEntry)
+        {
+            return new UserMealEntryDto()
+            {
+                Id = userMealEntry.Id,
+                Date = userMealEntry.Date,
+                UserDishId = userMealEntry.UserDishId,
+                UserDishName = userMealEntry.UserDish?.Name,
+                TotalQuantity = userMealEntry.TotalQuantity,
+                TotalNutrition = userMealEntry.TotalNutrition,
+                Ingredients = userMealEntry.Ingredients.Select(i => new UserMealEntryIngredientDto()
+                {
+                    Id = i.Id,
+                    UserProductId = i.UserProductId,
+                    Quantity = i.Quantity,
+                    ProductNameSnapshot = i.ProductNameSnapshot,
+                    ProductNutritionInfoSnapshot = i.ProductNutritionInfoSnapshot,
+                }).ToList()
+            };
         }
 
         [HttpDelete("{id}")]

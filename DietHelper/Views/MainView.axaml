@@ -50,10 +50,11 @@
                 
                     <ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<Button Content="{Binding ., StringFormat='ddd dd.MM'}" FontWeight="Bold"
-                                   Command="{Binding $parent[UserControl].DataContext.SetSelectedDateCommand}"
-                                   CommandParameter="{Binding .}" Background="Transparent" Width="100"
-                                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+							<Button Content="{Binding ., StringFormat='ddd dd.MM'}" 
+                                    Command="{Binding $parent[UserControl].DataContext.SetSelectedDateCommand}"
+                                    CommandParameter="{Binding .}" Background="Transparent" 
+                                    Width="100" MinHeight="25" FontWeight="Bold" Padding="-3"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                             </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

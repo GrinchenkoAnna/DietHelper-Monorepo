@@ -181,18 +181,18 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                var userMealEntries = await _apiService.GetUserMealsForDate(date);
-                if (userMealEntries is null) return;
+                var userMealEntriesDto = await _apiService.GetUserMealsForDate(date);
+                if (userMealEntriesDto is null) return;
 
                 UserProducts.Clear();
                 UserDishes.Clear();
 
-                foreach (var userMealEntry in userMealEntries)
+                foreach (var userMealEntryDto in userMealEntriesDto)
                 {
                     // отдельный продукт
-                    if (userMealEntry.UserDishId == null)
+                    if (!userMealEntryDto.UserDishId.HasValue)
                     {
-                        var product = userMealEntry.Ingredients.FirstOrDefault();
+                        var product = userMealEntryDto.Ingredients.FirstOrDefault();
                         if (product is null) continue;
 
                         var productNutritionInfo = product.ProductNutritionInfoSnapshot;
@@ -213,35 +213,36 @@ namespace DietHelper.ViewModels
                     }
                     else // блюдо
                     {
-                        if (userMealEntry.UserDish is null) continue;
+                        var userDish = await _apiService.GetUserDishAsync(userMealEntryDto.UserDishId.Value);
+                        if (userDish is null) continue;
 
-                        var userDish = new UserDishViewModel(userMealEntry.UserDish, new NutritionCalculator(_apiService), _apiService)
+                        var userDishViewModel = new UserDishViewModel(userDish, new NutritionCalculator(_apiService), _apiService)
                         {
-                            MealEntryId = userMealEntry.Id,
-                            Quantity = (double)userMealEntry.TotalQuantity,
-                            NutritionFacts = userMealEntry.TotalNutrition,
-                            IsReadyDish = (userMealEntry.Ingredients.Count == 0)
+                            MealEntryId = userMealEntryDto.Id,
+                            Quantity = (double)userMealEntryDto.TotalQuantity,
+                            NutritionFacts = userMealEntryDto.TotalNutrition,
+                            IsReadyDish = (userMealEntryDto.Ingredients.Count == 0)
                         };
 
-                        if (!userDish.IsReadyDish)
+                        if (!userDishViewModel.IsReadyDish)
                         {
                             // нужно строить ингредиенты заново, потому что эта версия блюда зафиксирована и, скорее всего, не совпадает с текущей (динамичной)
-                            foreach (var ingredient in userMealEntry.Ingredients)
+                            foreach (var ingredient in userMealEntryDto.Ingredients)
                             {
                                 var dishIngredient = new UserDishIngredientViewModel()
                                 {
                                     Id = ingredient.Id,
                                     UserProductId = ingredient.UserProductId,
-                                    UserDishId = userDish.Id,
+                                    UserDishId = userDishViewModel.Id,
                                     Name = ingredient.ProductNameSnapshot,
                                     CurrentNutrition = ingredient.ProductNutritionInfoSnapshot,
                                     ProductNameSnapshot = ingredient.ProductNameSnapshot,
                                     ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot,
                                 };
-                                userDish.Ingredients.Add(dishIngredient);
+                                userDishViewModel.Ingredients.Add(dishIngredient);
                             }
 
-                            UserDishes.Add(userDish);
+                            UserDishes.Add(userDishViewModel);
                         }
                     }
                 }

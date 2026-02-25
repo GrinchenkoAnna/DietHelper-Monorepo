@@ -149,6 +149,8 @@ namespace DietHelper.Common.Data
             {
                 entity.HasKey(ume => ume.Id);
                 entity.Property(ume => ume.Date).IsRequired();
+                entity.Property(ume => ume.Date).HasColumnType("date");
+                entity.Property(ume => ume.CreatedAt).HasColumnType("timestamp with time zone");
 
                 entity.OwnsOne(ume => ume.TotalNutrition, nutrition =>
                 {

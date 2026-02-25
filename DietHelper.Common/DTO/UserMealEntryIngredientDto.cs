@@ -9,6 +9,7 @@ namespace DietHelper.Common.DTO
 {
     public class UserMealEntryIngredientDto
     {
+        public int Id { get; set; }
         public int UserProductId { get; set; }
         public decimal Quantity { get; set; }
         public string ProductNameSnapshot { get; set; } = string.Empty;

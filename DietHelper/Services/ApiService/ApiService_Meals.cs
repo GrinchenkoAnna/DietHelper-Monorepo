@@ -10,7 +10,7 @@ namespace DietHelper.Services
 {
     public partial class ApiService
     {
-        public async Task<List<UserMealEntry>?> GetUserMealsForDate(DateTime date)
+        public async Task<List<UserMealEntryDto>?> GetUserMealsForDate(DateTime date)
         {
             if (!IsAuthenticated) LoadSavedSession();
 
@@ -19,7 +19,7 @@ namespace DietHelper.Services
                 var response = await SendRequestAsync(() => _httpClient.GetAsync($"meals?date={date:yyyy-MM-dd}"));
                 if (response is null) return null;
 
-                var userMeals = await response.Content.ReadFromJsonAsync<List<UserMealEntry>>();
+                var userMeals = await response.Content.ReadFromJsonAsync<List<UserMealEntryDto>>();
                 return userMeals;
             }
             catch (Exception ex)
@@ -29,14 +29,14 @@ namespace DietHelper.Services
             }
         }
 
-        public async Task<UserMealEntry?> AddUserMealEntryAsync(UserMealEntryDto request)
+        public async Task<UserMealEntryDto?> AddUserMealEntryAsync(UserMealEntryDto request)
         {
             if (!IsAuthenticated) LoadSavedSession();
 
             try
             {
                 var response = await SendRequestAsync(() => _httpClient.PostAsJsonAsync("meals", request), false);
-                return await response!.Content.ReadFromJsonAsync<UserMealEntry>();
+                return await response!.Content.ReadFromJsonAsync<UserMealEntryDto>();
             }
             catch (Exception ex)
             {
