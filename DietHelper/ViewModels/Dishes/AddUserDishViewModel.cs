@@ -83,8 +83,8 @@ namespace DietHelper.ViewModels.Dishes
                 {
                     if (dish.Id > 0)
                     {
-                        UserSearchResults.Add(new UserDishViewModel(dish, _nutritionCalculator, _apiService));
-                        AllUserItems.Add(new UserDishViewModel(dish, _nutritionCalculator, _apiService));
+                        UserSearchResults.Add(new UserDishViewModel(dish, _apiService));
+                        AllUserItems.Add(new UserDishViewModel(dish, _apiService));
                     }
                 }
             }            
@@ -130,7 +130,7 @@ namespace DietHelper.ViewModels.Dishes
             {
                 ClearManualEntries();
 
-                WeakReferenceMessenger.Default.Send(new AddUserDishClosedMessage(new UserDishViewModel(newUserDish, _nutritionCalculator, _apiService)));
+                WeakReferenceMessenger.Default.Send(new AddUserDishClosedMessage(new UserDishViewModel(newUserDish, _apiService)));
             }            
         }
 
