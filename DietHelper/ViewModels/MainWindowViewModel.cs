@@ -216,34 +216,17 @@ namespace DietHelper.ViewModels
                         var userDish = await _apiService.GetUserDishAsync(userMealEntryDto.UserDishId.Value);
                         if (userDish is null) continue;
 
-                        var userDishViewModel = new UserDishViewModel(userDish, new NutritionCalculator(_apiService), _apiService)
+                        var userDishViewModel = new UserDishViewModel(
+                            _apiService, userDish.Id, userDish.Name,
+                             isReadyDish: userMealEntryDto.Ingredients.Count == 0,
+                             quantity: (double)userMealEntryDto.TotalQuantity,
+                             totalNutrition: userMealEntryDto.TotalNutrition,
+                             ingredients: userMealEntryDto.Ingredients)
                         {
-                            MealEntryId = userMealEntryDto.Id,
-                            Quantity = (double)userMealEntryDto.TotalQuantity,
-                            NutritionFacts = userMealEntryDto.TotalNutrition,
-                            IsReadyDish = (userMealEntryDto.Ingredients.Count == 0)
+                            MealEntryId = userMealEntryDto.Id
                         };
 
-                        if (!userDishViewModel.IsReadyDish)
-                        {
-                            // нужно строить ингредиенты заново, потому что эта версия блюда зафиксирована и, скорее всего, не совпадает с текущей (динамичной)
-                            foreach (var ingredient in userMealEntryDto.Ingredients)
-                            {
-                                var dishIngredient = new UserDishIngredientViewModel()
-                                {
-                                    Id = ingredient.Id,
-                                    UserProductId = ingredient.UserProductId,
-                                    UserDishId = userDishViewModel.Id,
-                                    Name = ingredient.ProductNameSnapshot,
-                                    CurrentNutrition = ingredient.ProductNutritionInfoSnapshot,
-                                    ProductNameSnapshot = ingredient.ProductNameSnapshot,
-                                    ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot,
-                                };
-                                userDishViewModel.Ingredients.Add(dishIngredient);
-                            }
-
-                            UserDishes.Add(userDishViewModel);
-                        }
+                        UserDishes.Add(userDishViewModel);
                     }
                 }
             }

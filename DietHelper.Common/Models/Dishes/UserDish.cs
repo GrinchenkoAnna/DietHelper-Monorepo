@@ -23,6 +23,7 @@ namespace DietHelper.Common.Models.Dishes
         public string Name { get; set; } = string.Empty;
 
         public NutritionInfo NutritionFacts { get; set; } = new();
+
         public bool IsReadyDish { get; set; } = false;
 
         public bool IsDeleted { get; set; } = false;

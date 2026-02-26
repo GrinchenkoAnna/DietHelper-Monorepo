@@ -50,11 +50,21 @@
             </StackPanel>
         </StackPanel>
         
-        <ListBox x:Name="ingredientsList" ItemsSource="{Binding DisplayedIngredients}">
+        <ListBox x:Name="ingredientsList" ItemsSource="{Binding Ingredients}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
-                        <ingredients:UserProductView />
+                        <TextBlock Text="{Binding ProductNameSnapshot}" Width="150"/>
+                        <TextBlock Text="К: "/>
+                        <TextBlock Text="{Binding CurrentNutrition.Calories}" Width="80"/>
+                        <TextBlock Text="Б: "/>
+                        <TextBlock Text="{Binding CurrentNutrition.Protein}" Width="80"/>
+                        <TextBlock Text="Ж: "/>
+                        <TextBlock Text="{Binding CurrentNutrition.Fat}" Width="80"/>
+                        <TextBlock Text="У: "/>
+                        <TextBlock Text="{Binding CurrentNutrition.Carbs}" Width="80"/>
+                        <TextBlock Text="Вес: "/>
+                        <TextBox Text="{Binding Quantity}" Width="80"/>
                         <Button Content="-" HorizontalAlignment="Right"
                                 Margin="10 -5 0 0"
                                 Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"

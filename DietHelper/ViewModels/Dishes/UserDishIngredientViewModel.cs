@@ -29,7 +29,7 @@ namespace DietHelper.ViewModels.Dishes
 
         [ObservableProperty]
         [Range(0.1, double.MaxValue, ErrorMessage = "Количество должно быть больше 0")]
-        private double quantity = 100;
+        private double quantity;
 
         [ObservableProperty]
         private NutritionInfo currentNutrition = new();
@@ -40,7 +40,7 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         private NutritionInfo productNutritionInfoSnapshot = new();
 
-        public UserDishIngredientViewModel() {}
+        public UserDishIngredientViewModel() { }
 
         public UserDishIngredientViewModel(UserDishIngredient userDishIngredient)
         {
@@ -49,24 +49,44 @@ namespace DietHelper.ViewModels.Dishes
             UserProductId = userDishIngredient.UserProductId;
             Name = userDishIngredient.UserProduct.BaseProduct?.Name;
             Quantity = userDishIngredient.Quantity;
-            CurrentNutrition = userDishIngredient.CurrentNutrition;
 
             if (userDishIngredient.UserProduct is not null)
             {
                 ProductNameSnapshot = userDishIngredient.UserProduct.BaseProduct!.Name;
                 ProductNutritionInfoSnapshot = userDishIngredient.UserProduct.CustomNutrition ?? userDishIngredient.UserProduct.BaseProduct.NutritionFacts;
             }
+
+            Recalculate();
+        }
+
+        partial void OnQuantityChanged(double value)
+        {
+            Recalculate();
+        }
+
+        partial void OnProductNutritionInfoSnapshotChanging(NutritionInfo value)
+        {
+            Recalculate();
+        }
+
+        private void Recalculate()
+        {
+            CurrentNutrition = new NutritionInfo
+            {
+                Calories = ProductNutritionInfoSnapshot.Calories * Quantity / 100,
+                Protein = ProductNutritionInfoSnapshot.Protein * Quantity / 100,
+                Fat = ProductNutritionInfoSnapshot.Fat * Quantity / 100,
+                Carbs = ProductNutritionInfoSnapshot.Carbs * Quantity / 100
+            };
         }
 
         public UserDishIngredient ToModel()
         {
             return new UserDishIngredient
             {
-                //Id должен генерироваться на сервере
                 UserDishId = UserDishId,
                 UserProductId = UserProductId,
-                Quantity = Quantity,
-                //IsDeleted = false
+                Quantity = Quantity
             };
         }
     }

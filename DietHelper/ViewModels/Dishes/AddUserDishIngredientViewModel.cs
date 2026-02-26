@@ -115,7 +115,8 @@ namespace DietHelper.ViewModels.Dishes
                 UserProductId = SelectedUserItem.Id,
                 Name = SelectedUserItem.Name,
                 Quantity = SelectedUserItem.Quantity,
-                CurrentNutrition = new NutritionInfo()
+                ProductNameSnapshot = SelectedUserItem.Name,
+                ProductNutritionInfoSnapshot = new NutritionInfo()
                 {
                     Calories = SelectedUserItem.NutritionFacts.Calories,
                     Protein = SelectedUserItem.NutritionFacts.Protein,
@@ -156,7 +157,8 @@ namespace DietHelper.ViewModels.Dishes
                         UserProductId = createdUserProduct.Id,
                         Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
                         Quantity = SelectedBaseItem.Quantity,
-                        CurrentNutrition = new NutritionInfo()
+                        ProductNameSnapshot = SelectedBaseItem.Name!,
+                        ProductNutritionInfoSnapshot = new NutritionInfo()
                         {
                             Calories = SelectedBaseItem.Calories * (Quantity / 100),
                             Protein = SelectedBaseItem.Protein * (Quantity / 100),
@@ -187,7 +189,8 @@ namespace DietHelper.ViewModels.Dishes
                     UserProductId = newProduct.Id,
                     Name = ManualName!,
                     Quantity = Quantity,
-                    CurrentNutrition = new NutritionInfo()
+                    ProductNameSnapshot = ManualName!,
+                    ProductNutritionInfoSnapshot = new NutritionInfo()
                     {
                         Calories = ManualCalories * (Quantity / 100),
                         Protein = ManualProtein * (Quantity / 100),
