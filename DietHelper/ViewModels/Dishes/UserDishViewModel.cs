@@ -6,6 +6,7 @@ using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -50,7 +51,8 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         private double quantity;
         [ObservableProperty]
-        private string formattedQuantity;        
+        private string formattedQuantity;  
+        private bool isManualQuantity = false;
 
         private async void Recalculate()
         {
@@ -72,7 +74,7 @@ namespace DietHelper.ViewModels.Dishes
         }
         private void RecalculateForReadyDish()
         {
-            if (!IsReadyDish) return;
+            if (!IsReadyDish || isManualQuantity) return;
 
             var factor = Quantity / 100.0;
 
@@ -82,6 +84,17 @@ namespace DietHelper.ViewModels.Dishes
                 Protein = baseNutritionForReadyDish.Protein * factor,
                 Fat = baseNutritionForReadyDish.Fat * factor,
                 Carbs = baseNutritionForReadyDish.Carbs * factor
+            };
+        }
+
+        private void RestoreBaseNutritionForReadyDish(NutritionInfo totalNutrition, double quantity)
+        {
+            baseNutritionForReadyDish = new NutritionInfo()
+            {
+                Calories = totalNutrition.Calories * 100 / quantity,
+                Protein = totalNutrition.Protein * 100 / quantity,
+                Fat = totalNutrition.Fat * 100 / quantity,
+                Carbs = totalNutrition.Carbs * 100 / quantity
             };
         }
 
@@ -96,7 +109,6 @@ namespace DietHelper.ViewModels.Dishes
             UserId = userDish.UserId;
             Name = userDish.Name ?? string.Empty;
             IsReadyDish = userDish.IsReadyDish;
-            Quantity = IsReadyDish ? 100 : userDish.Quantity;
             CanAddIngredients = !IsReadyDish;
 
             if (userDish.IsReadyDish)
@@ -120,6 +132,8 @@ namespace DietHelper.ViewModels.Dishes
                 }
                 Recalculate();
             }
+            
+            Quantity = IsReadyDish ? 100 : userDish.Quantity;
 
             Ingredients.CollectionChanged += async (s, e) =>
             {
@@ -164,8 +178,23 @@ namespace DietHelper.ViewModels.Dishes
                     Quantity += ingredientViewModel.Quantity;
                 }
             }
-            else Quantity = quantity;
-        }
+            else
+            {
+                
+                if (quantity != 100)
+                {
+                    isManualQuantity = true;
+                    RestoreBaseNutritionForReadyDish(totalNutrition, quantity);
+                    Quantity = quantity;
+                    isManualQuantity = false;
+                }
+                else
+                {
+                    baseNutritionForReadyDish = totalNutrition;
+                    Quantity = quantity;
+                }
+            }
+        }        
 
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {

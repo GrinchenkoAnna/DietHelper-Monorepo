@@ -10,12 +10,4 @@ public partial class MainView : UserControl
     {
         InitializeComponent();
     }
-
-    private void Button_ActualThemeVariantChanged(object? sender, System.EventArgs e)
-    {
-    }
-
-    private void Button_ActualThemeVariantChanged_1(object? sender, System.EventArgs e)
-    {
-    }
 }

@@ -101,7 +101,7 @@ namespace DietHelper.Server.Controllers
         {
             var userId = GetCurrentUserId();
 
-            if (request.Ingredients is null || request.Ingredients.Count == 0)
+            if (request.Ingredients is null)
                 return BadRequest("Meal entry cannot be empty");
 
             var productIds = request.Ingredients.Select(i => i.UserProductId).Distinct().ToList();
@@ -147,7 +147,7 @@ namespace DietHelper.Server.Controllers
         {
             int userId = GetCurrentUserId();
 
-            if (request is null || request.Ingredients is null || request.Ingredients.Count == 0)
+            if (request is null || request.Ingredients is null)
                 return BadRequest("Meal entry cannot be empty");
 
             var productIds = request.Ingredients.Select(i => i.UserProductId).Distinct().ToList();
@@ -178,7 +178,13 @@ namespace DietHelper.Server.Controllers
                 CreatedAt = DateTime.UtcNow,
             };
 
-            userMealEntry = await AddIngredientsToUserMealEntry(userMealEntry, request);
+            if (request.Ingredients.Count > 0)
+                userMealEntry = await AddIngredientsToUserMealEntry(userMealEntry, request);
+            else
+            {
+                userMealEntry.TotalNutrition = request.TotalNutrition;
+                userMealEntry.TotalQuantity = request.TotalQuantity;
+            }
 
             _dbContext.UserMealEntries.Add(userMealEntry);
             await _dbContext.SaveChangesAsync();

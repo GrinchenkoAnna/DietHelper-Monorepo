@@ -369,13 +369,14 @@ namespace DietHelper.ViewModels
                     ProductNameSnapshot = ingredient.ProductNameSnapshot,
                     ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot
                 }).ToList();
-                if (ingredients is null || ingredients.Count == 0) return;
 
                 var userMealEntryDto = new UserMealEntryDto()
                 {
                     UserDishId = userDish.Id,
                     Date = SelectedDate,
-                    Ingredients = ingredients
+                    Ingredients = ingredients,
+                    TotalQuantity = (decimal)userDish.Quantity,
+                    TotalNutrition = userDish.NutritionFacts
                 };
 
                 var userMealEntry = _apiService.AddUserMealEntryAsync(userMealEntryDto);
