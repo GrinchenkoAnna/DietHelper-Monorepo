@@ -157,6 +157,7 @@ namespace DietHelper.ViewModels.Dishes
             Id = id;
             Name = name;
             IsReadyDish = isReadyDish;
+            CanAddIngredients = !IsReadyDish;
             NutritionFacts = totalNutrition;
 
             if (!IsReadyDish && ingredients is not null)

@@ -41,6 +41,8 @@ namespace DietHelper.ViewModels.Base
         [ObservableProperty]
         private NutritionInfo nutritionFacts = new();
 
+        protected bool isManualQuantity = false;
+
         public ProductViewModelBase()
         {
             ProductChanged += (sender, e) => { };
@@ -50,6 +52,8 @@ namespace DietHelper.ViewModels.Base
 
         protected void Recalculate()
         {
+            if (isManualQuantity) return;
+
             var factor = Quantity / 100.0;
 
             NutritionFacts = new()

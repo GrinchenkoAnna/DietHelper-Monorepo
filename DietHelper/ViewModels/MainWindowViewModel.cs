@@ -195,21 +195,15 @@ namespace DietHelper.ViewModels
                         var product = userMealEntryDto.Ingredients.FirstOrDefault();
                         if (product is null) continue;
 
-                        var productNutritionInfo = product.ProductNutritionInfoSnapshot;
-
-                        var userProduct = new UserProductViewModel()
+                        var userProductViewModel = new UserProductViewModel(
+                            product.UserProductId, product.ProductNameSnapshot, 
+                            quantity: (double)userMealEntryDto.TotalQuantity, 
+                            totalNutrition: userMealEntryDto.TotalNutrition)
                         {
-                            Id = product.UserProductId,
-                            MealEntryId = product.Id,
-                            Name = product.ProductNameSnapshot,
-                            Calories = productNutritionInfo.Calories,
-                            Protein = productNutritionInfo.Protein,
-                            Fat = productNutritionInfo.Fat,
-                            Carbs = productNutritionInfo.Carbs,
-                            Quantity = (double)product.Quantity
+                            MealEntryId = userMealEntryDto.Id
                         };
 
-                        UserProducts.Add(userProduct);
+                        UserProducts.Add(userProductViewModel);
                     }
                     else // блюдо
                     {
@@ -318,8 +312,8 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                var userProduct = await WeakReferenceMessenger.Default.Send(new AddUserProductMessage());
-                if (userProduct is null) return;
+                var userProductViewModel = await WeakReferenceMessenger.Default.Send(new AddUserProductMessage());
+                if (userProductViewModel is null) return;
 
                 var userMealEntryDto = new UserMealEntryDto()
                 {
@@ -328,15 +322,21 @@ namespace DietHelper.ViewModels
                     {
                         new UserMealEntryIngredientDto()
                         {
-                            UserProductId = userProduct.Id,
-                            Quantity = (decimal)userProduct.Quantity,
-                            ProductNameSnapshot = userProduct.Name!,
-                            ProductNutritionInfoSnapshot = userProduct.NutritionFacts
+                            UserProductId = userProductViewModel.Id,
+                            Quantity = (decimal)userProductViewModel.Quantity,
+                            ProductNameSnapshot = userProductViewModel.Name!,
+                            ProductNutritionInfoSnapshot = new NutritionInfo
+                            {
+                                Calories = userProductViewModel.Calories,
+                                Protein = userProductViewModel.Protein,
+                                Fat = userProductViewModel.Fat,
+                                Carbs = userProductViewModel.Carbs
+                            }
                         }
                     }
                 };
 
-                var userMealEntry = _apiService.AddUserMealEntryAsync(userMealEntryDto);
+                var userMealEntry = await _apiService.AddUserMealEntryAsync(userMealEntryDto);
 
                 if (userMealEntry is not null)
                     await LoadDataForDateAsync(SelectedDate);
@@ -379,7 +379,7 @@ namespace DietHelper.ViewModels
                     TotalNutrition = userDish.NutritionFacts
                 };
 
-                var userMealEntry = _apiService.AddUserMealEntryAsync(userMealEntryDto);
+                var userMealEntry = await _apiService.AddUserMealEntryAsync(userMealEntryDto);
 
                 if (userMealEntry is not null)
                     await LoadDataForDateAsync(SelectedDate);
@@ -402,9 +402,9 @@ namespace DietHelper.ViewModels
         {
             try
             {
-                foreach (var userProduct in UserProducts)
+                foreach (var userProductViewModel in UserProducts)
                 {
-                    if (userProduct.MealEntryId > 0)
+                    if (userProductViewModel.MealEntryId > 0)
                     {
                         var userMealEntryProduct = new UserMealEntryDto()
                         {
@@ -413,15 +413,21 @@ namespace DietHelper.ViewModels
                             {
                                 new UserMealEntryIngredientDto()
                                 {
-                                    UserProductId = userProduct.Id,
-                                    Quantity = (decimal)userProduct.Quantity,
-                                    ProductNameSnapshot = userProduct.Name!,
-                                    ProductNutritionInfoSnapshot = userProduct.NutritionFacts
+                                    UserProductId = userProductViewModel.Id,
+                                    Quantity = (decimal)userProductViewModel.Quantity,
+                                    ProductNameSnapshot = userProductViewModel.Name!,
+                                    ProductNutritionInfoSnapshot = new NutritionInfo
+                                    {
+                                        Calories = userProductViewModel.Calories,
+                                        Protein = userProductViewModel.Protein,
+                                        Fat = userProductViewModel.Fat,
+                                        Carbs = userProductViewModel.Carbs
+                                    }
                                 }
                             }
                         };
 
-                        await _apiService.UpdateUserMealEntry(userProduct.MealEntryId, userMealEntryProduct);
+                        await _apiService.UpdateUserMealEntry(userProductViewModel.MealEntryId, userMealEntryProduct);
                     }
                 }
 

@@ -13,13 +13,14 @@ namespace DietHelper.ViewModels.Products
         private int userId = -1;
 
         [ObservableProperty]
-        private int mealEntryId;
+        private int mealEntryId;        
 
         public UserProductViewModel()
         {
             Recalculate();
         }
 
+        // загрузка из справочника
         public UserProductViewModel(UserProduct userProduct)
         {
             Id = userProduct.Id;
@@ -39,6 +40,39 @@ namespace DietHelper.ViewModels.Products
                 ?? 0;
 
             Recalculate();
+        }
+
+        // загрузка из истории
+        public UserProductViewModel(int id, string name, double quantity, NutritionInfo totalNutrition)
+        {
+            Id = id;
+            Name = name;
+
+            if (quantity != 100)
+            {
+                isManualQuantity = true;
+                RestoreNutritionForUserProduct(totalNutrition, quantity);
+                NutritionFacts = totalNutrition;
+                Quantity = quantity;
+                isManualQuantity = false;
+            }
+            else
+            {
+                Calories = totalNutrition.Calories;
+                Protein = totalNutrition.Protein;
+                Fat = totalNutrition.Fat;
+                Carbs = totalNutrition.Carbs;
+                NutritionFacts = totalNutrition;
+                Quantity = quantity;
+            }
+        }
+
+        private void RestoreNutritionForUserProduct(NutritionInfo totalNutrition, double quantity)
+        {
+            Calories = totalNutrition.Calories * 100 / quantity;
+            Protein = totalNutrition.Protein * 100 / quantity;
+            Fat = totalNutrition.Fat * 100 / quantity;
+            Carbs = totalNutrition.Carbs * 100 / quantity;
         }
     }
 }
