@@ -109,6 +109,7 @@
                                         IsEnabled="{Binding CanAddIngredients}"
                                         IsVisible="{Binding CanAddIngredients}"
                                         Margin="8 5 -8 0"/>
+                                <TextBlock Text="{Binding CanAddIngredients}" Foreground="Red" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

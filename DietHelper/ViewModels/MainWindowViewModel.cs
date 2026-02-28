@@ -212,7 +212,7 @@ namespace DietHelper.ViewModels
 
                         var userDishViewModel = new UserDishViewModel(
                             _apiService, userDish.Id, userDish.Name,
-                             isReadyDish: userMealEntryDto.Ingredients.Count == 0,
+                             isReadyDish: userDish.IsReadyDish,
                              quantity: (double)userMealEntryDto.TotalQuantity,
                              totalNutrition: userMealEntryDto.TotalNutrition,
                              ingredients: userMealEntryDto.Ingredients)
