@@ -54,7 +54,7 @@ namespace DietHelper.ViewModels.Dishes
         private string formattedQuantity;  
         private bool isManualQuantity = false;
 
-        private async void Recalculate()
+        private void Recalculate()
         {
             if (IsReadyDish) return;
 
@@ -120,6 +120,7 @@ namespace DietHelper.ViewModels.Dishes
                     Fat = userDish.NutritionFacts?.Fat ?? 0,
                     Carbs = userDish.NutritionFacts?.Carbs ?? 0
                 };
+                Quantity = 100;
                 RecalculateForReadyDish();
             }
             else
@@ -131,9 +132,8 @@ namespace DietHelper.ViewModels.Dishes
                     ingredientViewModel.PropertyChanged += OnIngredientPropertyChanged;
                 }
                 Recalculate();
+                Quantity = userDish.Quantity;
             }
-            
-            Quantity = IsReadyDish ? 100 : userDish.Quantity;
 
             Ingredients.CollectionChanged += async (s, e) =>
             {
@@ -195,6 +195,19 @@ namespace DietHelper.ViewModels.Dishes
                     Quantity = quantity;
                 }
             }
+
+            Ingredients.CollectionChanged += async (s, e) =>
+            {
+                if (e.NewItems != null)
+                    foreach (UserDishIngredientViewModel item in e.NewItems)
+                        item.PropertyChanged += OnIngredientPropertyChanged;
+
+                if (e.OldItems != null)
+                    foreach (UserDishIngredientViewModel item in e.OldItems)
+                        item.PropertyChanged -= OnIngredientPropertyChanged;
+
+                Recalculate();
+            };
         }        
 
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)

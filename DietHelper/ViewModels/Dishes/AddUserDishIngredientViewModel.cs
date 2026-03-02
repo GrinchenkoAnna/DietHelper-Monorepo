@@ -122,6 +122,13 @@ namespace DietHelper.ViewModels.Dishes
                     Protein = SelectedUserItem.NutritionFacts.Protein,
                     Fat = SelectedUserItem.NutritionFacts.Fat,
                     Carbs = SelectedUserItem.NutritionFacts.Carbs
+                },
+                CurrentNutrition = new NutritionInfo()
+                {
+                    Calories = SelectedUserItem.NutritionFacts.Calories,
+                    Protein = SelectedUserItem.NutritionFacts.Protein,
+                    Fat = SelectedUserItem.NutritionFacts.Fat,
+                    Carbs = SelectedUserItem.NutritionFacts.Carbs
                 }
             };
 
@@ -191,6 +198,13 @@ namespace DietHelper.ViewModels.Dishes
                     Quantity = Quantity,
                     ProductNameSnapshot = ManualName!,
                     ProductNutritionInfoSnapshot = new NutritionInfo()
+                    {
+                        Calories = ManualCalories * (Quantity / 100),
+                        Protein = ManualProtein * (Quantity / 100),
+                        Fat = ManualFat * (Quantity / 100),
+                        Carbs = ManualCarbs * (Quantity / 100)
+                    },
+                    CurrentNutrition = new NutritionInfo()
                     {
                         Calories = ManualCalories * (Quantity / 100),
                         Protein = ManualProtein * (Quantity / 100),

@@ -127,9 +127,17 @@ namespace DietHelper.Server.Controllers
             var userMealEntry = await GetUserMeal(id);
             if (userMealEntry is null) return NotFound();
 
-            foreach (var ingredient in userMealEntry.Ingredients)
-                ingredient.IsDeleted = true;
-            userMealEntry = await AddIngredientsToUserMealEntry(userMealEntry, request);
+            if (userMealEntry.Ingredients.Count > 0)
+            {
+                foreach (var ingredient in userMealEntry.Ingredients)
+                    ingredient.IsDeleted = true;
+                userMealEntry = await AddIngredientsToUserMealEntry(userMealEntry, request);
+            }
+            else
+            {
+                userMealEntry.TotalQuantity = request.TotalQuantity;
+                userMealEntry.TotalNutrition = request.TotalNutrition;
+            }            
 
             userMealEntry.Date = request.Date;
             userMealEntry.UserDishId = request.UserDishId;

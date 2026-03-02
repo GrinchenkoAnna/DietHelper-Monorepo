@@ -56,13 +56,13 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding ProductNameSnapshot}" Width="150"/>
                         <TextBlock Text="К: "/>
-                        <TextBlock Text="{Binding CurrentNutrition.Calories}" Width="80"/>
+                        <TextBlock Text="{Binding CurrentNutrition.FormattedCalories}" Width="80"/>
                         <TextBlock Text="Б: "/>
-                        <TextBlock Text="{Binding CurrentNutrition.Protein}" Width="80"/>
+                        <TextBlock Text="{Binding CurrentNutrition.FormattedProtein}" Width="80"/>
                         <TextBlock Text="Ж: "/>
-                        <TextBlock Text="{Binding CurrentNutrition.Fat}" Width="80"/>
+                        <TextBlock Text="{Binding CurrentNutrition.FormattedFat}" Width="80"/>
                         <TextBlock Text="У: "/>
-                        <TextBlock Text="{Binding CurrentNutrition.Carbs}" Width="80"/>
+                        <TextBlock Text="{Binding CurrentNutrition.FormattedCarbs}" Width="80"/>
                         <TextBlock Text="Вес: "/>
                         <TextBox Text="{Binding Quantity}" Width="80"/>
                         <Button Content="-" HorizontalAlignment="Right"

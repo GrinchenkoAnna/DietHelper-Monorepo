@@ -452,7 +452,9 @@ namespace DietHelper.ViewModels
                         {
                             UserDishId = userDish.Id,
                             Date = SelectedDate,
-                            Ingredients = ingredients
+                            Ingredients = ingredients, 
+                            TotalQuantity = (decimal)userDish.Quantity,
+                            TotalNutrition = userDish.NutritionFacts
                         };
 
                         await _apiService.UpdateUserMealEntry(userDish.MealEntryId, userMealEntryDish);
