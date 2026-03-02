@@ -429,6 +429,8 @@ namespace DietHelper.ViewModels
 
                         await _apiService.UpdateUserMealEntry(userProductViewModel.MealEntryId, userMealEntryProduct);
                     }
+
+                    userProductViewModel.IsDirty = false;
                 }
 
                 foreach (var userDish in UserDishes)
@@ -459,6 +461,8 @@ namespace DietHelper.ViewModels
 
                         await _apiService.UpdateUserMealEntry(userDish.MealEntryId, userMealEntryDish);
                     }
+
+                    userDish.IsDirty = false;
                 }
             }
             catch (Exception ex)

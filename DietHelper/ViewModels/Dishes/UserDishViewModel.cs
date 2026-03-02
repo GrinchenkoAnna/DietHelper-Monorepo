@@ -54,6 +54,9 @@ namespace DietHelper.ViewModels.Dishes
         private string formattedQuantity;  
         private bool isManualQuantity = false;
 
+        [ObservableProperty]
+        private bool isDirty = false;
+
         private void Recalculate()
         {
             if (IsReadyDish) return;
@@ -147,6 +150,8 @@ namespace DietHelper.ViewModels.Dishes
 
                 Recalculate();
             };
+
+            IsDirty = false;
         }
 
         // загрузка из истории
@@ -208,17 +213,26 @@ namespace DietHelper.ViewModels.Dishes
 
                 Recalculate();
             };
+
+            IsDirty = false;
         }        
 
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(UserDishIngredientViewModel.Quantity))
+            {
+                IsDirty = true;
                 Recalculate();
+            }
         }
 
         partial void OnQuantityChanged(double value)
         {
-            if (IsReadyDish) RecalculateForReadyDish();
+            if (IsReadyDish)
+            {
+                IsDirty = true;
+                RecalculateForReadyDish();
+            }
             else UpdateTotalQuantity();
         }
 
@@ -254,6 +268,7 @@ namespace DietHelper.ViewModels.Dishes
             {
                 userDishIngredientViewModel.Id = newIngredientId.Value;
                 Ingredients.Add(userDishIngredientViewModel);
+                IsDirty = true;
             }
         }
 
@@ -261,7 +276,11 @@ namespace DietHelper.ViewModels.Dishes
         private async Task RemoveIngredient(UserDishIngredientViewModel userDishIngredientViewModel)
         {
             var isSuccess = await _apiService.RemoveUserDishIngredientAsync(Id, userDishIngredientViewModel.Id);
-            if (isSuccess) Ingredients.Remove(userDishIngredientViewModel);
+            if (isSuccess)
+            {
+                Ingredients.Remove(userDishIngredientViewModel);
+                IsDirty = true;
+            }
         }
     }
 }

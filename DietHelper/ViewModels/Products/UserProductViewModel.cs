@@ -2,8 +2,6 @@
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Products;
 using DietHelper.ViewModels.Base;
-using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace DietHelper.ViewModels.Products
 {
@@ -13,7 +11,7 @@ namespace DietHelper.ViewModels.Products
         private int userId = -1;
 
         [ObservableProperty]
-        private int mealEntryId;        
+        private int mealEntryId;       
 
         public UserProductViewModel()
         {
@@ -26,20 +24,21 @@ namespace DietHelper.ViewModels.Products
             Id = userProduct.Id;
             UserId = userProduct.UserId;
             Name = userProduct.BaseProduct?.Name;
-            Calories = userProduct.CustomNutrition?.Calories 
-                ?? userProduct.BaseProduct?.NutritionFacts?.Calories 
+            Calories = userProduct.CustomNutrition?.Calories
+                ?? userProduct.BaseProduct?.NutritionFacts?.Calories
                 ?? 0;
             Protein = userProduct.CustomNutrition?.Protein
-                ?? userProduct.BaseProduct?.NutritionFacts?.Protein 
+                ?? userProduct.BaseProduct?.NutritionFacts?.Protein
                 ?? 0;
             Fat = userProduct.CustomNutrition?.Fat
-                ?? userProduct.BaseProduct?.NutritionFacts?.Fat 
+                ?? userProduct.BaseProduct?.NutritionFacts?.Fat
                 ?? 0;
             Carbs = userProduct.CustomNutrition?.Carbs
-                ?? userProduct.BaseProduct?.NutritionFacts?.Carbs 
+                ?? userProduct.BaseProduct?.NutritionFacts?.Carbs
                 ?? 0;
 
             Recalculate();
+            IsDirty = false;
         }
 
         // загрузка из истории
@@ -65,6 +64,8 @@ namespace DietHelper.ViewModels.Products
                 NutritionFacts = totalNutrition;
                 Quantity = quantity;
             }
+
+            IsDirty = false;
         }
 
         private void RestoreNutritionForUserProduct(NutritionInfo totalNutrition, double quantity)

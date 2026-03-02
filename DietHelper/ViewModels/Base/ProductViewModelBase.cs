@@ -43,6 +43,9 @@ namespace DietHelper.ViewModels.Base
 
         protected bool isManualQuantity = false;
 
+        [ObservableProperty]
+        private bool isDirty = false;
+
         public ProductViewModelBase()
         {
             ProductChanged += (sender, e) => { };
@@ -68,6 +71,10 @@ namespace DietHelper.ViewModels.Base
             ProductChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        partial void OnQuantityChanged(double value) => Recalculate();
+        partial void OnQuantityChanged(double value)
+        {
+            IsDirty = true;
+            Recalculate();
+        }
     }
 }

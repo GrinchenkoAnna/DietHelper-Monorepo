@@ -8,12 +8,24 @@
              x:Class="DietHelper.Views.Dishes.UserDishView"
              x:DataType="vm:UserDishViewModel">
   
-    <StackPanel Margin="10 0 10 0">
-        <Grid ColumnDefinitions="Auto,*">
-            <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
+        <Grid Margin="10 0 10 0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *">
+            <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1" Text=" - изменено" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       IsVisible="{Binding IsDirty}" Foreground="Gray"/>
         </Grid>
 
-        <StackPanel Margin="12 10 0 10">
+        <TextBlock Grid.Row="1" Text="Готовое блюдо" FontSize="10" Foreground="Gray"
+                   IsVisible="{Binding IsReadyDish}"/>
+
+        <StackPanel Grid.Row="2" Margin="12 10 0 10">
             <TextBlock Text="Пищевая ценность всего блюда:" />
             <TextBlock Text="Для пересчета КБЖУ измените вес блюда" 
                        FontSize="10" Foreground="Gray"
@@ -24,22 +36,18 @@
                     <TextBlock Text="К: "/>
                     <TextBlock Text="{Binding NutritionFacts.FormattedCalories}" Width="100" />
                 </StackPanel>
-
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Б: "/>
                     <TextBlock Text="{Binding NutritionFacts.FormattedProtein}" Width="100" />
                 </StackPanel>
-
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Ж: "/>
                     <TextBlock Text="{Binding NutritionFacts.FormattedFat}" Width="100" />
                 </StackPanel>
-
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="У: "/>
                     <TextBlock Text="{Binding NutritionFacts.FormattedCarbs}" Width="100" />
                 </StackPanel>
-
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Вес: "/>
                     <TextBox Text="{Binding Quantity}" Width="100" 
@@ -49,8 +57,8 @@
                 </StackPanel>
             </StackPanel>
         </StackPanel>
-        
-        <ListBox x:Name="ingredientsList" ItemsSource="{Binding Ingredients}">
+
+        <ListBox Grid.Row="3" x:Name="ingredientsList" ItemsSource="{Binding Ingredients}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
@@ -71,8 +79,8 @@
                                 CommandParameter="{Binding}"/>
                     </StackPanel>
                 </DataTemplate>
-            </ListBox.ItemTemplate>			
-        </ListBox>		
-    </StackPanel>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
 
 </UserControl>
