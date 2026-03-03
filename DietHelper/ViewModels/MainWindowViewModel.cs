@@ -71,6 +71,7 @@ namespace DietHelper.ViewModels
         [RelayCommand]
         private void SetSelectedDate(DateTime date)
         {
+            if (date == SelectedDate) return;
             SelectedDate = date;
         }
 

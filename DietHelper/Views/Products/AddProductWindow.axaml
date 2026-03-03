@@ -36,6 +36,19 @@
                     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Visible">
                         <ListBox ItemsSource="{Binding UserSearchResults}"
                                  SelectedItem="{Binding SelectedUserItem}">
+                            <ListBox.Styles>
+                                <Style Selector="ListBox">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                                <Style Selector="ListBoxItem">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </Style>
+                            </ListBox.Styles>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -69,6 +82,19 @@
                     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Visible">
                         <ListBox ItemsSource="{Binding BaseSearchResults}"
                                  SelectedItem="{Binding SelectedBaseItem}">
+                            <ListBox.Styles>
+                                <Style Selector="ListBox">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                                <Style Selector="ListBoxItem">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </Style>
+                            </ListBox.Styles>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
