@@ -2,67 +2,134 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:ingredients="clr-namespace:DietHelper.Views.Products"
-             xmlns:vm ="clr-namespace:DietHelper.ViewModels.Dishes"
+             xmlns:vm="clr-namespace:DietHelper.ViewModels.Dishes"
+             xmlns:converters="clr-namespace:DietHelper.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DietHelper.Views.Dishes.UserDishView"
              x:DataType="vm:UserDishViewModel">
-  
-    <StackPanel Margin="10 0 10 0">
-        <Grid ColumnDefinitions="Auto,*">
-            <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
-        </Grid>
 
-        <StackPanel Margin="12 10 0 10">
-            <TextBlock Text="Пищевая ценность всего блюда:" />
-            <TextBlock Text="Для пересчета КБЖУ измените вес блюда" 
-                       FontSize="10" Foreground="Gray"
+    <UserControl.Resources>
+		<converters:BorderThicknessForDishConverter x:Key="BorderThicknessForDishConverter"/>
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource CardBackground}"
+            CornerRadius="8"
+            Margin="10,5"
+            Padding="12,8"
+            MinWidth="773">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="8" 
+                              Color="{DynamicResource CardShadowColor}" 
+                              OffsetX="0" OffsetY="0" 
+                              Opacity="1"/>
+        </Border.Effect>
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *">
+                <TextBlock Grid.Column="0" Text="{Binding Name}" 
+                           FontWeight="SemiBold" FontSize="16" />
+                <TextBlock Grid.Column="1" Text=" • изменено" 
+                           Foreground="Gray" FontSize="12" IsVisible="{Binding IsDirty}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="1" 
+                       Text="Готовое блюдо" 
+                       FontSize="10" 
+                       Foreground="Gray"
                        IsVisible="{Binding IsReadyDish}"/>
 
-            <StackPanel Orientation="Horizontal">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="К: "/>
-                    <TextBlock Text="{Binding NutritionFacts.FormattedCalories}" Width="100" />
-                </StackPanel>
+            <StackPanel Grid.Row="2" Margin="0,6,0,8">
+                <Border Background="Transparent"
+                        BorderBrush="Gray"
+                        BorderThickness="{Binding IsReadyDish, Converter={StaticResource BorderThicknessForDishConverter}}">
+                    <StackPanel>
+						<TextBlock Text="Пищевая ценность всего блюда:" />
+                        <TextBlock Text="Для пересчета КБЖУ измените вес блюда" 
+                                   FontSize="10" Foreground="Gray"
+                                   IsVisible="{Binding IsReadyDish}"/>
 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Б: "/>
-                    <TextBlock Text="{Binding NutritionFacts.FormattedProtein}" Width="100" />
-                </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left" Margin="0,4,0,0">        
+                            <TextBlock Text="К:" FontWeight="Medium" Margin="5,5,0,5"/>
+                            <TextBlock Text="{Binding NutritionFacts.FormattedCalories}" 
+                                       Width="100" Margin="5,5,0,5"/>
 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Ж: "/>
-                    <TextBlock Text="{Binding NutritionFacts.FormattedFat}" Width="100" />
-                </StackPanel>
+                            <TextBlock Text="Б:" FontWeight="Medium" Margin="5,5,0,5"/>
+                            <TextBlock Text="{Binding NutritionFacts.FormattedProtein}" 
+                                       Width="100" Margin="5,5,0,5"/>
 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="У: "/>
-                    <TextBlock Text="{Binding NutritionFacts.FormattedCarbs}" Width="100" />
-                </StackPanel>
+                            <TextBlock Text="Ж:" FontWeight="Medium" Margin="5,5,0,5"/>
+                            <TextBlock Text="{Binding NutritionFacts.FormattedFat}" 
+                                       Width="100" Margin="5,5,0,5"/>
 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Вес: "/>
-                    <TextBox Text="{Binding Quantity}" Width="100" 
-                             IsVisible="{Binding IsReadyDish}" Margin="5 -5 0 0"/>
-                    <TextBlock Text="{Binding FormattedQuantity}" Width="100"
-                             IsVisible="{Binding !IsReadyDish}"/>                    
-                </StackPanel>
+                            <TextBlock Text="У:" FontWeight="Medium" Margin="5,5,0,5"/>
+                            <TextBlock Text="{Binding NutritionFacts.FormattedCarbs}" 
+                                       Width="100" Margin="5,5,0,5"/>
+
+                            <TextBlock Text="Вес:" FontWeight="Medium" Margin="5,5,0,5"/>
+                            <TextBox Text="{Binding Quantity}" 
+                                     Width="100" 
+                                     Margin="5,0,0,0"
+                                     Background="Transparent"
+                                     IsVisible="{Binding IsReadyDish}"/>
+                            <TextBlock Text="{Binding FormattedQuantity}" 
+                                       Width="100" Margin="5,5,0,5"
+                                       IsVisible="{Binding !IsReadyDish}"/>
+                        </StackPanel>
+                    </StackPanel>			
+                </Border>                
             </StackPanel>
-        </StackPanel>
-        
-        <ListBox x:Name="ingredientsList" ItemsSource="{Binding DisplayedIngredients}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <ingredients:UserProductView />
-                        <Button Content="-" HorizontalAlignment="Right"
-                                Margin="10 -5 0 0"
-                                Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"
-                                CommandParameter="{Binding}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>			
-        </ListBox>		
-    </StackPanel>
 
+            <ListBox Grid.Row="3" 
+                     x:Name="ingredientsList" 
+                     ItemsSource="{Binding Ingredients}"
+                     Background="Transparent"
+                     BorderThickness="0">
+                <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="Padding" Value="0,2"/>
+                    </Style>
+                </ListBox.Styles>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid RowDefinitions="Auto, Auto" Margin="0,2">
+                            <TextBlock Grid.Row="0" Text="{Binding ProductNameSnapshot}" 
+                                       FontWeight="SemiBold" FontSize="14" 
+                                       Margin="5,5,0,2"/>
+
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,5">
+                                <TextBlock Text="К:" FontWeight="Medium" Margin="5,5,0,5"/>
+                                <TextBlock Text="{Binding CurrentNutrition.FormattedCalories}" 
+                                           Width="100" Margin="5,5,0,5"/>
+
+                                <TextBlock Text="Б:" FontWeight="Medium" Margin="5,5,0,5"/>
+                                <TextBlock Text="{Binding CurrentNutrition.FormattedProtein}" 
+                                           Width="100" Margin="5,5,0,5"/>
+
+                                <TextBlock Text="Ж:" FontWeight="Medium" Margin="5,5,0,5"/>
+                                <TextBlock Text="{Binding CurrentNutrition.FormattedFat}" 
+                                           Width="100" Margin="5,5,0,5"/>
+
+                                <TextBlock Text="У:" FontWeight="Medium" Margin="5,5,0,5"/>
+                                <TextBlock Text="{Binding CurrentNutrition.FormattedCarbs}" 
+                                           Width="100" Margin="5,5,0,5"/>
+
+                                <TextBlock Text="Вес:" FontWeight="Medium" Margin="5,5,0,5"/>
+                                <TextBox Text="{Binding Quantity}" 
+                                         Width="100" 
+                                         Margin="5,0,0,0"
+                                         Background="Transparent"/>
+
+                                <Button Content="-" Width="20"
+                                        Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"
+                                        CommandParameter="{Binding}"
+                                        Classes="control-button"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </Border>
 </UserControl>

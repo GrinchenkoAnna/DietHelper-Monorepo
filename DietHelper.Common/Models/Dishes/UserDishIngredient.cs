@@ -13,7 +13,6 @@ namespace DietHelper.Common.Models.Dishes
 
         [Required]
         public int UserDishId { get; set; }
-        //public virtual UserDish UserDish { get; set; } = null!;
 
         [Required]
         public int UserProductId { get; set; }

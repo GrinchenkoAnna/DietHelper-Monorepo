@@ -11,6 +11,35 @@
   
     <Application.Styles>
         <FluentTheme />
+        <Style Selector="Button.control-button">
+			<Setter Property="Background" Value="Transparent" />
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="FontWeight" Value="Light" />
+			<Setter Property="MinWidth" Value="25" />
+        </Style>
+        <Style Selector="Button.control-button:pointerover /template/ ContentPresenter">
+            <Setter Property="BorderBrush" Value="#696969"/>
+            <Setter Property="BorderThickness" Value="0.5" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="FontWeight" Value="Light" />
+			<Setter Property="MinWidth" Value="25" />
+        </Style>
     </Application.Styles>
 
+    <Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.ThemeDictionaries>
+				<ResourceDictionary x:Key="Light">
+                <SolidColorBrush x:Key="CardBackground" Color="#EEEEEE"/>
+                <Color x:Key="CardShadowColor">#30000000</Color>
+            </ResourceDictionary>
+            <ResourceDictionary x:Key="Dark">
+                <SolidColorBrush x:Key="CardBackground" Color="#222222"/>
+                <Color x:Key="CardShadowColor">#70FFFFFF</Color>
+            </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

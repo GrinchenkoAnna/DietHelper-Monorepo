@@ -10,7 +10,8 @@
         Title="DietHelper"
         x:Name="root"
         x:DataType="vm:MainWindowViewModel"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Width="900" MinWidth="900">
 
     <ContentControl x:Name="MainContent" />
 

@@ -115,6 +115,14 @@ namespace DietHelper.ViewModels.Dishes
                 UserProductId = SelectedUserItem.Id,
                 Name = SelectedUserItem.Name,
                 Quantity = SelectedUserItem.Quantity,
+                ProductNameSnapshot = SelectedUserItem.Name,
+                ProductNutritionInfoSnapshot = new NutritionInfo()
+                {
+                    Calories = SelectedUserItem.NutritionFacts.Calories,
+                    Protein = SelectedUserItem.NutritionFacts.Protein,
+                    Fat = SelectedUserItem.NutritionFacts.Fat,
+                    Carbs = SelectedUserItem.NutritionFacts.Carbs
+                },
                 CurrentNutrition = new NutritionInfo()
                 {
                     Calories = SelectedUserItem.NutritionFacts.Calories,
@@ -156,7 +164,8 @@ namespace DietHelper.ViewModels.Dishes
                         UserProductId = createdUserProduct.Id,
                         Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
                         Quantity = SelectedBaseItem.Quantity,
-                        CurrentNutrition = new NutritionInfo()
+                        ProductNameSnapshot = SelectedBaseItem.Name!,
+                        ProductNutritionInfoSnapshot = new NutritionInfo()
                         {
                             Calories = SelectedBaseItem.Calories * (Quantity / 100),
                             Protein = SelectedBaseItem.Protein * (Quantity / 100),
@@ -187,6 +196,14 @@ namespace DietHelper.ViewModels.Dishes
                     UserProductId = newProduct.Id,
                     Name = ManualName!,
                     Quantity = Quantity,
+                    ProductNameSnapshot = ManualName!,
+                    ProductNutritionInfoSnapshot = new NutritionInfo()
+                    {
+                        Calories = ManualCalories * (Quantity / 100),
+                        Protein = ManualProtein * (Quantity / 100),
+                        Fat = ManualFat * (Quantity / 100),
+                        Carbs = ManualCarbs * (Quantity / 100)
+                    },
                     CurrentNutrition = new NutritionInfo()
                     {
                         Calories = ManualCalories * (Quantity / 100),

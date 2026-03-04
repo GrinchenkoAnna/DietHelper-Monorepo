@@ -18,7 +18,7 @@ namespace DietHelper.Services
 
             try
             {
-                var response = await SendRequestAsync(() => _httpClient.GetAsync($"products"), true);
+                var response = await SendRequestAsync(() => _httpClient.GetAsync("products"), true);
                 var userProducts = await response.Content.ReadFromJsonAsync<List<UserProduct>>();
 
                 return userProducts;
@@ -36,7 +36,7 @@ namespace DietHelper.Services
 
             try
             {
-                var response = await SendRequestAsync(() => _httpClient.GetAsync($"products/base"), true);
+                var response = await SendRequestAsync(() => _httpClient.GetAsync("products/base"), true);
                 var baseProducts = await response.Content.ReadFromJsonAsync<List<BaseProduct>>();
 
                 return baseProducts;
@@ -75,7 +75,7 @@ namespace DietHelper.Services
 
             try
             {
-                var response = await SendRequestAsync(() => _httpClient.PostAsync($"products/user", content), false);
+                var response = await SendRequestAsync(() => _httpClient.PostAsync("products/user", content), false);
                 return await response!.Content.ReadFromJsonAsync<UserProduct>();
             }
             catch (Exception ex)

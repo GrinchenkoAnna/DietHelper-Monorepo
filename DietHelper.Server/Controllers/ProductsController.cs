@@ -24,7 +24,7 @@ namespace DietHelper.Server.Controllers
             _dbContext = dbContext;
         }
 
-        private int GetCurrentUser()
+        private int GetCurrentUserId()
         {
             var userClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userClaim is null || !int.TryParse(userClaim, out int userId))
@@ -38,7 +38,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                var userId = GetCurrentUser();
+                var userId = GetCurrentUserId();
 
                 var products = await _dbContext.UserProducts
                     .Include(p => p.BaseProduct)
@@ -58,7 +58,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                var userId = GetCurrentUser();
+                var userId = GetCurrentUserId();
 
                 var product = await _dbContext.UserProducts
                     .Include(up => up.BaseProduct)
@@ -134,7 +134,7 @@ namespace DietHelper.Server.Controllers
         {
             try
             {
-                var userId = GetCurrentUser();
+                var userId = GetCurrentUserId();
 
                 var userProduct = await _dbContext.UserProducts
                 .FirstOrDefaultAsync(up => up.UserId == userId && up.Id == userProductId && !up.IsDeleted);
