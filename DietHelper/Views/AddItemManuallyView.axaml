@@ -3,9 +3,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="clr-namespace:DietHelper.ViewModels.Base"
+			 xmlns:converters="clr-namespace:DietHelper.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DietHelper.Views.AddItemManuallyView"
 			 x:DataType="vm:IAddItemViewModel">
+
+	<UserControl.Resources>
+		<converters:DoubleToStringConverter x:Key="DoubleToStringConverter" />
+	</UserControl.Resources>
 
 	<Grid>
 		<Grid.RowDefinitions>
@@ -21,13 +26,13 @@
 
 		<UniformGrid Grid.Row="1" Columns="4" Margin="10 0 10 0">
 			<TextBox Watermark="Калорий, ккал" Height="20"
-					 Text="{Binding ManualCalories}"/>
+					 Text="{Binding ManualCalories, Converter={StaticResource DoubleToStringConverter}}"/>
 			<TextBox Watermark="Белков, г" Height="20"
-					 Text="{Binding ManualProtein}"/>
+					 Text="{Binding ManualProtein, Converter={StaticResource DoubleToStringConverter}}"/>
 			<TextBox Watermark="Жиров, г" Height="20"
-					 Text="{Binding ManualFat}"/>
+					 Text="{Binding ManualFat, Converter={StaticResource DoubleToStringConverter}}"/>
 			<TextBox Watermark="Углеводов, г" Height="20"
-					 Text="{Binding ManualCarbs}"/>
+					 Text="{Binding ManualCarbs, Converter={StaticResource DoubleToStringConverter}}"/>
 		</UniformGrid>
 	</Grid>
 	

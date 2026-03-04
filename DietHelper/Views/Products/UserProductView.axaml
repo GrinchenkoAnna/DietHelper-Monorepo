@@ -7,11 +7,17 @@
              x:Class="DietHelper.Views.Products.UserProductView"
              x:DataType="vm:UserProductViewModel">    
 
-    <Border Background="Transparent"
+    <Border Background="{DynamicResource CardBackground}"
             CornerRadius="8"
             Margin="10,5"
             Padding="12,8"
-            BoxShadow="0 2 8 0 #30000000">
+            MinWidth="773">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="8" 
+                              Color="{DynamicResource CardShadowColor}" 
+                              OffsetX="0" OffsetY="0" 
+                              Opacity="1"/>
+        </Border.Effect>
         <Grid RowDefinitions="Auto, Auto">
             <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *">
                 <TextBlock Grid.Column="0" Text="{Binding Name}" 
