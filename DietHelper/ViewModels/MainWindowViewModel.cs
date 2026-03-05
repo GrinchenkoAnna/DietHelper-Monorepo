@@ -399,6 +399,12 @@ namespace DietHelper.ViewModels
         }
 
         [RelayCommand]
+        private void OpenStatistics()
+        {
+
+        }
+
+        [RelayCommand]
         private async Task SaveDay()
         {
             try
