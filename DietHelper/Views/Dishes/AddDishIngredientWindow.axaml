@@ -58,8 +58,8 @@
 										<Button Content="Забыть"
 												Command="{Binding $parent[Window].DataContext.DeleteItemFromDatabaseCommand}"
 												CommandParameter="{Binding}"
-												HorizontalAlignment="Center"
-												VerticalAlignment="Center"/>
+												HorizontalAlignment="Center" VerticalAlignment="Center"
+												Classes="control-button"/>
 									</StackPanel>						
 								</DataTemplate>
 							</ListBox.ItemTemplate>
@@ -70,7 +70,8 @@
 							Content="Добавить ингредиент"
 							Command="{Binding AddUserItemCommand}"
 							HorizontalAlignment="Center"
-							Margin="0 5 0 5"/>
+							Margin="0 5 0 5"
+							Classes="control-button"/>
 				</Grid>
 			</TabItem>
 
@@ -111,7 +112,8 @@
 							Content="Добавить ингредиент"
 							Command="{Binding AddBaseItemCommand}"
 							HorizontalAlignment="Center"
-							Margin="0 5 0 5"/>
+							Margin="0 5 0 5"
+							Classes="control-button"/>
 				</Grid>
 			</TabItem>
 		</TabControl>		
@@ -122,7 +124,8 @@
                 Content="Создать ингредиент"
                 Command="{Binding AddManualItemCommand}"
                 HorizontalAlignment="Center"
-                Margin="0 5 0 10"/>
+                Margin="0 5 0 10"
+				Classes="control-button"/>
 	</Grid>
 
 </Window>

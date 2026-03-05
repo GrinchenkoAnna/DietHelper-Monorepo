@@ -53,8 +53,8 @@
 							<Button Content="Забыть"
 									Command="{Binding $parent[Window].DataContext.DeleteItemFromDatabaseCommand}"
 									CommandParameter="{Binding}"
-									HorizontalAlignment="Center"
-									VerticalAlignment="Center"/>
+									HorizontalAlignment="Center" VerticalAlignment="Center"
+									Classes="control-button"/>
 						</StackPanel>						
 					</DataTemplate>
 				</ListBox.ItemTemplate>
@@ -65,7 +65,8 @@
                 Content="Добавить блюдо"
                 Command="{Binding AddUserItemCommand}"
                 HorizontalAlignment="Center"
-                Margin="0 5 0 5"/>
+                Margin="0 5 0 5"
+				Classes="control-button"/>
 
 		<manual:AddDishManuallyView Grid.Row="3" Grid.ColumnSpan="2" />
 
@@ -73,7 +74,8 @@
                 Content="Создать блюдо"
                 Command="{Binding AddManualItemCommand}"
                 HorizontalAlignment="Center"
-                Margin="0 5 0 10"/>	
+                Margin="0 5 0 10"
+				Classes="control-button"/>	
 		
 		<StackPanel Grid.Row="4" Grid.Column="1" 
 			  Orientation="Horizontal"

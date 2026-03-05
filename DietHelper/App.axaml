@@ -33,10 +33,12 @@
 			<ResourceDictionary.ThemeDictionaries>
 				<ResourceDictionary x:Key="Light">
                 <SolidColorBrush x:Key="CardBackground" Color="#EEEEEE"/>
+                <SolidColorBrush x:Key="IngredientBackground" Color="#DDDDDD"/>
                 <Color x:Key="CardShadowColor">#30000000</Color>
             </ResourceDictionary>
             <ResourceDictionary x:Key="Dark">
                 <SolidColorBrush x:Key="CardBackground" Color="#222222"/>
+                <SolidColorBrush x:Key="IngredientBackground" Color="#111111"/>
                 <Color x:Key="CardShadowColor">#70FFFFFF</Color>
             </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
