@@ -32,9 +32,9 @@ namespace DietHelper.ViewModels
         private NutritionInfo totalNutrition = new();
 
         [ObservableProperty]
-        private List<NutritionInfo> nutritions = new();
+        private ObservableCollection<NutritionInfo> nutritions = new();
 
-        protected StatsViewModel(ApiService apiService) : base(apiService)
+        public StatsViewModel(ApiService apiService) : base(apiService)
         {
             _apiService = apiService;
         }
@@ -42,24 +42,41 @@ namespace DietHelper.ViewModels
         [RelayCommand]
         private async Task LoadStats()
         {
-            //загрузить за период (сначала реализовать в ApiService)
+            UserMeals.Clear();
+
+            var userMealsList = await _apiService.GetUserMealsForPeriod(StartDay, EndDay);
+            UserMeals = new ObservableCollection<UserMealEntryDto>(userMealsList ?? new List<UserMealEntryDto>());
+
+            CalculateStats();
         }
 
-        [RelayCommand]
-        private async Task CalculateStats()
+        private void CalculateStats()
         {
             Nutritions.Clear();
 
             var totalNutritions = new NutritionInfo();
+            var date = DateTime.Now;
 
             foreach (var userMeal in UserMeals)
             {
-                Nutritions.Add(userMeal.TotalNutrition);
+                if (userMeal.Date != date)
+                {
+                    Nutritions.Add(userMeal.TotalNutrition);
+                }
+                else
+                {
+                    Nutritions.Last().Calories += userMeal.TotalNutrition.Calories;
+                    Nutritions.Last().Protein += userMeal.TotalNutrition.Protein;
+                    Nutritions.Last().Fat += userMeal.TotalNutrition.Fat;
+                    Nutritions.Last().Carbs += userMeal.TotalNutrition.Carbs;
+                }
 
                 totalNutritions.Calories += userMeal.TotalNutrition.Calories;
                 totalNutritions.Protein += userMeal.TotalNutrition.Protein;
                 totalNutritions.Fat += userMeal.TotalNutrition.Fat;
                 totalNutritions.Carbs += userMeal.TotalNutrition.Carbs;
+
+                date = userMeal.Date;
             }
 
             TotalNutrition = totalNutritions;

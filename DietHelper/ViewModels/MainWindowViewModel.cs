@@ -399,9 +399,17 @@ namespace DietHelper.ViewModels
         }
 
         [RelayCommand]
-        private void OpenStatistics()
+        private async Task OpenStatistics()
         {
+            var mainWindow = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : null;
+            if (mainWindow is null) return;
 
+            var statsViewModel = new StatsViewModel(_apiService);
+            var statsWindow = new Views.StatsWindow()
+            {
+                DataContext = statsViewModel
+            };
+            await statsWindow.ShowDialog(mainWindow);
         }
 
         [RelayCommand]

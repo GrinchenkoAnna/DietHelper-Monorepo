@@ -30,7 +30,7 @@
             <Button Content="Сохранить день" DockPanel.Dock="Right"
                     Margin="0, 5, 5, 0" Command="{Binding SaveDayCommand}"/>
             <Button Content="Статистика" DockPanel.Dock="Right" 
-                    Margin="0, 5, 5, 0" />
+                    Margin="0, 5, 5, 0" Command="{Binding OpenStatisticsCommand}"/>
         </DockPanel>
 
         <Border Grid.Row="1" Margin="5" Padding="5"
@@ -205,10 +205,9 @@
                            Width="100" Margin="5,5,0,5"/>
 
                 <TextBlock Text="Вес:" FontWeight="Medium" Margin="5,5,0,5"/>
-                <TextBox Text="{Binding TotalQuantity}" 
-                         Width="100" 
-                         Margin="5,0,0,0"
-                         Background="Transparent"/>
+                <TextBlock Text="{Binding FormattedTotalQuantity}" 
+                           Width="100" Margin="5,5,0,5"
+                           Background="Transparent"/>
             </StackPanel>
         </Border>
     </Grid>

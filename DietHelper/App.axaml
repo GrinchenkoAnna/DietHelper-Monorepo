@@ -39,7 +39,7 @@
             <ResourceDictionary x:Key="Dark">
                 <SolidColorBrush x:Key="CardBackground" Color="#222222"/>
                 <SolidColorBrush x:Key="IngredientBackground" Color="#111111"/>
-                <Color x:Key="CardShadowColor">#70FFFFFF</Color>
+                <Color x:Key="CardShadowColor">Transparent</Color>
             </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
