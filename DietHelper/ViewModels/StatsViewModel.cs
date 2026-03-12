@@ -11,6 +11,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,14 +21,88 @@ namespace DietHelper.ViewModels
     {
         private readonly ApiService _apiService;
 
-        [ObservableProperty]
-        private int interval = 7;
+        [ObservableProperty] private bool isBusy = true;
 
-        [ObservableProperty]
         private DateTime startDay = DateTime.Today.AddDays(-7);
+        public DateTime StartDay
+        {
+            get => startDay;
+            set
+            {
+                if (startDay == value) return;
+                startDay = value;
+                if (!EnsureValidOrder()) OnPropertyChanged();
+                _ = LoadStatsAsync();
+            }
+        }
 
-        [ObservableProperty]
         private DateTime endDay = DateTime.Today;
+        public DateTime EndDay
+        {
+            get => endDay;
+            set
+            {
+                if (endDay == value) return;
+                endDay = value;
+                if (!EnsureValidOrder()) OnPropertyChanged();
+                _ = LoadStatsAsync();
+            }
+        }
+
+        private bool EnsureValidOrder()
+        {
+            if (startDay > endDay)
+            {
+                var temp = startDay;
+                startDay = endDay;
+                endDay = temp;
+
+                OnPropertyChanged(nameof(StartDay));
+                OnPropertyChanged(nameof(EndDay));
+                return true;
+            }
+            return false;
+        }
+
+        private int selectedPeriodIndex = 1;
+        public int SelectedPeriodIndex
+        {
+            get => selectedPeriodIndex;
+            set
+            {
+                if (selectedPeriodIndex == value) return;
+                selectedPeriodIndex = value;
+                UpdatePeriod();
+                OnPropertyChanged();
+            }
+        }
+
+        private void UpdatePeriod()
+        {
+            var today = DateTime.Today;
+            switch (SelectedPeriodIndex)
+            {
+                case 0:
+                    StartDay = today.AddDays(-3);
+                    EndDay = today;
+                    break;
+                case 1:
+                    StartDay = today.AddDays(-7);
+                    EndDay = today;
+                    break;
+                case 2:
+                    var daysInCurrentMonth = DateTime.DaysInMonth(today.Year, today.Month);
+                    StartDay = today.AddDays(- daysInCurrentMonth);
+                    EndDay = today;
+                    break;
+                default: return;
+            }
+
+            OnPropertyChanged(nameof(StartDay));
+            OnPropertyChanged(nameof(EndDay));
+
+            _ = LoadStatsAsync();
+        }
 
         [ObservableProperty]
         private ObservableCollection<UserMealEntryDto> userMeals = new();
@@ -39,10 +114,13 @@ namespace DietHelper.ViewModels
         private ObservableCollection<NutritionInfo> nutritions = new();
 
         [ObservableProperty]
-        private ObservableCollection<ISeries> nutritionSeries = new();
+        private ObservableCollection<ISeries> macronutrientsSeries = new();
 
         [ObservableProperty]
-        private ObservableCollection<Axis> xAxes = new()
+        private ObservableCollection<ISeries> caloriesSeries = new();
+
+        [ObservableProperty]
+        private ObservableCollection<Axis> xAxesMacronutrients = new()
         {
             new Axis
             {
@@ -51,11 +129,29 @@ namespace DietHelper.ViewModels
         };
 
         [ObservableProperty]
-        private ObservableCollection<Axis> yAxes = new()
+        private ObservableCollection<Axis> yAxesMacronutrients = new()
         {
             new Axis
             {
-                Name = "Значения"
+                Name = "грамм"
+            }
+        };
+
+        [ObservableProperty]
+        private ObservableCollection<Axis> xAxesCalories = new()
+        {
+            new Axis
+            {
+                Name = "Дата"
+            }
+        };
+
+        [ObservableProperty]
+        private ObservableCollection<Axis> yAxesCalories = new()
+        {
+            new Axis
+            {
+                Name = "ккал"
             }
         };
 
@@ -64,26 +160,36 @@ namespace DietHelper.ViewModels
             _apiService = apiService;
         }
 
-        [RelayCommand]
-        private async Task LoadStats()
+        public async Task LoadStatsAsync()
         {
-            UserMeals.Clear();
+            IsBusy = true;
 
-            var userMealsList = await _apiService.GetUserMealsForPeriod(StartDay, EndDay);
-            UserMeals = new ObservableCollection<UserMealEntryDto>(userMealsList ?? new List<UserMealEntryDto>());
+            try
+            {
+                UserMeals.Clear();
 
-            CalculateStats();
+                var userMealsList = await _apiService.GetUserMealsForPeriod(StartDay, EndDay);
+                UserMeals = new ObservableCollection<UserMealEntryDto>(userMealsList ?? new List<UserMealEntryDto>());
+
+                CalculateStats();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"StatsViewModel: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
-        private void CalculateStats()
+        private void SetSeries()
         {
-            Nutritions.Clear();
-
             var groups = UserMeals
                 .GroupBy(um => um.Date)
                 .OrderBy(g => g.Key)
-                .Select(g => new 
-                { 
+                .Select(g => new
+                {
                     Date = g.Key,
                     Calories = g.Sum(um => um.TotalNutrition.Calories),
                     Protein = g.Sum(um => um.TotalNutrition.Protein),
@@ -93,19 +199,36 @@ namespace DietHelper.ViewModels
                 .ToList();
 
             var dateIndices = groups.Select((_, i) => i).ToArray();
-            var caloriesValues = groups.Select(g => (double?)g.Calories).ToArray();
-            var proteinValues = groups.Select(g => (double?)g.Protein).ToArray();
-            var fatValues = groups.Select(g => (double?)g.Fat).ToArray();
-            var carbsValues = groups.Select(g => (double?)g.Carbs).ToArray();
 
-            var newSeries = new ObservableCollection<ISeries>
+            var caloriesValues = groups.Select(g => (double?)g.Calories).ToArray();
+
+            var newCaloriesSeries = new ObservableCollection<ISeries>
             {
                 new ColumnSeries<double?>
                 {
                     Name = "Калории",
                     Values = caloriesValues,
                     Fill = new SolidColorPaint(SKColors.Red)
-                },
+                }
+            };
+
+            XAxesCalories = new ObservableCollection<Axis>
+            {
+                new Axis
+                {
+                    Labels = groups.Select(g => g.Date.ToString("dd.MM")).ToList(),
+                    Name = "Дата"
+                }
+            };
+
+            CaloriesSeries = newCaloriesSeries;
+
+            var proteinValues = groups.Select(g => (double?)g.Protein).ToArray();
+            var fatValues = groups.Select(g => (double?)g.Fat).ToArray();
+            var carbsValues = groups.Select(g => (double?)g.Carbs).ToArray();
+
+            var newMacronutrientsSeries = new ObservableCollection<ISeries>
+            {
                 new ColumnSeries<double?>
                 {
                     Name = "Белки",
@@ -126,17 +249,23 @@ namespace DietHelper.ViewModels
                 }
             };
 
-            XAxes = new ObservableCollection<Axis>
+            XAxesMacronutrients = new ObservableCollection<Axis>
             {
                 new Axis
                 {
                     Labels = groups.Select(g => g.Date.ToString("dd.MM")).ToList(),
-                    LabelsRotation = 15,
                     Name = "Дата"
                 }
             };
 
-            NutritionSeries = newSeries;
+            MacronutrientsSeries = newMacronutrientsSeries;
+        }
+
+        private void CalculateStats()
+        {
+            Nutritions.Clear();
+
+            SetSeries();
 
             var totalNutritions = new NutritionInfo();
             var date = DateTime.Now;

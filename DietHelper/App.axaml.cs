@@ -9,6 +9,8 @@ using DietHelper.ViewModels.Base;
 using DietHelper.ViewModels.Dishes;
 using DietHelper.ViewModels.Products;
 using DietHelper.Views;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -43,8 +45,8 @@ namespace DietHelper
                 };
                 return client;
             });
+
             services.AddSingleton<ApiService>();
-            //services.AddSingleton<INavigationService, NavigationService>();
 
             services.AddTransient<ViewModelBase>();
             services.AddTransient<UserDishViewModel>();
@@ -58,6 +60,11 @@ namespace DietHelper
             _serviceProvider = services.BuildServiceProvider();
 
             ServiceLocator.Initialize(_serviceProvider);
+
+            LiveCharts.Configure(config => config
+                .AddSkiaSharp()
+                .AddDefaultMappers()
+            );
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {

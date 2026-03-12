@@ -18,8 +18,6 @@ namespace DietHelper.ViewModels.Dishes
 
     public partial class AddUserDishViewModel : AddItemBaseViewModel<UserDish, UserDishViewModel>
     {
-        private readonly NutritionCalculator _nutritionCalculator;
-
         [ObservableProperty]
         private DishType selectedDishType = DishType.EmptyDish;
 
@@ -44,9 +42,8 @@ namespace DietHelper.ViewModels.Dishes
             }
         }
 
-        public AddUserDishViewModel(ApiService apiService, NutritionCalculator nutritionCalculator) : base(apiService)
+        public AddUserDishViewModel(ApiService apiService) : base(apiService)
         {
-            _nutritionCalculator = nutritionCalculator;
 
             PropertyChanged += (s, e) =>
             {
