@@ -23,6 +23,8 @@ namespace DietHelper.ViewModels
 
         [ObservableProperty] private bool isBusy = true;
 
+        private bool isPresetInterval = true;
+
         private DateTime startDay = DateTime.Today.AddDays(-7);
         public DateTime StartDay
         {
@@ -31,7 +33,15 @@ namespace DietHelper.ViewModels
             {
                 if (startDay == value) return;
                 startDay = value;
+
                 if (!EnsureValidOrder()) OnPropertyChanged();
+
+                if (!isPresetInterval && SelectedPeriodIndex != -1)
+                {
+                    SelectedPeriodIndex = -1;
+                    OnPropertyChanged(nameof(SelectedPeriodIndex));
+                }
+
                 _ = LoadStatsAsync();
             }
         }
@@ -45,6 +55,13 @@ namespace DietHelper.ViewModels
                 if (endDay == value) return;
                 endDay = value;
                 if (!EnsureValidOrder()) OnPropertyChanged();
+
+                if (!isPresetInterval && SelectedPeriodIndex != -1)
+                {
+                    SelectedPeriodIndex = -1;
+                    OnPropertyChanged(nameof(SelectedPeriodIndex));
+                }
+
                 _ = LoadStatsAsync();
             }
         }
@@ -79,29 +96,37 @@ namespace DietHelper.ViewModels
 
         private void UpdatePeriod()
         {
-            var today = DateTime.Today;
-            switch (SelectedPeriodIndex)
+            isPresetInterval = true;
+
+            try
             {
-                case 0:
-                    StartDay = today.AddDays(-3);
-                    EndDay = today;
-                    break;
-                case 1:
-                    StartDay = today.AddDays(-7);
-                    EndDay = today;
-                    break;
-                case 2:
-                    var daysInCurrentMonth = DateTime.DaysInMonth(today.Year, today.Month);
-                    StartDay = today.AddDays(- daysInCurrentMonth);
-                    EndDay = today;
-                    break;
-                default: return;
+                var today = DateTime.Today;
+                switch (SelectedPeriodIndex)
+                {
+                    case 0:
+                        StartDay = today.AddDays(-3);
+                        EndDay = today;
+                        break;
+                    case 1:
+                        StartDay = today.AddDays(-7);
+                        EndDay = today;
+                        break;
+                    case 2:
+                        var daysInCurrentMonth = DateTime.DaysInMonth(today.Year, today.Month);
+                        StartDay = today.AddDays(-daysInCurrentMonth);
+                        EndDay = today;
+                        break;
+                    default: return;
+                }
             }
-
-            OnPropertyChanged(nameof(StartDay));
-            OnPropertyChanged(nameof(EndDay));
-
-            _ = LoadStatsAsync();
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"StatsViewModel: {ex.Message}");
+            }
+            finally
+            {
+                isPresetInterval = false;
+            }
         }
 
         [ObservableProperty]
