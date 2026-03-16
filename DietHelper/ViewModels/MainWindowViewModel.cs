@@ -27,9 +27,7 @@ namespace DietHelper.ViewModels
 
         private DateTime _currentWeekStart;
 
-        public ObservableCollection<DateTime> WeekDays { get; } = new();
-
-        private ObservableCollection<UserProductViewModel> _userProducts = [];
+        public ObservableCollection<DateTime> WeekDays { get; } = new();        
 
         private static DateTime GetStartOfWeek(DateTime date)
         {
@@ -74,6 +72,8 @@ namespace DietHelper.ViewModels
             if (date == SelectedDate) return;
             SelectedDate = date;
         }
+
+        private ObservableCollection<UserProductViewModel> _userProducts = [];
 
         public ObservableCollection<UserProductViewModel> UserProducts
         {

@@ -11,6 +11,7 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DietHelper.Services
@@ -18,6 +19,9 @@ namespace DietHelper.Services
     public partial class ApiService
     {
         private readonly HttpClient _httpClient;
+
+        private readonly SemaphoreSlim _authLock = new SemaphoreSlim(1, 1);
+
         private SessionData CurrentSessionData { get; set; } = new SessionData()
         {
             AccessToken = null,
@@ -134,6 +138,8 @@ namespace DietHelper.Services
 
         public async Task<AuthResponseDto?> RegisterAsync(RegisterDto registerDto)
         {
+            await _authLock.WaitAsync();
+
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("auth/register", registerDto);
@@ -167,10 +173,16 @@ namespace DietHelper.Services
                     Message = ex.Message
                 };
             }
+            finally
+            {
+                _authLock.Release();
+            }
         }
 
         public async Task<AuthResponseDto?> LoginAsync(LoginDto loginDto)
         {
+            await _authLock.WaitAsync();
+
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("auth/login", loginDto);
@@ -201,6 +213,10 @@ namespace DietHelper.Services
                     Message = ex.Message
                 };
             }
+            finally
+            {
+                _authLock.Release();
+            }
         }
 
         private async Task<bool> RefreshTokensAsync()
@@ -212,6 +228,8 @@ namespace DietHelper.Services
             }
 
             _httpClient.DefaultRequestHeaders.Authorization = null;
+
+            await _authLock.WaitAsync();
 
             try
             {
@@ -245,6 +263,10 @@ namespace DietHelper.Services
                 Debug.WriteLine($"[RefreshTokensAsync]: {ex.Message}");
                 EndSession();
                 return false;
+            }
+            finally
+            {
+                _authLock.Release();
             }
         }
 
