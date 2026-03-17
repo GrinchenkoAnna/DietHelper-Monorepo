@@ -93,76 +93,40 @@ namespace DietHelper.Server.Controllers
         [HttpGet("base/{id}")]
         public async Task<ActionResult<BaseProduct>> GetBaseProductById(int id)
         {
-            try
-            {
-                var baseProduct = await _dbContext.BaseProducts
+            var baseProduct = await _dbContext.BaseProducts
                 .FirstOrDefaultAsync(bp => bp.Id == id && !bp.IsDeleted);
 
-                if (baseProduct == null) return NotFound();
+            if (baseProduct == null) return NotFound();
 
-                return Ok(baseProduct);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"[ProductsController]: {ex.Message}");
-            }
+            return Ok(baseProduct);
         }
 
 
         [HttpPost("user")]
         public async Task<ActionResult> AddUserProduct([FromBody] UserProduct userProduct)
         {
-            try
-            {
-                var userId = GetCurrentUserId();
+            var baseProduct = await _dbContext.BaseProducts
+                .Where(bp => bp.Id == userProduct.BaseProductId && !bp.IsDeleted)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+            if (baseProduct is null)
+                return NotFound($"[ProductsController]: BaseProduct with id = {userProduct.BaseProductId} not found");
 
-                var baseProduct = await _dbContext.BaseProducts
-                    .Where(bp => bp.Id == userProduct.BaseProductId && !bp.IsDeleted)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync();
-                if (baseProduct is null)
-                    return NotFound($"[ProductsController]: BaseProduct with id = {userProduct.BaseProductId} not found");
+            userProduct.IsDeleted = false;
 
-                var existingUserProduct = await _dbContext.UserProducts
-                    .FirstOrDefaultAsync(up => up.UserId == userId && up.BaseProductId == baseProduct.Id);
-                if (existingUserProduct is not null)
-                {
-                    if (existingUserProduct.IsDeleted)
-                    {
-                        existingUserProduct.IsDeleted = false;
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    return Ok(existingUserProduct);
-                }
+            _dbContext.UserProducts.Add(userProduct);
+            await _dbContext.SaveChangesAsync();
 
-                userProduct.UserId = userId;
-                userProduct.IsDeleted = false;
-
-                _dbContext.UserProducts.Add(userProduct);
-                await _dbContext.SaveChangesAsync();
-
-                return Ok(userProduct);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"[ProductsController]: {ex.Message}");
-            }
+            return Ok(userProduct);
         }
 
         [HttpPost("base")]
         public async Task<ActionResult> AddBaseProduct([FromBody] BaseProduct baseProduct)
         {
-            try
-            {
-                _dbContext.BaseProducts.Add(baseProduct);
-                await _dbContext.SaveChangesAsync();
+            _dbContext.BaseProducts.Add(baseProduct);
+            await _dbContext.SaveChangesAsync();
 
-                return Ok(baseProduct);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"[ProductsController]: {ex.Message}");
-            }
+            return Ok(baseProduct);
         }
 
         [HttpDelete("{userProductId}")]

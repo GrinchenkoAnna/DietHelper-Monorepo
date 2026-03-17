@@ -101,8 +101,11 @@ namespace DietHelper.ViewModels.Products
         {
             if (SelectedBaseItem is null) return;
 
+            var user = await GetCurrentUser();
+
             var userProduct = new UserProduct()
             {
+                UserId = user.Id,
                 BaseProductId = SelectedBaseItem.Id,
                 CustomNutrition = new NutritionInfo()
                 {
