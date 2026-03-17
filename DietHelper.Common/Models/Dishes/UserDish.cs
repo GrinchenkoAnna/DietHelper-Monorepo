@@ -30,7 +30,7 @@ namespace DietHelper.Common.Models.Dishes
 
         public double Quantity
         {
-            get => IsReadyDish ? 100 : (Ingredients.Count == 0) ? 0 : Ingredients.Sum(i => i.Quantity);
+            get => IsReadyDish ? 100 : Ingredients.Sum(i => i.Quantity);
         }
 
         public virtual ICollection<UserDishIngredient> Ingredients { get; set; } = new List<UserDishIngredient>();

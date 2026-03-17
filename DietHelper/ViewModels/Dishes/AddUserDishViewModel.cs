@@ -97,8 +97,11 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async Task<UserDish?> CreateNewUserItem()
         {
+            User user = await GetCurrentUser();
+
             var userDish = new UserDish()
             {
+                UserId = user.Id,
                 Name = ManualName!,
                 NutritionFacts = new NutritionInfo()
                 {
@@ -107,7 +110,7 @@ namespace DietHelper.ViewModels.Dishes
                     Fat = ManualFat,
                     Carbs = ManualCarbs
                 },
-                IsReadyDish = SelectedDishType == DishType.ReadyDish,                
+                IsReadyDish = SelectedDishType == DishType.ReadyDish,
                 IsDeleted = false
             };
 

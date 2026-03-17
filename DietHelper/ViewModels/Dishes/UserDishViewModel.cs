@@ -70,12 +70,10 @@ namespace DietHelper.ViewModels.Dishes
                 totalNutritionInfo.Protein += ingredient.CurrentNutrition.Protein;
                 totalNutritionInfo.Fat += ingredient.CurrentNutrition.Fat;
                 totalNutritionInfo.Carbs += ingredient.CurrentNutrition.Carbs;
-                //Quantity += ingredient.Quantity;
+                Quantity += ingredient.Quantity;
             }
 
             NutritionFacts = totalNutritionInfo;
-
-            UpdateTotalQuantity();
         }
         private void RecalculateForReadyDish()
         {
@@ -167,31 +165,23 @@ namespace DietHelper.ViewModels.Dishes
             CanAddIngredients = !IsReadyDish;
             NutritionFacts = totalNutrition;
 
-            if (!IsReadyDish)
+            if (!IsReadyDish && ingredients is not null)
             {
-                if (ingredients.Count() != 0)
+                foreach (var ingredient in ingredients)
                 {
-                    foreach (var ingredient in ingredients)
+                    var ingredientViewModel = new UserDishIngredientViewModel()
                     {
-                        var ingredientViewModel = new UserDishIngredientViewModel()
-                        {
-                            Id = ingredient.Id,
-                            UserProductId = ingredient.UserProductId,
-                            UserDishId = id,
-                            Name = ingredient.ProductNameSnapshot,
-                            ProductNameSnapshot = ingredient.ProductNameSnapshot,
-                            ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot,
-                            Quantity = (double)ingredient.Quantity
-                        };
-                        Ingredients.Add(ingredientViewModel);
-                        ingredientViewModel.PropertyChanged += OnIngredientPropertyChanged;
-                        Quantity += ingredientViewModel.Quantity;
-                    }
-                }
-                else
-                {
-                    Quantity = 0;
-                    Recalculate();
+                        Id = ingredient.Id,
+                        UserProductId = ingredient.UserProductId,
+                        UserDishId = id,
+                        Name = ingredient.ProductNameSnapshot,
+                        ProductNameSnapshot = ingredient.ProductNameSnapshot,
+                        ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot,
+                        Quantity = (double)ingredient.Quantity
+                    };
+                    Ingredients.Add(ingredientViewModel);
+                    ingredientViewModel.PropertyChanged += OnIngredientPropertyChanged;
+                    Quantity += ingredientViewModel.Quantity;
                 }
             }
             else
@@ -243,6 +233,7 @@ namespace DietHelper.ViewModels.Dishes
                 IsDirty = true;
                 RecalculateForReadyDish();
             }
+            else UpdateTotalQuantity();
         }
 
         private void UpdateTotalQuantity()
