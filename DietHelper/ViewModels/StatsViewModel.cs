@@ -1,6 +1,4 @@
-﻿using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DietHelper.Common.DTO;
 using DietHelper.Common.Models.Core;
 using DietHelper.Services;
@@ -23,8 +21,6 @@ namespace DietHelper.ViewModels
 
         [ObservableProperty] private bool isBusy = true;
 
-        private bool isPresetInterval = true;
-
         private DateTime startDay = DateTime.Today.AddDays(-7);
         public DateTime StartDay
         {
@@ -34,13 +30,7 @@ namespace DietHelper.ViewModels
                 if (startDay == value) return;
                 startDay = value;
 
-                if (!EnsureValidOrder()) OnPropertyChanged();
-
-                if (!isPresetInterval && SelectedPeriodIndex != -1)
-                {
-                    SelectedPeriodIndex = -1;
-                    OnPropertyChanged(nameof(SelectedPeriodIndex));
-                }
+                EnsureValidOrder();
 
                 _ = LoadStatsAsync();
             }
@@ -54,31 +44,23 @@ namespace DietHelper.ViewModels
             {
                 if (endDay == value) return;
                 endDay = value;
-                if (!EnsureValidOrder()) OnPropertyChanged();
 
-                if (!isPresetInterval && SelectedPeriodIndex != -1)
-                {
-                    SelectedPeriodIndex = -1;
-                    OnPropertyChanged(nameof(SelectedPeriodIndex));
-                }
+                EnsureValidOrder();
 
                 _ = LoadStatsAsync();
             }
         }
 
-        private bool EnsureValidOrder()
+        private void EnsureValidOrder()
         {
-            if (startDay > endDay)
-            {
-                var temp = startDay;
-                startDay = endDay;
-                endDay = temp;
+            if (startDay > endDay) (startDay, endDay) = (endDay, startDay);
 
-                OnPropertyChanged(nameof(StartDay));
-                OnPropertyChanged(nameof(EndDay));
-                return true;
-            }
-            return false;
+            OnPropertyChanged(nameof(StartDay));
+            OnPropertyChanged(nameof(EndDay));
+
+            int presetIndex = GetPresetIndex();
+            if (presetIndex >= 0) SelectedPeriodIndex = presetIndex;
+            else SelectedPeriodIndex = -1;
         }
 
         private int selectedPeriodIndex = 1;
@@ -94,10 +76,30 @@ namespace DietHelper.ViewModels
             }
         }
 
+        private int GetPresetIndex()
+        {
+            try
+            {
+                var today = DateTime.Today;
+
+                if (StartDay == today.AddDays(-3) && EndDay == today) return 0;
+
+                if (StartDay == today.AddDays(-7) && EndDay == today) return 1;
+
+                int daysInMonth = DateTime.DaysInMonth(today.Year, today.Month);
+                if (StartDay == today.AddDays(-daysInMonth) && EndDay == today) return 2;
+
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"StatsViewModel: {ex.Message}");
+                return -1;
+            }
+        }
+
         private void UpdatePeriod()
         {
-            isPresetInterval = true;
-
             try
             {
                 var today = DateTime.Today;
@@ -116,16 +118,13 @@ namespace DietHelper.ViewModels
                         StartDay = today.AddDays(-daysInCurrentMonth);
                         EndDay = today;
                         break;
-                    default: return;
+                    default:
+                        return;
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"StatsViewModel: {ex.Message}");
-            }
-            finally
-            {
-                isPresetInterval = false;
             }
         }
 
