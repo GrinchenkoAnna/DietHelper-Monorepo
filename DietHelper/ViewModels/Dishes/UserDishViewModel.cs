@@ -57,6 +57,13 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         private bool isDirty = false;
 
+        [ObservableProperty]
+        private bool isInAddMode;
+
+        public bool ShowDirtyIndicator => !IsInAddMode && IsDirty;
+        partial void OnIsDirtyChanged(bool value) => OnPropertyChanged(nameof(ShowDirtyIndicator));
+        partial void OnIsInAddModeChanged(bool value) => OnPropertyChanged(nameof(ShowDirtyIndicator));
+
         private void Recalculate()
         {
             if (IsReadyDish) return;
@@ -154,6 +161,7 @@ namespace DietHelper.ViewModels.Dishes
             };
 
             IsDirty = false;
+            IsInAddMode = true;
         }
 
         // загрузка из истории
@@ -225,6 +233,7 @@ namespace DietHelper.ViewModels.Dishes
             };
 
             IsDirty = false;
+            IsInAddMode = false;
         }        
 
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)

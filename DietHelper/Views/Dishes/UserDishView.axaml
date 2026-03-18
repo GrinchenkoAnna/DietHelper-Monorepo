@@ -30,7 +30,7 @@
                 <TextBlock Grid.Column="0" Text="{Binding Name}" 
                            FontWeight="SemiBold" FontSize="16" />
                 <TextBlock Grid.Column="1" Text=" • изменено" 
-                           Foreground="Gray" FontSize="12" IsVisible="{Binding IsDirty}"/>
+                           Foreground="Gray" FontSize="12" IsVisible="{Binding ShowDirtyIndicator}"/>
             </Grid>
 
             <TextBlock Grid.Row="1" 

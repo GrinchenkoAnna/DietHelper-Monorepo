@@ -2,6 +2,7 @@
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Products;
 using DietHelper.ViewModels.Base;
+using System.ComponentModel;
 
 namespace DietHelper.ViewModels.Products
 {
@@ -11,7 +12,19 @@ namespace DietHelper.ViewModels.Products
         private int userId = -1;
 
         [ObservableProperty]
-        private int mealEntryId;       
+        private int mealEntryId;
+
+        [ObservableProperty]
+        private bool isInAddMode;
+
+        public bool ShowDirtyIndicator => !IsInAddMode && IsDirty;
+
+        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+            if (e.PropertyName == nameof(IsDirty) || e.PropertyName == nameof(IsInAddMode))
+                OnPropertyChanged(nameof(ShowDirtyIndicator));
+        }
 
         public UserProductViewModel()
         {
@@ -39,6 +52,7 @@ namespace DietHelper.ViewModels.Products
 
             Recalculate();
             IsDirty = false;
+            isInAddMode = true;
         }
 
         // загрузка из истории
@@ -66,6 +80,7 @@ namespace DietHelper.ViewModels.Products
             }
 
             IsDirty = false;
+            IsInAddMode = false;
         }
 
         private void RestoreNutritionForUserProduct(NutritionInfo totalNutrition, double quantity)
