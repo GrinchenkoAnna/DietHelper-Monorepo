@@ -66,7 +66,7 @@ namespace DietHelper.Server.Controllers
                     .ThenInclude(up => up.BaseProduct)
                     .FirstOrDefaultAsync(ud => ud.Id == userDishId && ud.UserId == userId);
 
-                if (dish == null) return NotFound();
+                //if (dish == null) return NotFound();
                 return Ok(dish);
             }
             catch (Exception ex)

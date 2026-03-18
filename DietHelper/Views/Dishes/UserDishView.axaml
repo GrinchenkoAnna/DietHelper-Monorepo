@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ingredients="clr-namespace:DietHelper.Views.Products"
              xmlns:vm="clr-namespace:DietHelper.ViewModels.Dishes"
+             xmlns:dishes="clr-namespace:DietHelper.Views.Dishes"
              xmlns:converters="clr-namespace:DietHelper.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DietHelper.Views.Dishes.UserDishView"
-             x:DataType="vm:UserDishViewModel">
+             x:DataType="vm:UserDishViewModel" x:Name="Root">
 
     <UserControl.Resources>
 		<converters:BorderThicknessForDishConverter x:Key="BorderThicknessForDishConverter"/>
@@ -128,9 +129,10 @@
                                          Background="Transparent"/>
 
                                 <Button Content="-" Width="20" Margin="0,0,5,1"
-                                        Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"
+                                        Command="{Binding $parent[dishes:UserDishView].DataContext.RemoveIngredientCommand, FallbackValue={x:Null}}"
                                         CommandParameter="{Binding}"
                                         Classes="control-button"/>
+                                <TextBlock Text="{Binding $parent[dishes:UserDishView].DataContext.RemoveIngredientCommand, FallbackValue='null'}" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
