@@ -46,7 +46,7 @@ namespace DietHelper
                 return client;
             });
 
-            services.AddSingleton<ApiService>();
+            services.AddSingleton<IApiService, ApiService>();
 
             services.AddTransient<ViewModelBase>();
             services.AddTransient<UserDishViewModel>();

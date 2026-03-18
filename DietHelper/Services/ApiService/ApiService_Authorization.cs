@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace DietHelper.Services
 {
-    public partial class ApiService
+    public partial class ApiService : IApiService
     {
         private readonly HttpClient _httpClient;
 
@@ -128,7 +128,7 @@ namespace DietHelper.Services
                     SetTokens(sessionData); //-> SaveSession с зашифрованной версией, старый файл не нужен
                     File.Delete(filePath);
                 }
-                    
+
             }
             catch (Exception ex)
             {

@@ -132,7 +132,6 @@
                                         Command="{Binding $parent[dishes:UserDishView].DataContext.RemoveIngredientCommand, FallbackValue={x:Null}}"
                                         CommandParameter="{Binding}"
                                         Classes="control-button"/>
-                                <TextBlock Text="{Binding $parent[dishes:UserDishView].DataContext.RemoveIngredientCommand, FallbackValue='null'}" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>

@@ -20,7 +20,7 @@ namespace DietHelper.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         [ObservableProperty]
         private DateTime selectedDate = DateTime.Today;
@@ -243,8 +243,7 @@ namespace DietHelper.ViewModels
             }
         }
 
-
-        public MainWindowViewModel(ApiService apiService) : base(apiService)
+        public MainWindowViewModel(IApiService apiService) : base(apiService)
         {
             _apiService = apiService;
             InitializeAsync();

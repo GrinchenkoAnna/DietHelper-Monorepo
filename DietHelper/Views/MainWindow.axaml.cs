@@ -18,14 +18,14 @@ namespace DietHelper.Views
     public partial class MainWindow : Window
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         public MainWindow(IServiceProvider serviceProvider)
         {
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
-            _apiService = serviceProvider.GetRequiredService<ApiService>();
+            _apiService = serviceProvider.GetRequiredService<IApiService>();
 
             Debug.WriteLine($"[MainWindow] Constructor called. ApiService hash: {_apiService.GetHashCode()}");
 

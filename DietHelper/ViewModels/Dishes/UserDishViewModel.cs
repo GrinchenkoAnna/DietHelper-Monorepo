@@ -19,7 +19,7 @@ namespace DietHelper.ViewModels.Dishes
 {
     public partial class UserDishViewModel : ObservableValidator
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         public ObservableCollection<UserDishIngredientViewModel> Ingredients { get; } = new();
 
@@ -106,7 +106,7 @@ namespace DietHelper.ViewModels.Dishes
         public UserDishViewModel() { }
 
         // загрузка из справочника
-        public UserDishViewModel(UserDish userDish, ApiService apiService)
+        public UserDishViewModel(UserDish userDish, IApiService apiService)
         {
             _apiService = apiService;
 
@@ -157,7 +157,7 @@ namespace DietHelper.ViewModels.Dishes
         }
 
         // загрузка из истории
-        public UserDishViewModel(ApiService apiService, int id, string name, bool isReadyDish, double quantity, 
+        public UserDishViewModel(IApiService apiService, int id, string name, bool isReadyDish, double quantity, 
                                 NutritionInfo totalNutrition, IEnumerable<UserMealEntryIngredientDto>? ingredients = null)
         {
             _apiService = apiService;

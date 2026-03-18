@@ -42,7 +42,7 @@ namespace DietHelper.ViewModels.Dishes
             }
         }
 
-        public AddUserDishViewModel(ApiService apiService) : base(apiService)
+        public AddUserDishViewModel(IApiService apiService) : base(apiService)
         {
 
             PropertyChanged += (s, e) =>
@@ -136,7 +136,5 @@ namespace DietHelper.ViewModels.Dishes
 
             WeakReferenceMessenger.Default.Send(new DeleteUserDishMessage(userDishViewModel.Id));
         }
-
-
     }
 }

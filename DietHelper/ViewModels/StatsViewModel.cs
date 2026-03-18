@@ -17,7 +17,7 @@ namespace DietHelper.ViewModels
 {
     public partial class StatsViewModel : ViewModelBase
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         [ObservableProperty] private bool isBusy = true;
 
@@ -179,7 +179,7 @@ namespace DietHelper.ViewModels
             }
         };
 
-        public StatsViewModel(ApiService apiService) : base(apiService)
+        public StatsViewModel(IApiService apiService) : base(apiService)
         {
             _apiService = apiService;
         }
