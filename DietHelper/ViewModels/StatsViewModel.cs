@@ -1,4 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using DietHelper.Common.DTO;
 using DietHelper.Common.Models.Core;
 using DietHelper.Services;
@@ -10,7 +13,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels
@@ -146,37 +151,25 @@ namespace DietHelper.ViewModels
         [ObservableProperty]
         private ObservableCollection<Axis> xAxesMacronutrients = new()
         {
-            new Axis
-            {
-                Name = "Дата"
-            }
+            new Axis { Name = "Дата" }
         };
 
         [ObservableProperty]
         private ObservableCollection<Axis> yAxesMacronutrients = new()
         {
-            new Axis
-            {
-                Name = "грамм"
-            }
+            new Axis { Name = "грамм" }
         };
 
         [ObservableProperty]
         private ObservableCollection<Axis> xAxesCalories = new()
         {
-            new Axis
-            {
-                Name = "Дата"
-            }
+            new Axis { Name = "Дата" }
         };
 
         [ObservableProperty]
         private ObservableCollection<Axis> yAxesCalories = new()
         {
-            new Axis
-            {
-                Name = "ккал"
-            }
+            new Axis { Name = "ккал" }
         };
 
         public StatsViewModel(IApiService apiService) : base(apiService)
@@ -317,6 +310,67 @@ namespace DietHelper.ViewModels
             }
 
             TotalNutrition = totalNutritions;
+        }
+
+        [RelayCommand]
+        private async Task ExportStats()
+        {
+            var mainWindow = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : null;
+            if (mainWindow is null) return;
+
+            var topLevel = TopLevel.GetTopLevel(mainWindow);
+            if (topLevel is null) return;
+
+            var options = new FilePickerSaveOptions
+            {
+                Title = "Экспорт статистики",
+                DefaultExtension = "txt",
+                SuggestedFileName = $"DietHelper_Статистика_{StartDay:dd-MM-yyyy}-{EndDay:dd-MM-yyyy}.txt",
+                FileTypeChoices = new[]
+                {
+                    new FilePickerFileType("Текстовые файлы")
+                    {
+                        Patterns = new[] { "*.txt" },
+                    }
+                }
+            };
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
+
+            if (file is not null)
+            {
+                await GenerateStatsFileAsync(file.Path.LocalPath);
+            }
+        }
+
+        private async Task GenerateStatsFileAsync(string filePath)
+        {
+            var statsSB = new StringBuilder();
+
+            var days = UserMeals.GroupBy(um => um.Date).OrderBy(g => g.Key);
+            foreach (var day in days)
+            {
+                statsSB.AppendLine($"Дата: {day.Key:ddd dd.MM.yyyy}");
+
+                foreach (var meal in day)
+                {
+                    string mealName = meal.UserDishName ?? meal.Ingredients?.FirstOrDefault()?.ProductNameSnapshot ?? "Без названия";
+                    statsSB.AppendLine($"- {mealName}:\n" +
+                        $"  К: {meal.TotalNutrition.FormattedCalories,-12}   " +
+                        $"Б: {meal.TotalNutrition.FormattedProtein,-10}   " +
+                        $"Ж: {meal.TotalNutrition.FormattedFat,-10}   " +
+                        $"У: {meal.TotalNutrition.FormattedCarbs,-10}   " +
+                        $"вес: {meal.TotalQuantity,-5:F0} г");
+                }
+                statsSB.AppendLine();
+            }
+
+            statsSB.AppendLine($"Итого:\n" +
+                $"  К: {TotalNutrition.FormattedCalories,-12}   " +
+                $"Б: {TotalNutrition.FormattedProtein,-10}   " +
+                $"Ж: {TotalNutrition.FormattedFat,-10}   " +
+                $"У: {TotalNutrition.FormattedCarbs,-10}");
+
+            await File.WriteAllTextAsync(filePath, statsSB.ToString());
         }
     }
 }
