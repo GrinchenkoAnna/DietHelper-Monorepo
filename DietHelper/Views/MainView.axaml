@@ -98,6 +98,8 @@
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
+                <TextBlock Text="{Binding ProductMessage}" IsVisible="{Binding ShowProductMessage}" 
+                           HorizontalAlignment="Center" FontWeight="Light" Foreground="#696969"/>
                 <ListBox ItemsSource="{Binding UserProducts}" Margin="0 10 0 10" x:Name="UserProductsList" SelectionMode="Toggle">
                     <ListBox.Styles>
                         <Style Selector="ListBox">
@@ -132,6 +134,8 @@
                         HorizontalContentAlignment="Center"
                         Classes="control-button"/>
 
+                <TextBlock Text="{Binding DishMessage}" IsVisible="{Binding ShowDishMessage}"
+                           HorizontalAlignment="Center" FontWeight="Light" Foreground="#696969"/>
                 <ListBox ItemsSource="{Binding UserDishes}" Margin="0 10 0 10" x:Name="UserDishesList" SelectionMode="Toggle">
                     <ListBox.Styles>
                         <Style Selector="ListBox">

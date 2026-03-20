@@ -36,7 +36,6 @@ namespace DietHelper
 
             var services = new ServiceCollection();
 
-            services.AddSingleton<NutritionCalculator>();
             services.AddSingleton(sp =>
             {
                 var client = new HttpClient
@@ -47,6 +46,7 @@ namespace DietHelper
             });
 
             services.AddSingleton<IApiService, ApiService>();
+            services.AddSingleton<INotificationService, NotificationService>();
 
             services.AddTransient<ViewModelBase>();
             services.AddTransient<UserDishViewModel>();

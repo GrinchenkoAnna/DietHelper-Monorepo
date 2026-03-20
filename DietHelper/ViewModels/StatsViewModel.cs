@@ -23,6 +23,7 @@ namespace DietHelper.ViewModels
     public partial class StatsViewModel : ViewModelBase
     {
         private readonly IApiService _apiService;
+        private readonly INotificationService _notificationService;
 
         [ObservableProperty] private bool isBusy = true;
 
@@ -172,9 +173,10 @@ namespace DietHelper.ViewModels
             new Axis { Name = "ккал" }
         };
 
-        public StatsViewModel(IApiService apiService) : base(apiService)
+        public StatsViewModel(IApiService apiService, INotificationService notificationService) : base(apiService)
         {
             _apiService = apiService;
+            _notificationService = notificationService;
         }
 
         public async Task LoadStatsAsync()
@@ -189,6 +191,8 @@ namespace DietHelper.ViewModels
                 UserMeals = new ObservableCollection<UserMealEntryDto>(userMealsList ?? new List<UserMealEntryDto>());
 
                 CalculateStats();
+
+                _notificationService.ShowSuccess("Sussess", "Loaded");
             }
             catch (Exception ex)
             {
