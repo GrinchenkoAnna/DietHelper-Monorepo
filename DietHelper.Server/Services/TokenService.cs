@@ -55,6 +55,13 @@ namespace DietHelper.Server.Services
 
         public async Task<string> GenerateRefreshTokenAsync(User user)
         {
+            var activeTokens = await _dbContext.RefreshTokens
+        .Where(rt => rt.UserId == user.Id && rt.RevokedAt == null)
+        .ToListAsync();
+
+            foreach (var token in activeTokens)
+                token.RevokedAt = DateTime.UtcNow;
+
             var randomNumber = new byte[32];
             var randomNumberGenerator = RandomNumberGenerator.Create();
             randomNumberGenerator.GetBytes(randomNumber);

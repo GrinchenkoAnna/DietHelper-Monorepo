@@ -1,0 +1,89 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:DietHelper.ViewModels"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:converters="clr-namespace:DietHelper.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="DietHelper.Views.StatsWindow"
+        x:DataType="vm:StatsViewModel"
+        MinWidth="1000" Width="1000" MinHeight="800"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <converters:DataRangeConverter x:Key="DataRangeConverter" />
+    </Window.Resources>
+
+    <StackPanel HorizontalAlignment="Stretch" Spacing="15" Margin="10">
+        <Border Height="30" Margin="0,5" HorizontalAlignment="Stretch" 
+                BorderThickness="0.5" BorderBrush="#696969" Background="{DynamicResource ThemeBackgroundBrush}"
+                CornerRadius="5" Padding="5">
+            <Grid>
+                <ProgressBar IsIndeterminate="True" Height="4" 
+                             VerticalAlignment="Center" IsVisible="{Binding IsBusy}"/>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           FontWeight="Bold" FontSize="14" IsVisible="{Binding !IsBusy}">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource DataRangeConverter}">
+                            <Binding Path="StartDay"/>
+                            <Binding Path="EndDay"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </Grid>
+        </Border>        
+
+        <Grid HorizontalAlignment="Stretch" RowDefinitions="Auto,Auto">
+            <Border Grid.Row="1" CornerRadius="5" BorderThickness="0.5" 
+                    Background="{DynamicResource CardBackground}" BorderBrush="#696969"
+                    Margin="0,10,0,5" Height="30">
+                <StackPanel Orientation="Horizontal" Spacing="20"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Итоги за период" FontWeight="Bold" Margin="0,5,0,5"/>
+                    <TextBlock Text="К:" FontWeight="Medium" Margin="5,5,0,5"/>
+                    <TextBlock Text="{Binding TotalNutrition.FormattedCalories}" Width="100" Margin="5,5,0,5"/>
+                    <TextBlock Text="Б:" FontWeight="Medium" Margin="5,5,0,5"/>
+                    <TextBlock Text="{Binding TotalNutrition.FormattedProtein}" Width="100" Margin="5,5,0,5"/>
+                    <TextBlock Text="Ж:" FontWeight="Medium" Margin="5,5,0,5"/>
+                    <TextBlock Text="{Binding TotalNutrition.FormattedFat}" Width="100" Margin="5,5,0,5"/>
+                    <TextBlock Text="У:" FontWeight="Medium" Margin="5,5,0,5"/>
+                    <TextBlock Text="{Binding TotalNutrition.FormattedCarbs}" Width="100" Margin="5,5,0,5"/>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*" HorizontalAlignment="Stretch" Margin="0,0,0,10">
+                <CalendarDatePicker Grid.Column="0" SelectedDate="{Binding StartDay}" Watermark="Начало периода" 
+                                    UseFloatingWatermark="True" Width="200" Height="50" BorderThickness="0.5"
+                                    HorizontalAlignment="Left"/>
+                <CalendarDatePicker Grid.Column="1" SelectedDate="{Binding EndDay}" Watermark="Конец периода" 
+                                    UseFloatingWatermark="True" Width="200" Height="50" BorderThickness="0.5"
+                                    HorizontalAlignment="Left"/>
+                <ComboBox Grid.Column="2" SelectedIndex="{Binding SelectedPeriodIndex}" Width="200"
+                          VerticalAlignment="Center" Height="50" BorderThickness="0.5"
+                          HorizontalAlignment="Left">
+                    <ComboBoxItem>Ближайшие 3 дня</ComboBoxItem> 
+                    <ComboBoxItem>Ближайшая неделя</ComboBoxItem> 
+                    <ComboBoxItem>Ближайший месяц</ComboBoxItem> 
+                </ComboBox>                
+                <Button Grid.Column="3" Content="Экспорт статистики" Command="{Binding ExportStatsCommand}" 
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                        Width="200" Height="50" FontWeight="Bold" Classes="control-button"
+                        HorizontalAlignment="Right"/>
+            </Grid>
+        </Grid>
+
+        <StackPanel Orientation="Vertical" Spacing="10" HorizontalAlignment="Stretch">
+            <lvc:CartesianChart Series="{Binding MacronutrientsSeries}"
+                                XAxes="{Binding XAxesMacronutrients}" 
+                                YAxes="{Binding YAxesMacronutrients}"
+                                MinHeight="300" 
+                                IsVisible="{Binding !IsBusy}"/>
+            <lvc:CartesianChart Series="{Binding CaloriesSeries}"
+                                XAxes="{Binding XAxesCalories}" 
+                                YAxes="{Binding YAxesCalories}"
+                                MinHeight="300" 
+                                IsVisible="{Binding !IsBusy}"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

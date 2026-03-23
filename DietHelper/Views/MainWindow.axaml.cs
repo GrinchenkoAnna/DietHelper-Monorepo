@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Models.Messages;
@@ -12,20 +13,29 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using Avalonia.Notification;
+using System.Runtime.CompilerServices;
 
 namespace DietHelper.Views
 {
     public partial class MainWindow : Window
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
+        public static WindowNotificationManager _notificationManager;
 
         public MainWindow(IServiceProvider serviceProvider)
         {
             InitializeComponent();
 
+            _notificationManager = new WindowNotificationManager(this)
+            {
+                Position = NotificationPosition.BottomRight,
+                MaxItems = 3
+            };
+
             _serviceProvider = serviceProvider;
-            _apiService = serviceProvider.GetRequiredService<ApiService>();
+            _apiService = serviceProvider.GetRequiredService<IApiService>();
 
             Debug.WriteLine($"[MainWindow] Constructor called. ApiService hash: {_apiService.GetHashCode()}");
 
@@ -183,6 +193,19 @@ namespace DietHelper.Views
 
                     if (userDishToRemove is not null)
                         mainWindowViewModel.UserDishes.Remove(userDishToRemove);
+                }
+            });
+
+            WeakReferenceMessenger.Default.Register<NotificationMessages>(this, (w, m) =>
+            {
+                if (this.IsActive)
+                {
+                    _notificationManager?.Show(new Notification
+                    {
+                        Title = m.Title,
+                        Message = m.Message,
+                        Type = m.Type
+                    });
                 }
             });
         }

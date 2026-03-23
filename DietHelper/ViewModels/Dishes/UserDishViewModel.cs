@@ -19,7 +19,7 @@ namespace DietHelper.ViewModels.Dishes
 {
     public partial class UserDishViewModel : ObservableValidator
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         public ObservableCollection<UserDishIngredientViewModel> Ingredients { get; } = new();
 
@@ -57,6 +57,13 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         private bool isDirty = false;
 
+        [ObservableProperty]
+        private bool isInAddMode;
+
+        public bool ShowDirtyIndicator => !IsInAddMode && IsDirty;
+        partial void OnIsDirtyChanged(bool value) => OnPropertyChanged(nameof(ShowDirtyIndicator));
+        partial void OnIsInAddModeChanged(bool value) => OnPropertyChanged(nameof(ShowDirtyIndicator));
+
         private void Recalculate()
         {
             if (IsReadyDish) return;
@@ -70,10 +77,12 @@ namespace DietHelper.ViewModels.Dishes
                 totalNutritionInfo.Protein += ingredient.CurrentNutrition.Protein;
                 totalNutritionInfo.Fat += ingredient.CurrentNutrition.Fat;
                 totalNutritionInfo.Carbs += ingredient.CurrentNutrition.Carbs;
-                Quantity += ingredient.Quantity;
+                //Quantity += ingredient.Quantity;
             }
 
             NutritionFacts = totalNutritionInfo;
+
+            UpdateTotalQuantity();
         }
         private void RecalculateForReadyDish()
         {
@@ -104,7 +113,7 @@ namespace DietHelper.ViewModels.Dishes
         public UserDishViewModel() { }
 
         // загрузка из справочника
-        public UserDishViewModel(UserDish userDish, ApiService apiService)
+        public UserDishViewModel(UserDish userDish, IApiService apiService)
         {
             _apiService = apiService;
 
@@ -152,10 +161,11 @@ namespace DietHelper.ViewModels.Dishes
             };
 
             IsDirty = false;
+            IsInAddMode = true;
         }
 
         // загрузка из истории
-        public UserDishViewModel(ApiService apiService, int id, string name, bool isReadyDish, double quantity, 
+        public UserDishViewModel(IApiService apiService, int id, string name, bool isReadyDish, double quantity, 
                                 NutritionInfo totalNutrition, IEnumerable<UserMealEntryIngredientDto>? ingredients = null)
         {
             _apiService = apiService;
@@ -165,23 +175,31 @@ namespace DietHelper.ViewModels.Dishes
             CanAddIngredients = !IsReadyDish;
             NutritionFacts = totalNutrition;
 
-            if (!IsReadyDish && ingredients is not null)
+            if (!IsReadyDish)
             {
-                foreach (var ingredient in ingredients)
+                if (ingredients.Count() != 0)
                 {
-                    var ingredientViewModel = new UserDishIngredientViewModel()
+                    foreach (var ingredient in ingredients)
                     {
-                        Id = ingredient.Id,
-                        UserProductId = ingredient.UserProductId,
-                        UserDishId = id,
-                        Name = ingredient.ProductNameSnapshot,
-                        ProductNameSnapshot = ingredient.ProductNameSnapshot,
-                        ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot,
-                        Quantity = (double)ingredient.Quantity
-                    };
-                    Ingredients.Add(ingredientViewModel);
-                    ingredientViewModel.PropertyChanged += OnIngredientPropertyChanged;
-                    Quantity += ingredientViewModel.Quantity;
+                        var ingredientViewModel = new UserDishIngredientViewModel()
+                        {
+                            Id = ingredient.Id,
+                            UserProductId = ingredient.UserProductId,
+                            UserDishId = id,
+                            Name = ingredient.ProductNameSnapshot,
+                            ProductNameSnapshot = ingredient.ProductNameSnapshot,
+                            ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot,
+                            Quantity = (double)ingredient.Quantity
+                        };
+                        Ingredients.Add(ingredientViewModel);
+                        ingredientViewModel.PropertyChanged += OnIngredientPropertyChanged;
+                        Quantity += ingredientViewModel.Quantity;
+                    }
+                }
+                else
+                {
+                    Quantity = 0;
+                    Recalculate();
                 }
             }
             else
@@ -215,6 +233,7 @@ namespace DietHelper.ViewModels.Dishes
             };
 
             IsDirty = false;
+            IsInAddMode = false;
         }        
 
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -233,7 +252,6 @@ namespace DietHelper.ViewModels.Dishes
                 IsDirty = true;
                 RecalculateForReadyDish();
             }
-            else UpdateTotalQuantity();
         }
 
         private void UpdateTotalQuantity()

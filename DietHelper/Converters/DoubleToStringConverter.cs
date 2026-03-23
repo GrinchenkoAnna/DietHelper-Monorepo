@@ -19,7 +19,7 @@ namespace DietHelper.Converters
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is null || string.IsNullOrWhiteSpace(value.ToString())) return 0.0;
-            if (double.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out double result)) return result;
+            if (double.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.CurrentCulture, out double result)) return result;
             return 0.0;
         }
     }

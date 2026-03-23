@@ -15,7 +15,7 @@ namespace DietHelper.ViewModels.Products
 {
     public partial class AddProductViewModel : AddItemBaseViewModel<UserProduct, UserProductViewModel>
     {
-        public AddProductViewModel(ApiService _apiService) : base(_apiService) { }
+        public AddProductViewModel(IApiService _apiService) : base(_apiService) { }
 
         [ObservableProperty] private BaseProductViewModel? selectedBaseItem;
 
@@ -101,11 +101,8 @@ namespace DietHelper.ViewModels.Products
         {
             if (SelectedBaseItem is null) return;
 
-            var user = await GetCurrentUser();
-
             var userProduct = new UserProduct()
             {
-                UserId = user.Id,
                 BaseProductId = SelectedBaseItem.Id,
                 CustomNutrition = new NutritionInfo()
                 {

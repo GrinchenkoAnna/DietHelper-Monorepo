@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ingredients="clr-namespace:DietHelper.Views.Products"
              xmlns:vm="clr-namespace:DietHelper.ViewModels.Dishes"
+             xmlns:dishes="clr-namespace:DietHelper.Views.Dishes"
              xmlns:converters="clr-namespace:DietHelper.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DietHelper.Views.Dishes.UserDishView"
-             x:DataType="vm:UserDishViewModel">
+             x:DataType="vm:UserDishViewModel" x:Name="Root">
 
     <UserControl.Resources>
 		<converters:BorderThicknessForDishConverter x:Key="BorderThicknessForDishConverter"/>
@@ -21,7 +22,7 @@
         <Border.Effect>
             <DropShadowEffect BlurRadius="8" 
                               Color="{DynamicResource CardShadowColor}" 
-                              OffsetX="0" OffsetY="0" 
+                              OffsetX="0" OffsetY="2" 
                               Opacity="1"/>
         </Border.Effect>
         <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
@@ -29,7 +30,7 @@
                 <TextBlock Grid.Column="0" Text="{Binding Name}" 
                            FontWeight="SemiBold" FontSize="16" />
                 <TextBlock Grid.Column="1" Text=" • изменено" 
-                           Foreground="Gray" FontSize="12" IsVisible="{Binding IsDirty}"/>
+                           Foreground="Gray" FontSize="12" IsVisible="{Binding ShowDirtyIndicator}"/>
             </Grid>
 
             <TextBlock Grid.Row="1" 
@@ -84,7 +85,7 @@
                      Background="Transparent"
                      BorderThickness="0"
                      CornerRadius="8"
-                     Margin="-5,0,-5,-5">
+                     Margin="0,0,-5,-5">
                 <ListBox.Styles>
                     <Style Selector="ListBoxItem">
                         <Setter Property="Background" Value="{DynamicResource IngredientBackground}"/>
@@ -128,7 +129,7 @@
                                          Background="Transparent"/>
 
                                 <Button Content="-" Width="20" Margin="0,0,5,1"
-                                        Command="{Binding $parent[UserControl].DataContext.RemoveIngredientCommand}"
+                                        Command="{Binding $parent[dishes:UserDishView].DataContext.RemoveIngredientCommand, FallbackValue={x:Null}}"
                                         CommandParameter="{Binding}"
                                         Classes="control-button"/>
                             </StackPanel>

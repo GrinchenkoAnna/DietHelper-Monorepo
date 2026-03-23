@@ -20,16 +20,15 @@ namespace DietHelper.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
+        private readonly INotificationService _notificationService;
 
         [ObservableProperty]
         private DateTime selectedDate = DateTime.Today;
 
         private DateTime _currentWeekStart;
 
-        public ObservableCollection<DateTime> WeekDays { get; } = new();
-
-        private ObservableCollection<UserProductViewModel> _userProducts = [];
+        public ObservableCollection<DateTime> WeekDays { get; } = new();        
 
         private static DateTime GetStartOfWeek(DateTime date)
         {
@@ -75,6 +74,8 @@ namespace DietHelper.ViewModels
             SelectedDate = date;
         }
 
+        private ObservableCollection<UserProductViewModel> _userProducts = [];
+
         public ObservableCollection<UserProductViewModel> UserProducts
         {
             get => _userProducts;
@@ -97,6 +98,13 @@ namespace DietHelper.ViewModels
                 UpdateTotals();
             }
         }
+
+        [ObservableProperty]
+        private string productMessage = string.Empty;
+        [ObservableProperty]
+        private string dishMessage = string.Empty;
+        public bool ShowProductMessage => UserProducts.Count == 0;
+        public bool ShowDishMessage => UserDishes.Count == 0;
 
         private ObservableCollection<UserDishViewModel> _userDishes = [];
 
@@ -182,6 +190,9 @@ namespace DietHelper.ViewModels
         {
             try
             {
+                ProductMessage = string.Empty;
+                DishMessage = string.Empty;
+
                 var userMealEntriesDto = await _apiService.GetUserMealsForDate(date);
                 if (userMealEntriesDto is null) return;
 
@@ -224,6 +235,9 @@ namespace DietHelper.ViewModels
                         UserDishes.Add(userDishViewModel);
                     }
                 }
+
+                if (UserProducts.Count == 0) ProductMessage = "Список продуктов пока пуст";
+                if (UserDishes.Count == 0) DishMessage = "Список блюд пока пуст";
             }
             catch (Exception ex)
             {
@@ -243,10 +257,10 @@ namespace DietHelper.ViewModels
             }
         }
 
-
-        public MainWindowViewModel(ApiService apiService) : base(apiService)
+        public MainWindowViewModel(IApiService apiService, INotificationService notificationService) : base(apiService)
         {
             _apiService = apiService;
+            _notificationService = notificationService;
             InitializeAsync();
 
             _currentWeekStart = GetStartOfWeek(SelectedDate);
@@ -396,6 +410,20 @@ namespace DietHelper.ViewModels
         {
             if (await _apiService.DeleteUserMealEntryAsync(userDish.MealEntryId))
                 UserDishes.Remove(userDish);
+        }
+
+        [RelayCommand]
+        private async Task OpenStatistics()
+        {
+            var mainWindow = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : null;
+            if (mainWindow is null) return;
+
+            var statsViewModel = new StatsViewModel(_apiService, _notificationService);
+            var statsWindow = new Views.StatsWindow()
+            {
+                DataContext = statsViewModel
+            };
+            await statsWindow.ShowDialog(mainWindow);
         }
 
         [RelayCommand]

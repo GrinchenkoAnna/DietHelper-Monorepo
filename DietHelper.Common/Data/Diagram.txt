@@ -1,0 +1,100 @@
+﻿erDiagram
+    User {
+        int Id PK
+        string UserName
+        string Email
+        text PasswordHash
+    }
+
+    RefreshToken {
+        int Id PK
+        string Token
+        int UserId FK
+        datetime CreatedAt
+        datetime ExpiresAt
+        datetime RevokedAt
+    }
+
+    BaseProduct {
+        int Id PK
+        string Name
+        bool IsDeleted
+        decimal Calories
+        decimal Protein
+        decimal Fat
+        decimal Carbs
+    }
+
+    UserProduct {
+        int Id PK
+        int UserId FK
+        int BaseProductId FK
+        bool IsDeleted
+        decimal CustomCalories
+        decimal CustomProtein
+        decimal CustomFat
+        decimal CustomCarbs
+    }
+
+    UserDish {
+        int Id PK
+        int UserId FK
+        string Name
+        bool IsReadyDish
+        bool IsDeleted
+        decimal Calories
+        decimal Protein
+        decimal Fat
+        decimal Carbs
+    }
+
+    UserDishIngredient {
+        int Id PK
+        int UserDishId FK
+        int UserProductId FK
+        double Quantity
+        bool IsDeleted
+        decimal Calories
+        decimal Protein
+        decimal Fat
+        decimal Carbs
+    }
+
+    UserMealEntry {
+        int Id PK
+        int UserId FK
+        int UserDishId FK
+        date Date
+        decimal TotalQuantity
+        bool IsDeleted
+        datetime CreatedAt
+        decimal TotalCalories
+        decimal TotalProtein
+        decimal TotalFat
+        decimal TotalCarbs
+    }
+
+    UserMealEntryIngredient {
+        int Id PK
+        int UserMealEntryId FK
+        int UserProductId FK
+        decimal Quantity
+        string ProductNameSnapshot
+        bool IsDeleted
+        decimal CaloriesSnapshot
+        decimal ProteinSnapshot
+        decimal FatSnapshot
+        decimal CarbsSnapshot
+    }
+
+User ||--o{ RefreshToken : "имеет токены"
+User ||--o{ UserProduct : "владеет продуктами"
+User ||--o{ UserDish : "владеет блюдами"
+User ||--o{ UserMealEntry : "ведет записи"
+
+BaseProduct ||--o{ UserProduct : "используется как шаблон"
+UserDish ||--o{ UserDishIngredient : "состоит из ингредиентов"
+UserProduct ||--o{ UserDishIngredient : "является ингредиентом блюда"
+UserDish ||--o{ UserMealEntry : "может быть приемом пищи"
+UserMealEntry ||--o{ UserMealEntryIngredient : "состоит из снапшотов"
+UserProduct ||--o{ UserMealEntryIngredient : "ссылка на продукт в снапшоте"

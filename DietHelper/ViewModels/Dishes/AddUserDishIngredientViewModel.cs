@@ -18,7 +18,7 @@ namespace DietHelper.ViewModels.Dishes
 {
     public partial class AddUserDishIngredientViewModel : AddItemBaseViewModel<UserProduct, UserProductViewModel>
     {
-        public AddUserDishIngredientViewModel(ApiService _apiService) : base(_apiService) { }
+        public AddUserDishIngredientViewModel(IApiService _apiService) : base(_apiService) { }
 
         [ObservableProperty] private BaseProductViewModel? selectedBaseItem;
 

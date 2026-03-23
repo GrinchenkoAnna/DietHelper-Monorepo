@@ -15,7 +15,7 @@
         <Border.Effect>
             <DropShadowEffect BlurRadius="8" 
                               Color="{DynamicResource CardShadowColor}" 
-                              OffsetX="0" OffsetY="0" 
+                              OffsetX="0" OffsetY="2" 
                               Opacity="1"/>
         </Border.Effect>
         <Grid RowDefinitions="Auto, Auto">

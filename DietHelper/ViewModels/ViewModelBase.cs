@@ -7,8 +7,8 @@ namespace DietHelper.ViewModels
 {
     public class ViewModelBase : ObservableObject
     {
-        private readonly ApiService _apiService;
-        protected ViewModelBase(ApiService apiService)
+        private readonly IApiService _apiService;
+        protected ViewModelBase(IApiService apiService)
         {
             _apiService = apiService;
         }

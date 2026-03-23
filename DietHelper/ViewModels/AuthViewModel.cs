@@ -14,7 +14,7 @@ namespace DietHelper.ViewModels
 {
     public partial class AuthViewModel : ObservableObject
     {
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         [ObservableProperty]
         private string userName = string.Empty;
@@ -31,7 +31,7 @@ namespace DietHelper.ViewModels
         [ObservableProperty]
         private bool isNewUser = false;
 
-        public AuthViewModel(ApiService apiService)
+        public AuthViewModel(IApiService apiService)
         {
             _apiService = apiService;
 

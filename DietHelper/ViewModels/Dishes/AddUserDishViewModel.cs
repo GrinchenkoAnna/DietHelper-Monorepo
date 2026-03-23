@@ -18,8 +18,6 @@ namespace DietHelper.ViewModels.Dishes
 
     public partial class AddUserDishViewModel : AddItemBaseViewModel<UserDish, UserDishViewModel>
     {
-        private readonly NutritionCalculator _nutritionCalculator;
-
         [ObservableProperty]
         private DishType selectedDishType = DishType.EmptyDish;
 
@@ -44,9 +42,8 @@ namespace DietHelper.ViewModels.Dishes
             }
         }
 
-        public AddUserDishViewModel(ApiService apiService, NutritionCalculator nutritionCalculator) : base(apiService)
+        public AddUserDishViewModel(IApiService apiService) : base(apiService)
         {
-            _nutritionCalculator = nutritionCalculator;
 
             PropertyChanged += (s, e) =>
             {
@@ -100,11 +97,8 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async Task<UserDish?> CreateNewUserItem()
         {
-            User user = await GetCurrentUser();
-
             var userDish = new UserDish()
             {
-                UserId = user.Id,
                 Name = ManualName!,
                 NutritionFacts = new NutritionInfo()
                 {
@@ -113,7 +107,7 @@ namespace DietHelper.ViewModels.Dishes
                     Fat = ManualFat,
                     Carbs = ManualCarbs
                 },
-                IsReadyDish = SelectedDishType == DishType.ReadyDish,
+                IsReadyDish = SelectedDishType == DishType.ReadyDish,                
                 IsDeleted = false
             };
 
@@ -142,7 +136,5 @@ namespace DietHelper.ViewModels.Dishes
 
             WeakReferenceMessenger.Default.Send(new DeleteUserDishMessage(userDishViewModel.Id));
         }
-
-
     }
 }

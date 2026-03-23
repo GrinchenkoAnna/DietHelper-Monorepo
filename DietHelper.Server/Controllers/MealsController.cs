@@ -96,6 +96,22 @@ namespace DietHelper.Server.Controllers
             return userMealEntry;
         }
 
+        [HttpGet("period")]
+        public async Task<ActionResult<List<UserMealEntryDto>>> GetUserMealsForPeriod([FromQuery] DateTime start, [FromQuery] DateTime end)
+        {
+            var userId = GetCurrentUserId();
+
+            var userMeals = await _dbContext.UserMealEntries
+                .Include(ume => ume.Ingredients.Where(i => !i.IsDeleted))
+                    .ThenInclude(i => i.UserProduct)
+                        .ThenInclude(up => up.BaseProduct)
+                .Include(ume => ume.UserDish)
+                .Where(ume => ume.UserId == userId && ume.Date >= start && ume.Date <= end && !ume.IsDeleted)
+                .ToListAsync();
+
+            return Ok(userMeals.Select(MapModelToDto));
+        }
+
         [HttpPut("{id}")]
         public async Task<ActionResult<UserMealEntryDto>> UpdateUserMeal(int id, UserMealEntryDto request)
         {
