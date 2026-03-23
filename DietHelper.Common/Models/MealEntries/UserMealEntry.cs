@@ -8,6 +8,13 @@ using System.Threading.Tasks;
 
 namespace DietHelper.Common.Models.MealEntries
 {
+    public enum MealType
+    {
+        Breakfast = 0,
+        Lunch = 1,
+        Dinner = 2,
+        Snack = 3
+    }
     public class UserMealEntry
     {
         public int Id { get; set; }
@@ -18,6 +25,7 @@ namespace DietHelper.Common.Models.MealEntries
         public NutritionInfo TotalNutrition { get; set; } = new();
         public List<UserMealEntryIngredient> Ingredients { get; set; } = new();
         public bool IsDeleted { get; set; }
+        public MealType MealType { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now; // служебная
 

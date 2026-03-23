@@ -1,4 +1,5 @@
 ﻿using DietHelper.Common.Models.Core;
+using DietHelper.Common.Models.MealEntries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,6 @@ namespace DietHelper.Common.DTO
         public decimal TotalQuantity { get; set; }
         public NutritionInfo TotalNutrition { get; set; } = new();
         public List<UserMealEntryIngredientDto> Ingredients { get; set; } = new();
+        public MealType MealType { get; set; }
     }
 }
