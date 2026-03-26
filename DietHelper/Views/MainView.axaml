@@ -36,14 +36,6 @@
                             VerticalAlignment="Top" HorizontalAlignment="Right"
                             Classes="control-button"/>
                 </StackPanel>
-                <Button Content="+ ингредиент" 
-                        HorizontalContentAlignment="Center"
-                        HorizontalAlignment="Stretch" 
-                        Command="{Binding AddDishIngredientCommand}"
-                        IsEnabled="{Binding CanAddIngredients}"
-                        IsVisible="{Binding CanAddIngredients}"
-                        Margin="8 5 -8 0"
-                        Classes="control-button"/>
             </StackPanel>
         </DataTemplate>
     </UserControl.DataTemplates>
@@ -123,9 +115,11 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
-                    <Button Content="+ продукт" Classes="control-button small-control-button"
+                    <Button Content="+ продукт" Classes="small-control-button"
+                            Width="100" Height="20"
                             Command="{Binding AddUserProductCommand}" />
-                    <Button Content="+ блюдо" Classes="control-button small-control-button"
+                    <Button Content="+ блюдо" Classes="small-control-button"
+                            Width="100" Height="20"
                             Command="{Binding AddDishCommand}" />
                 </StackPanel>
 
@@ -138,9 +132,11 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
-                    <Button Content="+ продукт" Classes="control-button small-control-button"
+                    <Button Content="+ продукт" Classes="small-control-button"
+                            Width="100" Height="20"
                             Command="{Binding AddUserProductCommand}" />
-                    <Button Content="+ блюдо" Classes="control-button small-control-button"
+                    <Button Content="+ блюдо" Classes="small-control-button"
+                            Width="100" Height="20"
                             Command="{Binding AddDishCommand}" />
                 </StackPanel>
 
@@ -153,9 +149,11 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
-                    <Button Content="+ продукт" Classes="control-button small-control-button"
+                    <Button Content="+ продукт" Classes="small-control-button"
+                            Width="100" Height="20"
                             Command="{Binding AddUserProductCommand}" />
-                    <Button Content="+ блюдо" Classes="control-button small-control-button"
+                    <Button Content="+ блюдо" Classes="small-control-button"
+                            Width="100" Height="20"
                             Command="{Binding AddDishCommand}" />
                 </StackPanel>
 
@@ -168,9 +166,11 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
-                    <Button Content="+ продукт" Classes="control-button small-control-button"
+                    <Button Content="+ продукт" Classes="small-control-button"
+                            Width="100" Height="20"
                             Command="{Binding AddUserProductCommand}" />
-                    <Button Content="+ блюдо" Classes="control-button small-control-button"
+                    <Button Content="+ блюдо" Classes="small-control-button"
+                            Width="100" Height="20"
                             Command="{Binding AddDishCommand}" />
                 </StackPanel>
 

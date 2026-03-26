@@ -26,11 +26,19 @@
                               Opacity="1"/>
         </Border.Effect>
         <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
-            <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, Auto">
                 <TextBlock Grid.Column="0" Text="{Binding Name}" 
-                           FontWeight="SemiBold" FontSize="16" />
+                           FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap"/>
                 <TextBlock Grid.Column="1" Text=" • изменено" 
                            Foreground="Gray" FontSize="12" IsVisible="{Binding ShowDirtyIndicator}"/>
+                <Button Grid.Column="3" Content="+" 
+                        HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" 
+                        Command="{Binding AddDishIngredientCommand}"
+                        IsEnabled="{Binding CanAddIngredients}"
+                        IsVisible="{Binding CanAddIngredients}"
+                        Margin="0,0,5,0" Width="25" Height="25"
+                        ToolTip.Tip="Добавить ингредиент"
+                        Classes="small-control-button"/>
             </Grid>
 
             <TextBlock Grid.Row="1" 
