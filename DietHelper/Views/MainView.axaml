@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:DietHelper.ViewModels"
-             xmlns:products="clr-namespace:DietHelper.Views.Products"
+             xmlns:products="using:DietHelper.Views.Products"
              xmlns:dishes="clr-namespace:DietHelper.Views.Dishes"
              xmlns:converters="clr-namespace:DietHelper.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -13,7 +13,40 @@
 
     <UserControl.Resources>
 		<converters:DateStyleConverter x:Key="DateStyleConverter" />
+        <converters:MealTypeToStringConverter x:Key="MealTypeToStringConverter" />        
     </UserControl.Resources>
+
+    <UserControl.DataTemplates>
+		<DataTemplate DataType="{x:Type vm:Products.UserProductViewModel}">
+            <StackPanel Orientation="Horizontal">
+                <products:UserProductView DataContext="{Binding}" />
+                <Button Content="-" Margin="10 0 0 0" MinWidth="25"
+                        Command="{Binding $parent[UserControl].DataContext.RemoveEntryCommand}"
+                        CommandParameter="{Binding}"
+                        Classes="control-button"/>
+            </StackPanel>			
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:Dishes.UserDishViewModel}">
+			<StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <dishes:UserDishView DataContext="{Binding}" />
+                    <Button Content="-" Margin="10 0 0 0"
+                            Command="{Binding $parent[UserControl].DataContext.RemoveEntryCommand}"
+                            CommandParameter="{Binding}"
+                            VerticalAlignment="Top" HorizontalAlignment="Right"
+                            Classes="control-button"/>
+                </StackPanel>
+                <Button Content="+ ингредиент" 
+                        HorizontalContentAlignment="Center"
+                        HorizontalAlignment="Stretch" 
+                        Command="{Binding AddDishIngredientCommand}"
+                        IsEnabled="{Binding CanAddIngredients}"
+                        IsVisible="{Binding CanAddIngredients}"
+                        Margin="8 5 -8 0"
+                        Classes="control-button"/>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.DataTemplates>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -59,31 +92,14 @@
 						<DataTemplate>
 							<Button Content="{Binding ., StringFormat='ddd dd.MM'}" 
                                     Command="{Binding $parent[UserControl].DataContext.SetSelectedDateCommand}"
-                                    CommandParameter="{Binding .}" Background="Transparent"
-                                    Width="100" MinHeight="25" Padding="-3"
-                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                    CommandParameter="{Binding .}"
+                                    Classes="day-button">
                                 <Button.Tag>
                                     <MultiBinding Converter="{StaticResource DateStyleConverter}">
                                         <Binding Path="."/>
                                         <Binding Path="$parent[UserControl].DataContext.SelectedDate"/>
                                     </MultiBinding>
                                 </Button.Tag>
-                                <Button.Styles>
-                                    <Style Selector="Button[Tag=isSelected]">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="BorderBrush" Value="#696969"/>
-                                        <Setter Property="BorderThickness" Value="0.5" />
-                                        <Setter Property="CornerRadius" Value="3" />
-                                        <Setter Property="FontWeight" Value="Light" />
-                                    </Style>
-                                    <Style Selector="Button[Tag=isSelected]:pointerover /template/ ContentPresenter">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="BorderBrush" Value="#696969"/>
-                                        <Setter Property="BorderThickness" Value="0.5" />
-                                        <Setter Property="CornerRadius" Value="3" />
-                                        <Setter Property="FontWeight" Value="Light" />
-                                    </Style>
-                                </Button.Styles>
                             </Button>
                         </DataTemplate> 
                     </ItemsControl.ItemTemplate>
@@ -98,88 +114,66 @@
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <TextBlock Text="{Binding ProductMessage}" IsVisible="{Binding ShowProductMessage}" 
-                           HorizontalAlignment="Center" FontWeight="Light" Foreground="#696969"/>
-                <ListBox ItemsSource="{Binding UserProducts}" Margin="0 10 0 10" x:Name="UserProductsList" SelectionMode="Toggle">
-                    <ListBox.Styles>
-                        <Style Selector="ListBox">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderBrush" Value="Transparent"/>
-                        </Style>
-                        <Style Selector="ListBoxItem">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderBrush" Value="Transparent"/>
-                        </Style>
-                        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="Transparent"/>
-                        </Style>
-                    </ListBox.Styles>
+                <TextBlock Text="Завтрак" FontWeight="Bold" Margin="10,10,0,5"/>
+                <ListBox ItemsSource="{Binding BreakfastEntries}" Background="Transparent" BorderThickness="0">
                     <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="vm:Products.UserProductViewModel">
-                            <StackPanel Orientation="Horizontal">
-                                <products:UserProductView DataContext="{Binding}" />
-                                <Button Content="-" Margin="10 0 0 0" MinWidth="25"
-                                        Command="{Binding $parent[UserControl].DataContext.RemoveUserProductCommand}"
-                                        CommandParameter="{Binding}"
-                                        Classes="control-button"/>
-                            </StackPanel>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
+                    <Button Content="+ продукт" Classes="control-button small-control-button"
+                            Command="{Binding AddUserProductCommand}" />
+                    <Button Content="+ блюдо" Classes="control-button small-control-button"
+                            Command="{Binding AddDishCommand}" />
+                </StackPanel>
 
-                <Button Content="+ продукт" Margin="5"
-                        Command="{Binding AddUserProductCommand}"
-                        VerticalAlignment="Bottom"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Classes="control-button"/>
-
-                <TextBlock Text="{Binding DishMessage}" IsVisible="{Binding ShowDishMessage}"
-                           HorizontalAlignment="Center" FontWeight="Light" Foreground="#696969"/>
-                <ListBox ItemsSource="{Binding UserDishes}" Margin="0 10 0 10" x:Name="UserDishesList" SelectionMode="Toggle">
-                    <ListBox.Styles>
-                        <Style Selector="ListBox">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderBrush" Value="Transparent"/>
-                        </Style>
-                        <Style Selector="ListBoxItem">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderBrush" Value="Transparent"/>
-                        </Style>
-                        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="Transparent"/>
-                        </Style>
-                    </ListBox.Styles>
+                <TextBlock Text="Обед" FontWeight="Bold" Margin="10,10,0,5"/>
+                <ListBox ItemsSource="{Binding LunchEntries}" Background="Transparent" BorderThickness="0">
                     <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="vm:Dishes.UserDishViewModel">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <dishes:UserDishView DataContext="{Binding}" />
-                                    <Button Content="-" Margin="10 0 0 0"
-                                            Command="{Binding $parent[UserControl].DataContext.RemoveDishCommand}"
-                                            CommandParameter="{Binding}"
-                                            VerticalAlignment="Top" HorizontalAlignment="Right"
-                                            Classes="control-button"/>
-                                </StackPanel>
-                                <Button Content="+ ингредиент" 
-                                        HorizontalContentAlignment="Center"
-                                        HorizontalAlignment="Stretch" 
-                                        Command="{Binding AddDishIngredientCommand}"
-                                        IsEnabled="{Binding CanAddIngredients}"
-                                        IsVisible="{Binding CanAddIngredients}"
-                                        Margin="8 5 -8 0"
-                                        Classes="control-button"/>
-                            </StackPanel>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
+                    <Button Content="+ продукт" Classes="control-button small-control-button"
+                            Command="{Binding AddUserProductCommand}" />
+                    <Button Content="+ блюдо" Classes="control-button small-control-button"
+                            Command="{Binding AddDishCommand}" />
+                </StackPanel>
 
-                <Button Content="+ блюдо" Margin="5"
-                        Command="{Binding AddDishCommand}"
-                        VerticalAlignment="Bottom"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Classes="control-button"/>
+                <TextBlock Text="Ужин" FontWeight="Bold" Margin="10,10,0,5"/>
+                <ListBox ItemsSource="{Binding DinnerEntries}" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
+                    <Button Content="+ продукт" Classes="control-button small-control-button"
+                            Command="{Binding AddUserProductCommand}" />
+                    <Button Content="+ блюдо" Classes="control-button small-control-button"
+                            Command="{Binding AddDishCommand}" />
+                </StackPanel>
+
+                <TextBlock Text="Перекус" FontWeight="Bold" Margin="10,10,0,5"/>
+                <ListBox ItemsSource="{Binding SnackEntries}" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
+                    <Button Content="+ продукт" Classes="control-button small-control-button"
+                            Command="{Binding AddUserProductCommand}" />
+                    <Button Content="+ блюдо" Classes="control-button small-control-button"
+                            Command="{Binding AddDishCommand}" />
+                </StackPanel>
+
             </StackPanel>
         </ScrollViewer>
 

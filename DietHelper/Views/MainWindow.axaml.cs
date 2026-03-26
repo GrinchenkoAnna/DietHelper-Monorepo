@@ -12,9 +12,6 @@ using DietHelper.Views.Products;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
-using System.Linq;
-using Avalonia.Notification;
-using System.Runtime.CompilerServices;
 
 namespace DietHelper.Views
 {
@@ -124,7 +121,7 @@ namespace DietHelper.Views
         {
             WeakReferenceMessenger.Default.Register<MainWindow, AddBaseProductMessage>(this, static (w, m) =>
              {
-                 var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
+                 var viewModel = w._serviceProvider.GetRequiredService<AddProductViewModel>();
 
                  var dialog = new AddProductWindow
                  {
@@ -135,7 +132,7 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddUserProductMessage>(this, static (w, m) =>
             {
-                var viewModel = ServiceLocator.GetRequiredService<AddProductViewModel>();
+                var viewModel = w._serviceProvider.GetRequiredService<AddProductViewModel>();
 
                 var dialog = new AddProductWindow
                 {
@@ -146,7 +143,7 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddUserDishMessage>(this, static (w, m) =>
             {
-                var viewModel = ServiceLocator.GetRequiredService<AddUserDishViewModel>();
+                var viewModel = w._serviceProvider.GetRequiredService<AddUserDishViewModel>();
 
                 var dialog = new AddDishWindow
                 {
@@ -157,43 +154,13 @@ namespace DietHelper.Views
 
             WeakReferenceMessenger.Default.Register<MainWindow, AddDishIngredientMessage>(this, static (w, m) =>
             {
-                var viewModel = ServiceLocator.GetRequiredService<AddUserDishIngredientViewModel>();
+                var viewModel = w._serviceProvider.GetRequiredService<AddUserDishIngredientViewModel>();
 
                 var dialog = new AddDishIngredientWindow
                 {
                     DataContext = viewModel
                 };
                 m.Reply(dialog.ShowDialog<UserDishIngredientViewModel?>(w));
-            });
-
-            WeakReferenceMessenger.Default.Register<MainWindow, DeleteUserProductMessage>(this, static (w, m) =>
-            {
-                if (w.DataContext is MainWindowViewModel mainWindowViewModel)
-                {
-                    var userProductToRemove = mainWindowViewModel.UserProducts.FirstOrDefault(p => p.Id == m.Value);
-
-                    if (userProductToRemove is not null)
-                        mainWindowViewModel.UserProducts.Remove(userProductToRemove);
-
-                    foreach (var userDish in mainWindowViewModel.UserDishes)
-                    {
-                        var ingredientToRemove = userDish.Ingredients.FirstOrDefault(i => i.UserProductId == m.Value);
-
-                        if (ingredientToRemove is not null)
-                            userDish.Ingredients.Remove(ingredientToRemove);
-                    }
-                }
-            });
-
-            WeakReferenceMessenger.Default.Register<MainWindow, DeleteUserDishMessage>(this, static (w, m) =>
-            {
-                if (w.DataContext is MainWindowViewModel mainWindowViewModel)
-                {
-                    var userDishToRemove = mainWindowViewModel.UserDishes.FirstOrDefault(d => d.Id == m.Value);
-
-                    if (userDishToRemove is not null)
-                        mainWindowViewModel.UserDishes.Remove(userDishToRemove);
-                }
             });
 
             WeakReferenceMessenger.Default.Register<NotificationMessages>(this, (w, m) =>

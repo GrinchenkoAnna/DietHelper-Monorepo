@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.DTO;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
+using DietHelper.Common.Models.MealEntries;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using System;
@@ -47,6 +48,9 @@ namespace DietHelper.ViewModels.Dishes
 
         [ObservableProperty]
         private int mealEntryId;
+
+        [ObservableProperty]
+        private MealType mealType;
 
         [ObservableProperty]
         private double quantity;
