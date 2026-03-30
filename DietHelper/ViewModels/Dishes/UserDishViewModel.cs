@@ -68,6 +68,9 @@ namespace DietHelper.ViewModels.Dishes
         partial void OnIsDirtyChanged(bool value) => OnPropertyChanged(nameof(ShowDirtyIndicator));
         partial void OnIsInAddModeChanged(bool value) => OnPropertyChanged(nameof(ShowDirtyIndicator));
 
+        [ObservableProperty]
+        public bool showIngredients = true;
+
         private void Recalculate()
         {
             if (IsReadyDish) return;
@@ -197,8 +200,9 @@ namespace DietHelper.ViewModels.Dishes
                         };
                         Ingredients.Add(ingredientViewModel);
                         ingredientViewModel.PropertyChanged += OnIngredientPropertyChanged;
-                        Quantity += ingredientViewModel.Quantity;
+                        //Quantity += ingredientViewModel.Quantity;
                     }
+                    UpdateTotalQuantity();
                 }
                 else
                 {

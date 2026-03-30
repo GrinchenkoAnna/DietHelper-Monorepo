@@ -106,7 +106,7 @@
             </Grid>
         </Border>
 
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">            
             <StackPanel>
                 <TextBlock Text="Завтрак" FontWeight="Bold" Margin="10,10,0,5"/>
                 <ListBox ItemsSource="{Binding BreakfastEntries}" Background="Transparent" BorderThickness="0">

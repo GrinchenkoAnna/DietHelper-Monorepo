@@ -45,6 +45,38 @@
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
+        <Style Selector="ToggleButton.show-ingredient">
+            <Setter Property="Background" Value="{DynamicResource MainBackground}" />
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="Padding" Value="0" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleButton.show-ingredient:pointerover /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleButton.show-ingredient:checked /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleButton.show-ingredient:unchecked /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+
         <Style Selector="Button.day-button">
 			<Setter Property="Background" Value="Transparent"/>
 			<Setter Property="Width" Value="100"/>
