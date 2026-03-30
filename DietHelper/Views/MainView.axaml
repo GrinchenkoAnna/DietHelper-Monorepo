@@ -2,10 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mealEntries="using:DietHelper.Common.Models.MealEntries"
              xmlns:vm="using:DietHelper.ViewModels"
              xmlns:products="using:DietHelper.Views.Products"
              xmlns:dishes="clr-namespace:DietHelper.Views.Dishes"
              xmlns:converters="clr-namespace:DietHelper.Converters"
+             xmlns:mealTypes="clr-namespace:DietHelper.Common.Models.MealEntries"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="DietHelper.Views.MainView"
              x:Name="root"
@@ -117,10 +119,12 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
                     <Button Content="+ продукт" Classes="small-control-button"
                             Width="100" Height="20"
-                            Command="{Binding AddUserProductCommand}" />
+                            Command="{Binding AddUserProductCommand}" 
+                            CommandParameter="{x:Static mealEntries:MealType.Breakfast}"/>
                     <Button Content="+ блюдо" Classes="small-control-button"
                             Width="100" Height="20"
-                            Command="{Binding AddDishCommand}" />
+                            Command="{Binding AddDishCommand}" 
+                            CommandParameter="{x:Static mealEntries:MealType.Breakfast}"/>
                 </StackPanel>
 
                 <TextBlock Text="Обед" FontWeight="Bold" Margin="10,10,0,5"/>
@@ -134,10 +138,12 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
                     <Button Content="+ продукт" Classes="small-control-button"
                             Width="100" Height="20"
-                            Command="{Binding AddUserProductCommand}" />
+                            Command="{Binding AddUserProductCommand}" 
+                            CommandParameter="{x:Static mealEntries:MealType.Lunch}"/>
                     <Button Content="+ блюдо" Classes="small-control-button"
                             Width="100" Height="20"
-                            Command="{Binding AddDishCommand}" />
+                            Command="{Binding AddDishCommand}" 
+                            CommandParameter="{x:Static mealEntries:MealType.Lunch}"/>
                 </StackPanel>
 
                 <TextBlock Text="Ужин" FontWeight="Bold" Margin="10,10,0,5"/>
@@ -151,10 +157,12 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
                     <Button Content="+ продукт" Classes="small-control-button"
                             Width="100" Height="20"
-                            Command="{Binding AddUserProductCommand}" />
+                            Command="{Binding AddUserProductCommand}" 
+                            CommandParameter="{x:Static mealEntries:MealType.Dinner}"/>
                     <Button Content="+ блюдо" Classes="small-control-button"
                             Width="100" Height="20"
-                            Command="{Binding AddDishCommand}" />
+                            Command="{Binding AddDishCommand}" 
+                            CommandParameter="{x:Static mealEntries:MealType.Dinner}"/>
                 </StackPanel>
 
                 <TextBlock Text="Перекус" FontWeight="Bold" Margin="10,10,0,5"/>
@@ -168,10 +176,12 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
                     <Button Content="+ продукт" Classes="small-control-button"
                             Width="100" Height="20"
-                            Command="{Binding AddUserProductCommand}" />
+                            Command="{Binding AddUserProductCommand}" 
+                            CommandParameter="{x:Static mealEntries:MealType.Snack}"/>
                     <Button Content="+ блюдо" Classes="small-control-button"
                             Width="100" Height="20"
-                            Command="{Binding AddDishCommand}" />
+                            Command="{Binding AddDishCommand}" 
+                            CommandParameter="{x:Static mealEntries:MealType.Snack}"/>
                 </StackPanel>
 
             </StackPanel>

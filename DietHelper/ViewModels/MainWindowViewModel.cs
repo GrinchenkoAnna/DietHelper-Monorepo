@@ -88,6 +88,8 @@ namespace DietHelper.ViewModels
                 foreach (var item in e.OldItems)
                     UnsubscribeFromEntries(item);
 
+            DistributeEntriesByMealType();
+
             OnPropertyChanged(nameof(UserProducts));
             OnPropertyChanged(nameof(UserDishes));
 
@@ -292,7 +294,7 @@ namespace DietHelper.ViewModels
         }
 
         [RelayCommand]
-        private async Task AddUserProduct()
+        private async Task AddUserProduct(MealType mealType)
         {
             try
             {
@@ -318,7 +320,7 @@ namespace DietHelper.ViewModels
                             }
                         }
                     },
-                    MealType = userProductViewModel.MealType,
+                    MealType = mealType,
                 };
 
                 var userMealEntry = await _apiService.AddUserMealEntryAsync(userMealEntryDto);
@@ -333,7 +335,7 @@ namespace DietHelper.ViewModels
         }
 
         [RelayCommand]
-        private async Task AddDish()
+        private async Task AddDish(MealType mealType)
         {
             try
             {
@@ -355,7 +357,7 @@ namespace DietHelper.ViewModels
                     Ingredients = ingredients,
                     TotalQuantity = (decimal)userDishViewModel.Quantity,
                     TotalNutrition = userDishViewModel.NutritionFacts,
-                    MealType = userDishViewModel.MealType
+                    MealType = mealType
                 };
 
                 var userMealEntry = await _apiService.AddUserMealEntryAsync(userMealEntryDto);
