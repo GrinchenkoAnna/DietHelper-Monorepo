@@ -22,21 +22,22 @@
 		<DataTemplate DataType="{x:Type vm:Products.UserProductViewModel}">
             <StackPanel Orientation="Horizontal">
                 <products:UserProductView DataContext="{Binding}" />
-                <Button Content="-" Margin="10 0 0 0" MinWidth="25"
+                <Button Content="-" Margin="0, 5, 0, 0" Width="25" Height="25"
                         Command="{Binding $parent[UserControl].DataContext.RemoveEntryCommand}"
                         CommandParameter="{Binding}"
-                        Classes="control-button"/>
+                        VerticalAlignment="Top" HorizontalAlignment="Right"
+                        Classes="small-control-button"/>
             </StackPanel>			
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:Dishes.UserDishViewModel}">
 			<StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <dishes:UserDishView DataContext="{Binding}" />
-                    <Button Content="-" Margin="10 0 0 0"
+                    <Button Content="-" Margin="0, 5, 0, 0" Width="25" Height="25"
                             Command="{Binding $parent[UserControl].DataContext.RemoveEntryCommand}"
                             CommandParameter="{Binding}"
                             VerticalAlignment="Top" HorizontalAlignment="Right"
-                            Classes="control-button"/>
+                            Classes="small-control-button"/>
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
