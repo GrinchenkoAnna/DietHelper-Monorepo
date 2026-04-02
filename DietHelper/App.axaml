@@ -104,6 +104,11 @@
 			<Setter Property="Padding" Value="0"/>
 			<Setter Property="Margin" Value="0"/>
         </Style>
+
+        <Style Selector="Border.section">
+			<Setter Property="BorderThickness" Value="0,0,0,0.5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
     </Application.Styles>
 
     <Application.Resources>
