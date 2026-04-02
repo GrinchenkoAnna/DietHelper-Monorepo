@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.DTO;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
+using DietHelper.Common.Models.MealEntries;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using System;
@@ -49,6 +50,9 @@ namespace DietHelper.ViewModels.Dishes
         private int mealEntryId;
 
         [ObservableProperty]
+        private MealType mealType;
+
+        [ObservableProperty]
         private double quantity;
         [ObservableProperty]
         private string formattedQuantity;  
@@ -63,6 +67,9 @@ namespace DietHelper.ViewModels.Dishes
         public bool ShowDirtyIndicator => !IsInAddMode && IsDirty;
         partial void OnIsDirtyChanged(bool value) => OnPropertyChanged(nameof(ShowDirtyIndicator));
         partial void OnIsInAddModeChanged(bool value) => OnPropertyChanged(nameof(ShowDirtyIndicator));
+
+        [ObservableProperty]
+        public bool showIngredients = true;
 
         private void Recalculate()
         {
@@ -193,8 +200,9 @@ namespace DietHelper.ViewModels.Dishes
                         };
                         Ingredients.Add(ingredientViewModel);
                         ingredientViewModel.PropertyChanged += OnIngredientPropertyChanged;
-                        Quantity += ingredientViewModel.Quantity;
+                        //Quantity += ingredientViewModel.Quantity;
                     }
+                    UpdateTotalQuantity();
                 }
                 else
                 {

@@ -157,6 +157,7 @@ namespace DietHelper.Server.Controllers
 
             userMealEntry.Date = request.Date;
             userMealEntry.UserDishId = request.UserDishId;
+            userMealEntry.MealType = request.MealType;
 
             await _dbContext.SaveChangesAsync();
 
@@ -200,6 +201,7 @@ namespace DietHelper.Server.Controllers
                 UserDishId = request.UserDishId,
                 Date = request.Date,
                 CreatedAt = DateTime.UtcNow,
+                MealType = request.MealType
             };
 
             if (request.Ingredients.Count > 0)
@@ -229,6 +231,7 @@ namespace DietHelper.Server.Controllers
                 UserDishName = userMealEntry.UserDish?.Name,
                 TotalQuantity = userMealEntry.TotalQuantity,
                 TotalNutrition = userMealEntry.TotalNutrition,
+                MealType = userMealEntry.MealType,
                 Ingredients = userMealEntry.Ingredients.Select(i => new UserMealEntryIngredientDto()
                 {
                     Id = i.Id,

@@ -150,7 +150,7 @@ namespace DietHelper.Common.Data
                 entity.HasKey(ume => ume.Id);
                 entity.Property(ume => ume.Date).IsRequired().HasColumnType("date");
                 entity.Property(ume => ume.CreatedAt).HasColumnType("timestamp with time zone");
-                entity.Property(ume => ume.MealType).IsRequired().HasDefaultValue(MealType.Snack);
+                entity.Property(ume => ume.MealType).IsRequired();
 
                 entity.OwnsOne(ume => ume.TotalNutrition, nutrition =>
                 {

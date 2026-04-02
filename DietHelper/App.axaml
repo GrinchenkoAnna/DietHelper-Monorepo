@@ -11,6 +11,7 @@
   
     <Application.Styles>
         <FluentTheme />
+
         <Style Selector="Button.control-button">
 			<Setter Property="Background" Value="Transparent" />
 			<Setter Property="BorderBrush" Value="#696969" />
@@ -23,8 +24,90 @@
             <Setter Property="BorderBrush" Value="#696969"/>
             <Setter Property="BorderThickness" Value="0.5" />
             <Setter Property="CornerRadius" Value="3" />
-            <Setter Property="FontWeight" Value="Light" />
+            <Setter Property="FontWeight" Value="Bold" />
 			<Setter Property="MinWidth" Value="25" />
+        </Style>
+
+        <Style Selector="Button.small-control-button">
+            <Setter Property="Background" Value="{DynamicResource MainBackground}" />
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="5" />
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="Padding" Value="0, -5, 0, -5" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.small-control-button:pointerover /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="5" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style Selector="ToggleButton.show-ingredient">
+            <Setter Property="Background" Value="{DynamicResource MainBackground}" />
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="Padding" Value="0" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleButton.show-ingredient:pointerover /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleButton.show-ingredient:checked /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleButton.show-ingredient:unchecked /template/ ContentPresenter">
+			<Setter Property="BorderBrush" Value="#696969" />
+			<Setter Property="BorderThickness" Value="0.5" />
+			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style Selector="Button.day-button">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Width" Value="100"/>
+			<Setter Property="MinHeight" Value="25"/>
+			<Setter Property="Padding" Value="-3"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.day-button[Tag=isSelected]">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#696969"/>
+            <Setter Property="BorderThickness" Value="0.5" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="FontWeight" Value="Light" />
+        </Style>
+        <Style Selector="Button.day-button[Tag=isSelected]:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#696969"/>
+            <Setter Property="BorderThickness" Value="0.5" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="FontWeight" Value="Light" />
+        </Style>
+
+        <Style Selector="ListBoxItem">
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="Margin" Value="0"/>
+        </Style>
+
+        <Style Selector="Border.section">
+			<Setter Property="BorderThickness" Value="0,0,0,0.5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
     </Application.Styles>
 
@@ -34,11 +117,13 @@
 				<ResourceDictionary x:Key="Light">
                 <SolidColorBrush x:Key="CardBackground" Color="#EEEEEE"/>
                 <SolidColorBrush x:Key="IngredientBackground" Color="#DDDDDD"/>
+                <SolidColorBrush x:Key="MainBackground" Color="White" />
                 <Color x:Key="CardShadowColor">#30000000</Color>
             </ResourceDictionary>
             <ResourceDictionary x:Key="Dark">
                 <SolidColorBrush x:Key="CardBackground" Color="#222222"/>
                 <SolidColorBrush x:Key="IngredientBackground" Color="#111111"/>
+                <SolidColorBrush x:Key="MainBackground" Color="Black" />
                 <Color x:Key="CardShadowColor">Transparent</Color>
             </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>

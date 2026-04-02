@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DietHelper.Common.Models.Core;
+using DietHelper.Common.Models.MealEntries;
 using DietHelper.Common.Models.Products;
 using DietHelper.ViewModels.Base;
 using System.ComponentModel;
@@ -13,6 +14,9 @@ namespace DietHelper.ViewModels.Products
 
         [ObservableProperty]
         private int mealEntryId;
+
+        [ObservableProperty]
+        private MealType mealType;
 
         [ObservableProperty]
         private bool isInAddMode;
