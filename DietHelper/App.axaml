@@ -32,7 +32,7 @@
             <Setter Property="Background" Value="{DynamicResource MainBackground}" />
 			<Setter Property="BorderBrush" Value="#696969" />
 			<Setter Property="BorderThickness" Value="0.5" />
-			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="CornerRadius" Value="5" />
 			<Setter Property="FontSize" Value="12" />
 			<Setter Property="Padding" Value="0, -5, 0, -5" />
 			<Setter Property="VerticalContentAlignment" Value="Center" />
@@ -41,7 +41,7 @@
         <Style Selector="Button.small-control-button:pointerover /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#696969" />
 			<Setter Property="BorderThickness" Value="0.5" />
-			<Setter Property="CornerRadius" Value="3" />
+			<Setter Property="CornerRadius" Value="5" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 

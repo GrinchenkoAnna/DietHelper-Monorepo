@@ -20,26 +20,22 @@
 
     <UserControl.DataTemplates>
 		<DataTemplate DataType="{x:Type vm:Products.UserProductViewModel}">
-            <StackPanel Orientation="Horizontal">
-                <products:UserProductView DataContext="{Binding}" />
-                <Button Content="-" Margin="0, 5, 0, 0" Width="25" Height="25"
+            <Grid ColumnDefinitions="*, 25">
+                <products:UserProductView Grid.Column="0" DataContext="{Binding}" HorizontalAlignment="Stretch"/>
+                <Button Grid.Column="1" Content="-" Width="25" Height="25"
                         Command="{Binding $parent[UserControl].DataContext.RemoveEntryCommand}"
-                        CommandParameter="{Binding}"
-                        VerticalAlignment="Top" HorizontalAlignment="Right"
+                        CommandParameter="{Binding}" Margin="-8,8" VerticalAlignment="Top"
                         Classes="small-control-button"/>
-            </StackPanel>			
+            </Grid>			
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:Dishes.UserDishViewModel}">
-			<StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <dishes:UserDishView DataContext="{Binding}" />
-                    <Button Content="-" Margin="0, 5, 0, 0" Width="25" Height="25"
-                            Command="{Binding $parent[UserControl].DataContext.RemoveEntryCommand}"
-                            CommandParameter="{Binding}"
-                            VerticalAlignment="Top" HorizontalAlignment="Right"
-                            Classes="small-control-button"/>
-                </StackPanel>
-            </StackPanel>
+			<Grid ColumnDefinitions="*, 25">
+                <dishes:UserDishView Grid.Column="0" DataContext="{Binding}" HorizontalAlignment="Stretch"/>
+                <Button Grid.Column="1" Content="-" Width="25" Height="25"
+                        Command="{Binding $parent[UserControl].DataContext.RemoveEntryCommand}"
+                        CommandParameter="{Binding}" Margin="-8,8"  VerticalAlignment="Top"
+                        Classes="small-control-button"/>
+            </Grid>
         </DataTemplate>
     </UserControl.DataTemplates>
 
@@ -76,10 +72,10 @@
                         Background="Transparent"/>
 
                 <ItemsControl Grid.Column="1" ItemsSource="{Binding WeekDays}"
-                              HorizontalAlignment="Center" VerticalAlignment="Center">
+                              HorizontalAlignment="Stretch" VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
-							<StackPanel Orientation="Horizontal" Spacing="10" />
+							<UniformGrid Columns="7" Rows="1"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>			
                 
@@ -110,80 +106,84 @@
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">            
             <StackPanel>
                 <TextBlock Text="Завтрак" FontWeight="Bold" Margin="10,10,0,5"/>
-                <ListBox ItemsSource="{Binding BreakfastEntries}" Background="Transparent" BorderThickness="0">
+                <ListBox ItemsSource="{Binding BreakfastEntries}" Background="Transparent" 
+                         BorderThickness="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <ContentControl Content="{Binding}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
-                    <Button Content="+ продукт" Classes="small-control-button"
-                            Width="100" Height="20"
-                            Command="{Binding AddUserProductCommand}" 
+                <Grid ColumnDefinitions="*,*" HorizontalAlignment="Stretch" Margin="5">
+                    <Button Grid.Column="0" Content="+ продукт" Classes="small-control-button"
+                            Height="20" HorizontalAlignment="Stretch"
+                            Command="{Binding AddUserProductCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Breakfast}"/>
-                    <Button Content="+ блюдо" Classes="small-control-button"
-                            Width="100" Height="20"
-                            Command="{Binding AddDishCommand}" 
+                    <Button Grid.Column="1" Content="+ блюдо" Classes="small-control-button"
+                            Height="20" HorizontalAlignment="Stretch"
+                            Command="{Binding AddDishCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Breakfast}"/>
-                </StackPanel>
+                </Grid>
 
                 <TextBlock Text="Обед" FontWeight="Bold" Margin="10,10,0,5"/>
-                <ListBox ItemsSource="{Binding LunchEntries}" Background="Transparent" BorderThickness="0">
+                <ListBox ItemsSource="{Binding LunchEntries}" Background="Transparent" 
+                         BorderThickness="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <ContentControl Content="{Binding}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
-                    <Button Content="+ продукт" Classes="small-control-button"
-                            Width="100" Height="20"
-                            Command="{Binding AddUserProductCommand}" 
+                <Grid ColumnDefinitions="*,*" HorizontalAlignment="Stretch" Margin="5">
+                    <Button Grid.Column="0" Content="+ продукт" Classes="small-control-button"
+                            Height="20" HorizontalAlignment="Stretch"
+                            Command="{Binding AddUserProductCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Lunch}"/>
-                    <Button Content="+ блюдо" Classes="small-control-button"
-                            Width="100" Height="20"
-                            Command="{Binding AddDishCommand}" 
+                    <Button Grid.Column="1" Content="+ блюдо" Classes="small-control-button"
+                            Height="20" HorizontalAlignment="Stretch"
+                            Command="{Binding AddDishCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Lunch}"/>
-                </StackPanel>
+                </Grid>
 
                 <TextBlock Text="Ужин" FontWeight="Bold" Margin="10,10,0,5"/>
-                <ListBox ItemsSource="{Binding DinnerEntries}" Background="Transparent" BorderThickness="0">
+                <ListBox ItemsSource="{Binding DinnerEntries}" Background="Transparent" 
+                         BorderThickness="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <ContentControl Content="{Binding}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
-                    <Button Content="+ продукт" Classes="small-control-button"
-                            Width="100" Height="20"
-                            Command="{Binding AddUserProductCommand}" 
+                <Grid ColumnDefinitions="*,*" HorizontalAlignment="Stretch" Margin="5">
+                    <Button Grid.Column="0" Content="+ продукт" Classes="small-control-button"
+                            Height="20" HorizontalAlignment="Stretch"
+                            Command="{Binding AddUserProductCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Dinner}"/>
-                    <Button Content="+ блюдо" Classes="small-control-button"
-                            Width="100" Height="20"
-                            Command="{Binding AddDishCommand}" 
+                    <Button Grid.Column="1" Content="+ блюдо" Classes="small-control-button"
+                            Height="20" HorizontalAlignment="Stretch"
+                            Command="{Binding AddDishCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Dinner}"/>
-                </StackPanel>
+                </Grid>
 
                 <TextBlock Text="Перекус" FontWeight="Bold" Margin="10,10,0,5"/>
-                <ListBox ItemsSource="{Binding SnackEntries}" Background="Transparent" BorderThickness="0">
+                <ListBox ItemsSource="{Binding SnackEntries}" Background="Transparent" 
+                         BorderThickness="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <ContentControl Content="{Binding}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="5">
-                    <Button Content="+ продукт" Classes="small-control-button"
-                            Width="100" Height="20"
-                            Command="{Binding AddUserProductCommand}" 
+                <Grid ColumnDefinitions="*,*" HorizontalAlignment="Stretch" Margin="5">
+                    <Button Grid.Column="0" Content="+ продукт" Classes="small-control-button"
+                            Height="20" HorizontalAlignment="Stretch"
+                            Command="{Binding AddUserProductCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Snack}"/>
-                    <Button Content="+ блюдо" Classes="small-control-button"
-                            Width="100" Height="20"
-                            Command="{Binding AddDishCommand}" 
+                    <Button Grid.Column="1" Content="+ блюдо" Classes="small-control-button"
+                            Height="20" HorizontalAlignment="Stretch"
+                            Command="{Binding AddDishCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Snack}"/>
-                </StackPanel>
+                </Grid>
 
             </StackPanel>
         </ScrollViewer>
@@ -192,32 +192,27 @@
                 CornerRadius="3" BorderThickness="1" 
                 Background="{DynamicResource ThemeBackgroundBrush}"
                 BorderBrush="#696969">
-            <StackPanel Orientation="Horizontal" 
-                        Spacing="8"
-                        HorizontalAlignment="Left"
-                        Margin="13,0,0,0">
+            <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,25" HorizontalAlignment="Stretch">
+                <TextBlock Grid.Column="0" Text="К:" FontWeight="Medium" Margin="5,5,0,5" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Column="1" Text="{Binding TotalNutrition.FormattedCalories}" 
+                           Margin="5,5,0,5" HorizontalAlignment="Left"/>
 
-                <TextBlock Text="К:" FontWeight="Medium" Margin="5,5,0,5"/>
-                <TextBlock Text="{Binding TotalNutrition.FormattedCalories}" 
-                           Width="100" Margin="5,5,0,5"/>
+                <TextBlock Grid.Column="2" Text="Б:" FontWeight="Medium" Margin="5,5,0,5" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Column="3" Text="{Binding TotalNutrition.FormattedProtein}" 
+                           Margin="5,5,0,5" HorizontalAlignment="Left"/>
 
-                <TextBlock Text="Б:" FontWeight="Medium" Margin="5,5,0,5"/>
-                <TextBlock Text="{Binding TotalNutrition.FormattedProtein}" 
-                           Width="100" Margin="5,5,0,5"/>
+                <TextBlock Grid.Column="4" Text="Ж:" FontWeight="Medium" Margin="5,5,0,5" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Column="5" Text="{Binding TotalNutrition.FormattedFat}" 
+                           Margin="5,5,0,5" HorizontalAlignment="Left"/>
 
-                <TextBlock Text="Ж:" FontWeight="Medium" Margin="5,5,0,5"/>
-                <TextBlock Text="{Binding TotalNutrition.FormattedFat}" 
-                           Width="100" Margin="5,5,0,5"/>
+                <TextBlock Grid.Column="6" Text="У:" FontWeight="Medium" Margin="5,5,0,5" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Column="7" Text="{Binding TotalNutrition.FormattedCarbs}" 
+                           Margin="5,5,0,5" HorizontalAlignment="Left"/>
 
-                <TextBlock Text="У:" FontWeight="Medium" Margin="5,5,0,5"/>
-                <TextBlock Text="{Binding TotalNutrition.FormattedCarbs}" 
-                           Width="100" Margin="5,5,0,5"/>
-
-                <TextBlock Text="Вес:" FontWeight="Medium" Margin="5,5,0,5"/>
-                <TextBlock Text="{Binding FormattedTotalQuantity}" 
-                           Width="100" Margin="5,5,0,5"
-                           Background="Transparent"/>
-            </StackPanel>
+                <TextBlock Grid.Column="8" Text="Вес:" FontWeight="Medium" Margin="5,5,0,5" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Column="9" Text="{Binding FormattedTotalQuantity}" 
+                           Margin="5,5,0,5" HorizontalAlignment="Left"/>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>
