@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DietHelper.Common.DTO;
 using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Products;
@@ -18,6 +19,8 @@ namespace DietHelper.ViewModels.Products
         public AddProductViewModel(IApiService _apiService) : base(_apiService) { }
 
         [ObservableProperty] private BaseProductViewModel? selectedBaseItem;
+
+        [ObservableProperty] private string barcode = string.Empty;
 
         public ObservableCollection<BaseProductViewModel> BaseSearchResults { get; } = new();
 
@@ -146,6 +149,29 @@ namespace DietHelper.ViewModels.Products
         protected override async Task<UserProduct> CreateNewUserItem()
         {
             return await CreateProductAsync();
+        }
+
+        [RelayCommand]
+        private async void FindProductInOpenFoodFacts()
+        {
+            if (string.IsNullOrWhiteSpace(Barcode)) return; //уведомление пользователю
+
+            var openFoodFactsDto = await _apiService.GetProductFromOpenFoodFactsAsync(Barcode);
+            if (openFoodFactsDto is null) return; //уведомление пользователю
+            
+            var baseProduct = new BaseProduct()
+            {
+                Name = openFoodFactsDto.Name,
+                NutritionFacts = new NutritionInfo
+                {
+                    Calories = openFoodFactsDto.Calories,
+                    Protein = openFoodFactsDto.Protein,
+                    Fat = openFoodFactsDto.Fat,
+                    Carbs = openFoodFactsDto.Carbs
+                }
+            };
+
+            BaseSearchResults.Add(new BaseProductViewModel(baseProduct));
         }
         
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)

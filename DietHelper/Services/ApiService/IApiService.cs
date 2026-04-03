@@ -24,6 +24,7 @@ namespace DietHelper.Services
         Task<bool> DeleteUserMealEntryAsync(int userMealEntryId);
         Task DeleteUserProductAsync(int id);
         Task<List<BaseProduct>?> GetBaseProductsAsync();
+        Task<OpenFoodFactsDto?> GetProductFromOpenFoodFactsAsync(string barcode);
         Task<User> GetUserAsync();
         Task<UserDish?> GetUserDishAsync(int userDishId);
         Task<List<UserDish>?> GetUserDishesAsync();
