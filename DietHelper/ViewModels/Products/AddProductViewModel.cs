@@ -16,7 +16,7 @@ namespace DietHelper.ViewModels.Products
 {
     public partial class AddProductViewModel : AddItemBaseViewModel<UserProduct, UserProductViewModel>
     {
-        public AddProductViewModel(IApiService _apiService) : base(_apiService) { }
+        public AddProductViewModel(IApiService _apiService, INotificationService _notificationService) : base(_apiService, _notificationService) { }
 
         [ObservableProperty] private BaseProductViewModel? selectedBaseItem;
 
@@ -154,11 +154,22 @@ namespace DietHelper.ViewModels.Products
         [RelayCommand]
         private async void FindProductInOpenFoodFacts()
         {
-            if (string.IsNullOrWhiteSpace(Barcode)) return; //уведомление пользователю
+            if (string.IsNullOrWhiteSpace(Barcode))
+            {
+                _notificationService.ShowError("Ошибка заполнения штрих-кода", "Штрих-код не может быть пустым");
+                return;
+            }
 
             var openFoodFactsDto = await _apiService.GetProductFromOpenFoodFactsAsync(Barcode);
-            if (openFoodFactsDto is null) return; //уведомление пользователю
-            
+
+            if (openFoodFactsDto is null || !string.IsNullOrEmpty(openFoodFactsDto.Message))
+            {
+                _notificationService.ShowInfo("Поиск продукта по штрих-коду", "Продукт не найден");
+                return;
+            }
+
+            BaseSearchResults.Clear();
+
             var baseProduct = new BaseProduct()
             {
                 Name = openFoodFactsDto.Name,

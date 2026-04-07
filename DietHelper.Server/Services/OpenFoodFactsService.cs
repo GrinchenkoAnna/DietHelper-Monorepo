@@ -1,5 +1,7 @@
 ﻿using DietHelper.Common.DTO;
+using DietHelper.Server.Models;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace DietHelper.Server.Services
 {
@@ -11,7 +13,7 @@ namespace DietHelper.Server.Services
     public class OpenFoodFactsService : IOpenFoodFactsService
     {
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "https://world.openfoodfacts.org/api/v2";
+        private const string BaseUrl = "https://world.openfoodfacts.org/api/v2/";
 
         public OpenFoodFactsService(HttpClient httpClient)
         {
@@ -24,7 +26,7 @@ namespace DietHelper.Server.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"products/{barcode}.json");
+                var response = await _httpClient.GetAsync($"product/{barcode}.json");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -36,12 +38,29 @@ namespace DietHelper.Server.Services
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                //дописать
+                Debug.WriteLine($"Response from API: {json}");
 
+                var product = JsonSerializer.Deserialize<OFFProduct>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                if (product?.Status != 1 || product is null)
+                    return new OpenFoodFactsDto()
+                    {
+                        Barcode = barcode,
+                        Message = "Продукт не найден"
+                    };
+
+                var productInfo = product.ProductInfo;
 
                 return new OpenFoodFactsDto()
                 {
-                    //дописать
+                    Barcode = barcode,
+                    Name = productInfo.Name + (string.IsNullOrEmpty(productInfo.Brand) ? "" : $" - {productInfo.Brand}"),
+                    Calories = productInfo.Nutriments.Calories,
+                    Protein = productInfo.Nutriments.Protein,
+                    Fat = productInfo.Nutriments.Fat,
+                    Carbs = productInfo.Nutriments.Carbs
                 };
             }
             catch (Exception ex)

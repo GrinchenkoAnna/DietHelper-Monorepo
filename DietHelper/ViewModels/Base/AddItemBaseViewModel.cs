@@ -14,6 +14,7 @@ namespace DietHelper.ViewModels.Base
         where TViewModel : class
     {
         protected readonly IApiService _apiService;
+        protected readonly INotificationService _notificationService;
 
         [ObservableProperty] private string? searchText = string.Empty;
         [ObservableProperty] private bool isBusy = false;
@@ -78,9 +79,11 @@ namespace DietHelper.ViewModels.Base
             ManualCarbs = 0;
         }
 
-        protected AddItemBaseViewModel(IApiService apiService) : base(apiService)
+        protected AddItemBaseViewModel(IApiService apiService, INotificationService notificationService) : base(apiService)
         {
             _apiService = apiService;
+            _notificationService = notificationService;
+
             InitializeData();
         }
 

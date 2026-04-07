@@ -9,11 +9,11 @@ namespace DietHelper.Server.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class OpenFoodFactController : Controller
+    public class OpenFoodFactsController : Controller
     {
         private readonly IOpenFoodFactsService _openFoodFactsService;
 
-        public OpenFoodFactController(IOpenFoodFactsService openFoodFactsService)
+        public OpenFoodFactsController(IOpenFoodFactsService openFoodFactsService)
         {
             _openFoodFactsService = openFoodFactsService;
         }
@@ -21,9 +21,6 @@ namespace DietHelper.Server.Controllers
         [HttpGet("barcode/{barcode}")]
         public async Task<ActionResult<OpenFoodFactsDto>> GetProductByBarcode(string barcode)
         {
-            if (string.IsNullOrWhiteSpace(barcode) || string.IsNullOrEmpty(barcode)) 
-                return BadRequest("Штрих-код не может быть пустым");
-
             var result = await _openFoodFactsService.GetProductByBarcodeAsync(barcode);
 
             return Ok(result);

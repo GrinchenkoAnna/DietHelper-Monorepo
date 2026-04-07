@@ -42,7 +42,7 @@ namespace DietHelper.ViewModels.Dishes
             }
         }
 
-        public AddUserDishViewModel(IApiService apiService) : base(apiService)
+        public AddUserDishViewModel(IApiService _apiService, INotificationService _notificationService) : base(_apiService, _notificationService)
         {
 
             PropertyChanged += (s, e) =>
