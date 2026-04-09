@@ -103,7 +103,7 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async Task<UserProduct?> CreateNewUserItem()
         {
-            return await CreateProductAsync();
+            return await CreateProductFromDataAsync(ManualName!, ManualCalories, ManualProtein, ManualFat, ManualCarbs);
         }
 
         protected override void AddUserItem()

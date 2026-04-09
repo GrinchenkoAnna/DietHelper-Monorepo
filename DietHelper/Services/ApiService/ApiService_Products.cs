@@ -48,6 +48,25 @@ namespace DietHelper.Services
             }
         }
 
+        public async Task<BaseProduct?> GetBaseProductAsync(string barcode)
+        {
+            if (!IsAuthenticated) LoadSavedSession();
+
+            try
+            {
+                var response = await SendRequestAsync(() => _httpClient.GetAsync($"products/base/barcode/{barcode}"), true);
+                if (response == null) return null;
+
+                var baseProduct = await response.Content.ReadFromJsonAsync<BaseProduct>();
+                return baseProduct;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ApiService]: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<UserProduct?> GetUserProductAsync(int userProductId)
         {
             if (!IsAuthenticated) LoadSavedSession();

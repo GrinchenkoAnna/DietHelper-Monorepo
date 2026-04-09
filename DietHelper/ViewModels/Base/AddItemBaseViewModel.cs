@@ -4,6 +4,7 @@ using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Products;
 using DietHelper.Services;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -25,49 +26,59 @@ namespace DietHelper.ViewModels.Base
 
         protected ObservableCollection<TViewModel> AllUserItems { get; } = new();
 
-        [ObservableProperty] private string? manualName;
-        [ObservableProperty] private double manualCalories;
-        [ObservableProperty] private double manualProtein;
-        [ObservableProperty] private double manualFat;
-        [ObservableProperty] private double manualCarbs;
+        [ObservableProperty] protected string? manualName;
+        [ObservableProperty] protected double manualCalories;
+        [ObservableProperty] protected double manualProtein;
+        [ObservableProperty] protected double manualFat;
+        [ObservableProperty] protected double manualCarbs;
         
         protected abstract Task<TModel?> CreateNewUserItem();
 
-        protected async Task<UserProduct?> CreateProductAsync()
+        protected async Task<UserProduct?> CreateProductFromDataAsync(string name, double calories, double protein, double fat, double carbs, string? barcode = null)
         {
+            BaseProduct? existingBaseProduct = null;
+
+            if (!string.IsNullOrEmpty(barcode))
+            {
+                existingBaseProduct = await _apiService.GetBaseProductAsync(barcode);
+
+                if (existingBaseProduct is not null)
+                    return await CreateUserProductOnBaseProduct(calories, protein, fat, carbs, existingBaseProduct);
+            }
+
             var baseProduct = new BaseProduct()
             {
-                Name = ManualName!,
+                Name = name!,
                 NutritionFacts = new NutritionInfo()
                 {
-                    Calories = ManualCalories,
-                    Protein = ManualProtein,
-                    Fat = ManualFat,
-                    Carbs = ManualCarbs
+                    Calories = calories,
+                    Protein = protein,
+                    Fat = fat,
+                    Carbs = carbs
                 },
                 IsDeleted = false
             };
             var createdBaseProduct = await _apiService.AddProductAsync(baseProduct);
+            if (createdBaseProduct is null) return null;
+            return await CreateUserProductOnBaseProduct(calories, protein, fat, carbs, createdBaseProduct);
+        }
 
-            if (createdBaseProduct is not null)
+        private async Task<UserProduct?> CreateUserProductOnBaseProduct(double calories, double protein, double fat, double carbs, BaseProduct existingBaseProduct)
+        {
+            var userProduct = new UserProduct()
             {
-                var userProduct = new UserProduct()
+                UserId = await GetCurrentUserId(),
+                BaseProductId = existingBaseProduct.Id,
+                CustomNutrition = new NutritionInfo()
                 {
-                    UserId = await GetCurrentUserId(),
-                    BaseProductId = createdBaseProduct.Id,
-                    CustomNutrition = new NutritionInfo()
-                    {
-                        Calories = ManualCalories,
-                        Protein = ManualProtein,
-                        Fat = ManualFat,
-                        Carbs = ManualCarbs
-                    },
-                    IsDeleted = false
-                };
-
-                return await _apiService.AddUserProductAsync(userProduct);
-            }
-            return null;
+                    Calories = calories,
+                    Protein = protein,
+                    Fat = fat,
+                    Carbs = carbs
+                },
+                IsDeleted = false
+            };
+            return await _apiService.AddUserProductAsync(userProduct);
         }
 
         protected void ClearManualEntries()

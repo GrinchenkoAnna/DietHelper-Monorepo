@@ -1,4 +1,5 @@
-﻿using DietHelper.Common.Models.Core;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Products;
 using DietHelper.ViewModels.Base;
 using System;
@@ -7,6 +8,9 @@ namespace DietHelper.ViewModels.Products
 {
     public partial class BaseProductViewModel : ProductViewModelBase
     {
+
+        [ObservableProperty] private string? barcode;
+
         public BaseProductViewModel()
         {
             Recalculate();
@@ -16,6 +20,7 @@ namespace DietHelper.ViewModels.Products
         {
             Id = baseProduct.Id;
             Name = baseProduct.Name;
+            Barcode = baseProduct.Barcode;
             Calories = baseProduct.NutritionFacts?.Calories ?? 0;
             Protein = baseProduct.NutritionFacts?.Protein ?? 0;
             Fat = baseProduct.NutritionFacts?.Fat ?? 0;

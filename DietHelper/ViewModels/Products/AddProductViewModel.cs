@@ -29,7 +29,6 @@ namespace DietHelper.ViewModels.Products
         protected override async void InitializeData()
         {
             var userProducts = await _apiService.GetUserProductsAsync();
-
             if (userProducts is not null)
             {
                 foreach (var userProduct in userProducts)
@@ -43,7 +42,6 @@ namespace DietHelper.ViewModels.Products
             }
             
             var baseProducts = await _apiService.GetBaseProductsAsync();
-
             if (baseProducts is not null)
             {
                 foreach (var baseProduct in baseProducts)
@@ -102,20 +100,55 @@ namespace DietHelper.ViewModels.Products
         [RelayCommand]
         protected async Task AddBaseItem()
         {
-            if (SelectedBaseItem is null) return;
-
-            var userProduct = new UserProduct()
+            if (SelectedBaseItem is null)
             {
-                BaseProductId = SelectedBaseItem.Id,
-                CustomNutrition = new NutritionInfo()
+                _notificationService.ShowError("Ошибка выбора продукта", "Не выбран продукт для добавления");
+                return;
+            }
+
+            UserProduct? createdUserProduct = null;
+
+            // продукт из OpenFoodFacts
+            if (SelectedBaseItem.Id <= 0 && !string.IsNullOrEmpty(SelectedBaseItem.Barcode))
+            {
+                createdUserProduct = await CreateProductFromDataAsync(
+                    SelectedBaseItem.Name!,
+                    SelectedBaseItem.Calories,
+                    SelectedBaseItem.Protein,
+                    SelectedBaseItem.Fat,
+                    SelectedBaseItem.Carbs,
+                    SelectedBaseItem.Barcode
+                );
+
+                if (createdUserProduct is null)
                 {
-                    Calories = SelectedBaseItem.Calories,
-                    Protein = SelectedBaseItem.Protein,
-                    Fat = SelectedBaseItem.Fat,
-                    Carbs = SelectedBaseItem.Carbs
+                    _notificationService.ShowError("Ошибка добавления продукта", "Не удалось добавить продукт");
+                    return;
                 }
-            };
-            var createdUserProduct = await _apiService.AddUserProductAsync(userProduct);
+            }
+            else // базовый продукт есть в бд
+            {
+                createdUserProduct = new UserProduct()
+                {
+                    BaseProductId = SelectedBaseItem.Id,
+                    CustomNutrition = new NutritionInfo()
+                    {
+                        Calories = SelectedBaseItem.Calories,
+                        Protein = SelectedBaseItem.Protein,
+                        Fat = SelectedBaseItem.Fat,
+                        Carbs = SelectedBaseItem.Carbs
+                    }
+                };
+
+                if (createdUserProduct is null)
+                {
+                    _notificationService.ShowError("Ошибка добавления продукта", "Не удалось добавить продукт");
+                    return;
+                }
+
+                createdUserProduct = await _apiService.AddUserProductAsync(createdUserProduct);
+            }
+            
             var userProductViewModel = new UserProductViewModel(createdUserProduct)
             {
                 Name = SelectedBaseItem.Name,
@@ -135,6 +168,12 @@ namespace DietHelper.ViewModels.Products
             if (string.IsNullOrEmpty(ManualName)) return;
 
             var newUserProduct = await CreateNewUserItem();
+            if (newUserProduct is null)
+            {
+                _notificationService.ShowError("Создание продукта", "Не удалось создать продукт");
+                return;
+            }
+
 
             var newItem = new UserProductViewModel(newUserProduct)
             {
@@ -146,9 +185,9 @@ namespace DietHelper.ViewModels.Products
             WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(newItem));
         }
 
-        protected override async Task<UserProduct> CreateNewUserItem()
+        protected override async Task<UserProduct?> CreateNewUserItem()
         {
-            return await CreateProductAsync();
+            return await CreateProductFromDataAsync(ManualName!, ManualCalories, ManualProtein, ManualFat, ManualCarbs);
         }
 
         [RelayCommand]
@@ -179,7 +218,8 @@ namespace DietHelper.ViewModels.Products
                     Protein = openFoodFactsDto.Protein,
                     Fat = openFoodFactsDto.Fat,
                     Carbs = openFoodFactsDto.Carbs
-                }
+                },
+                Barcode = openFoodFactsDto.Barcode
             };
 
             BaseSearchResults.Add(new BaseProductViewModel(baseProduct));
