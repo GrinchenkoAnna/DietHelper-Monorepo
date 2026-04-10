@@ -23,6 +23,8 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty] private BaseProductViewModel? selectedBaseItem;
 
         [ObservableProperty] private double quantity = 100;
+        
+        [ObservableProperty] private string barcode = string.Empty;
 
         public ObservableCollection<BaseProductViewModel> BaseSearchResults { get; } = new();
 
@@ -138,44 +140,80 @@ namespace DietHelper.ViewModels.Dishes
         [RelayCommand]
         private async void AddBaseItem()
         {
-            if (SelectedBaseItem is null) return;
+            if (SelectedBaseItem is null)
+            {
+                _notificationService.ShowError("Ошибка выбора ингредиента", "Не выбран ингредиент для добавления");
+                return;
+            }
+
+            UserProduct? createdUserProduct = null;
 
             try
-            {
-                var userProduct = new UserProduct()
+            {                
+                // Продукт из OpenFoodFacts (временный, Id <= 0)
+                if (SelectedBaseItem.Id <= 0 && !string.IsNullOrEmpty(SelectedBaseItem.Barcode))
                 {
-                    UserId = await GetCurrentUserId(),
-                    BaseProductId = SelectedBaseItem.Id,
-                    CustomNutrition = new NutritionInfo()
-                    {
-                        Calories = SelectedBaseItem.Calories,
-                        Protein = SelectedBaseItem.Protein,
-                        Fat = SelectedBaseItem.Fat,
-                        Carbs = SelectedBaseItem.Carbs
-                    }
-                };
-                var createdUserProduct = await _apiService.AddUserProductAsync(userProduct);
-                if (createdUserProduct is not null)
-                {
-                    var userProductViewModel = new UserProductViewModel(createdUserProduct);
+                    createdUserProduct = await CreateProductFromDataAsync(
+                        SelectedBaseItem.Name!,
+                        SelectedBaseItem.Calories,
+                        SelectedBaseItem.Protein,
+                        SelectedBaseItem.Fat,
+                        SelectedBaseItem.Carbs,
+                        SelectedBaseItem.Barcode
+                    );
 
-                    var userDishIngredient = new UserDishIngredientViewModel()
+                    if (createdUserProduct is null)
                     {
-                        UserProductId = createdUserProduct.Id,
-                        Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
-                        Quantity = SelectedBaseItem.Quantity,
-                        ProductNameSnapshot = SelectedBaseItem.Name!,
-                        ProductNutritionInfoSnapshot = new NutritionInfo()
+                        _notificationService.ShowError("Ошибка добавления", "Не удалось создать продукт из OpenFoodFacts");
+                        return;
+                    }
+                }
+                else // Базовый продукт уже есть в БД
+                {
+                    var userProduct = new UserProduct()
+                    {
+                        UserId = await GetCurrentUserId(),
+                        BaseProductId = SelectedBaseItem.Id,
+                        CustomNutrition = new NutritionInfo()
                         {
-                            Calories = SelectedBaseItem.Calories * (Quantity / 100),
-                            Protein = SelectedBaseItem.Protein * (Quantity / 100),
-                            Fat = SelectedBaseItem.Fat * (Quantity / 100),
-                            Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
+                            Calories = SelectedBaseItem.Calories,
+                            Protein = SelectedBaseItem.Protein,
+                            Fat = SelectedBaseItem.Fat,
+                            Carbs = SelectedBaseItem.Carbs
                         }
                     };
 
-                    WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userDishIngredient));
-                }                
+                    createdUserProduct = await _apiService.AddUserProductAsync(userProduct);
+                    if (createdUserProduct is null)
+                    {
+                        _notificationService.ShowError("Ошибка добавления", "Не удалось добавить продукт пользователя");
+                        return;
+                    }
+                }
+
+                var userDishIngredient = new UserDishIngredientViewModel()
+                {
+                    UserProductId = createdUserProduct.Id,
+                    Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
+                    Quantity = SelectedBaseItem.Quantity,
+                    ProductNameSnapshot = SelectedBaseItem.Name!,
+                    ProductNutritionInfoSnapshot = new NutritionInfo()
+                    {
+                        Calories = SelectedBaseItem.Calories * (Quantity / 100),
+                        Protein = SelectedBaseItem.Protein * (Quantity / 100),
+                        Fat = SelectedBaseItem.Fat * (Quantity / 100),
+                        Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
+                    },
+                    CurrentNutrition = new NutritionInfo()
+                    {
+                        Calories = SelectedBaseItem.Calories * (Quantity / 100),
+                        Protein = SelectedBaseItem.Protein * (Quantity / 100),
+                        Fat = SelectedBaseItem.Fat * (Quantity / 100),
+                        Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
+                    }
+                };
+
+                WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userDishIngredient));                               
             }
             catch (Exception ex)
             {
@@ -218,6 +256,41 @@ namespace DietHelper.ViewModels.Dishes
                 WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userIngredient));
             }
             ClearManualEntries();
+        }
+
+        [RelayCommand]
+        private async void FindProductInOpenFoodFacts()
+        {
+            if (string.IsNullOrWhiteSpace(Barcode))
+            {
+                _notificationService.ShowError("Ошибка заполнения штрих-кода", "Штрих-код не может быть пустым");
+                return;
+            }
+
+            var openFoodFactsDto = await _apiService.GetProductFromOpenFoodFactsAsync(Barcode);
+
+            if (openFoodFactsDto is null || !string.IsNullOrEmpty(openFoodFactsDto.Message))
+            {
+                _notificationService.ShowInfo("Поиск продукта по штрих-коду", "Продукт не найден");
+                return;
+            }
+
+            BaseSearchResults.Clear();
+
+            var baseProduct = new BaseProduct()
+            {
+                Name = openFoodFactsDto.Name,
+                NutritionFacts = new NutritionInfo
+                {
+                    Calories = openFoodFactsDto.Calories,
+                    Protein = openFoodFactsDto.Protein,
+                    Fat = openFoodFactsDto.Fat,
+                    Carbs = openFoodFactsDto.Carbs
+                },
+                Barcode = openFoodFactsDto.Barcode
+            };
+
+            BaseSearchResults.Add(new BaseProductViewModel(baseProduct));
         }
 
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)
