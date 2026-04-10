@@ -1,15 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using DietHelper.Common.DTO;
-using DietHelper.Common.Models;
-using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Products;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Base;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels.Products
@@ -40,7 +38,7 @@ namespace DietHelper.ViewModels.Products
                     }
                 }
             }
-            
+
             var baseProducts = await _apiService.GetBaseProductsAsync();
             if (baseProducts is not null)
             {
@@ -52,7 +50,7 @@ namespace DietHelper.ViewModels.Products
                         AllBaseItems.Add(new BaseProductViewModel(baseProduct));
                     }
                 }
-            }            
+            }
         }
 
         protected override async Task DoSearch(string? term)
@@ -106,55 +104,26 @@ namespace DietHelper.ViewModels.Products
                 return;
             }
 
-            UserProduct? createdUserProduct = null;
-
-            // продукт из OpenFoodFacts
-            if (SelectedBaseItem.Id <= 0 && !string.IsNullOrEmpty(SelectedBaseItem.Barcode))
+            try
             {
-                createdUserProduct = await CreateProductFromDataAsync(
-                    SelectedBaseItem.Name!,
-                    SelectedBaseItem.Calories,
-                    SelectedBaseItem.Protein,
-                    SelectedBaseItem.Fat,
-                    SelectedBaseItem.Carbs,
-                    SelectedBaseItem.Barcode
-                );
-
+                var createdUserProduct = await CreateUserProductFromBaseItemAsync(SelectedBaseItem);
                 if (createdUserProduct is null)
                 {
-                    _notificationService.ShowError("Ошибка добавления продукта", "Не удалось добавить продукт");
+                    _notificationService.ShowError("Ошибка добавления", "Не удалось добавить продукт");
                     return;
                 }
-            }
-            else // базовый продукт есть в бд
-            {
-                createdUserProduct = new UserProduct()
+
+                var userProductViewModel = new UserProductViewModel(createdUserProduct)
                 {
-                    BaseProductId = SelectedBaseItem.Id,
-                    CustomNutrition = new NutritionInfo()
-                    {
-                        Calories = SelectedBaseItem.Calories,
-                        Protein = SelectedBaseItem.Protein,
-                        Fat = SelectedBaseItem.Fat,
-                        Carbs = SelectedBaseItem.Carbs
-                    }
+                    Name = SelectedBaseItem.Name,
+                    Quantity = SelectedBaseItem.Quantity
                 };
-
-                if (createdUserProduct is null)
-                {
-                    _notificationService.ShowError("Ошибка добавления продукта", "Не удалось добавить продукт");
-                    return;
-                }
-
-                createdUserProduct = await _apiService.AddUserProductAsync(createdUserProduct);
+                WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(userProductViewModel));
             }
-            
-            var userProductViewModel = new UserProductViewModel(createdUserProduct)
+            catch (Exception ex)
             {
-                Name = SelectedBaseItem.Name,
-                Quantity = SelectedBaseItem.Quantity
-            };
-            WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(userProductViewModel));
+                Debug.WriteLine($"[AddProductViewModel]: {ex.Message}");
+            }
         }
 
         protected override void AddUserItem()
@@ -162,7 +131,7 @@ namespace DietHelper.ViewModels.Products
             if (SelectedUserItem is not null)
                 WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(SelectedUserItem));
         }
-        
+
         protected override async void AddManualItem()
         {
             if (string.IsNullOrEmpty(ManualName)) return;
@@ -191,40 +160,11 @@ namespace DietHelper.ViewModels.Products
         }
 
         [RelayCommand]
-        private async void FindProductInOpenFoodFacts()
+        private async Task FindProductInOpenFoodFacts()
         {
-            if (string.IsNullOrWhiteSpace(Barcode))
-            {
-                _notificationService.ShowError("Ошибка заполнения штрих-кода", "Штрих-код не может быть пустым");
-                return;
-            }
-
-            var openFoodFactsDto = await _apiService.GetProductFromOpenFoodFactsAsync(Barcode);
-
-            if (openFoodFactsDto is null || !string.IsNullOrEmpty(openFoodFactsDto.Message))
-            {
-                _notificationService.ShowInfo("Поиск продукта по штрих-коду", "Продукт не найден");
-                return;
-            }
-
-            BaseSearchResults.Clear();
-
-            var baseProduct = new BaseProduct()
-            {
-                Name = openFoodFactsDto.Name,
-                NutritionFacts = new NutritionInfo
-                {
-                    Calories = openFoodFactsDto.Calories,
-                    Protein = openFoodFactsDto.Protein,
-                    Fat = openFoodFactsDto.Fat,
-                    Carbs = openFoodFactsDto.Carbs
-                },
-                Barcode = openFoodFactsDto.Barcode
-            };
-
-            BaseSearchResults.Add(new BaseProductViewModel(baseProduct));
+            await FindProductInOpenFoodFactsAsync(Barcode, BaseSearchResults);
         }
-        
+
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)
         {
             RemoveFromCollections(userProductViewModel);
