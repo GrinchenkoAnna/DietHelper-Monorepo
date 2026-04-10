@@ -56,6 +56,7 @@ namespace DietHelper.ViewModels.Base
                     Fat = fat,
                     Carbs = carbs
                 },
+                Barcode = barcode,
                 IsDeleted = false
             };
             var createdBaseProduct = await _apiService.AddProductAsync(baseProduct);
