@@ -17,7 +17,6 @@ namespace DietHelper.Common.Models.Dishes
 
         [Required]
         public int UserId { get; set; }
-        //public virtual User User { get; set; } = null!;
 
         [Required]
         public string Name { get; set; } = string.Empty;

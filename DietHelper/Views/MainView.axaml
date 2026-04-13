@@ -20,11 +20,25 @@
 
     <UserControl.DataTemplates>
 		<DataTemplate DataType="{x:Type vm:Products.UserProductViewModel}">
-            <Grid ColumnDefinitions="*, 25">
+            <Grid ColumnDefinitions="*,25">
                 <products:UserProductView Grid.Column="0" DataContext="{Binding}" HorizontalAlignment="Stretch"/>
+                <Button Grid.Column="1" Content="🍽️" 
+                        Classes="small-control-button" Width="25" Height="25" Margin="-5,0,0,8" VerticalAlignment="Bottom"
+                        Command="{Binding $parent[UserControl].DataContext.TurnProductToReadyDishCommand}"
+                        CommandParameter="{Binding}"
+                        ToolTip.Tip="Это готовое блюдо">
+                    <Button.Styles>						
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="BorderBrush" Value="#696969" />
+                            <Setter Property="BorderThickness" Value="0.5" />
+                            <Setter Property="CornerRadius" Value="5" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                        </Style>
+                    </Button.Styles>                    
+                </Button>
                 <Button Grid.Column="1" Content="-" Width="25" Height="25"
                         Command="{Binding $parent[UserControl].DataContext.RemoveEntryCommand}"
-                        CommandParameter="{Binding}" Margin="-8,8" VerticalAlignment="Top"
+                        CommandParameter="{Binding}" Margin="-5,8,0,0" VerticalAlignment="Top"
                         Classes="small-control-button"/>
             </Grid>			
         </DataTemplate>
