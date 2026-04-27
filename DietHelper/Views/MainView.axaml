@@ -241,7 +241,7 @@
 
                 <TextBlock Grid.Column="8" Text="Вес:" FontWeight="Medium" Margin="5,5,0,5" HorizontalAlignment="Left"/>
                 <TextBlock Grid.Column="9" Text="{Binding FormattedTotalQuantity}" 
-                           Margin="5,5,0,5" HorizontalAlignment="Left"/>
+                           Margin="15,5,0,5" HorizontalAlignment="Left"/>
             </Grid>
         </Border>
     </Grid>
