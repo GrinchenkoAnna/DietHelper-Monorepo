@@ -96,8 +96,25 @@ namespace DietHelper.Server.Controllers
             try
             {
                 var baseProduct = await _dbContext.BaseProducts
-                .FirstOrDefaultAsync(bp => bp.Id == id && !bp.IsDeleted);
+                    .FirstOrDefaultAsync(bp => bp.Id == id && !bp.IsDeleted);
 
+                if (baseProduct == null) return NotFound();
+
+                return Ok(baseProduct);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"[ProductsController]: {ex.Message}");
+            }
+        }
+
+        [HttpGet("base/barcode/{barcode}")]
+        public async Task<ActionResult<BaseProduct>> GetBaseProductByBarcode(string barcode)
+        {
+            try
+            {
+                var baseProduct = await _dbContext.BaseProducts
+                    .FirstOrDefaultAsync(bp => bp.Barcode == barcode && !bp.IsDeleted);
                 if (baseProduct == null) return NotFound();
 
                 return Ok(baseProduct);

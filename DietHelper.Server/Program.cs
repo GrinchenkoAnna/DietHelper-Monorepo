@@ -41,6 +41,7 @@ builder.Services.AddDbContext<DietHelperDbContext>(options =>
 });
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddHttpClient<IOpenFoodFactsService, OpenFoodFactsService>();
 
 builder.Services.AddIdentityCore<User>(options =>
 {

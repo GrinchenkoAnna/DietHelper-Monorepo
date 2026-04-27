@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.DTO;
 using DietHelper.Common.Models.Core;
+using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.MealEntries;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
@@ -13,6 +14,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -359,7 +361,6 @@ namespace DietHelper.ViewModels
                     TotalNutrition = userDishViewModel.NutritionFacts,
                     MealType = mealType
                 };
-
                 var userMealEntry = await _apiService.AddUserMealEntryAsync(userMealEntryDto);
 
                 if (userMealEntry is not null)
@@ -386,6 +387,50 @@ namespace DietHelper.ViewModels
                 UpdateTotals();
             }
 
+        }
+
+        [RelayCommand]
+        private async Task TurnProductToReadyDish(UserProductViewModel userProductViewModel)
+        {
+            try
+            {
+                var newReadyDish = new UserDish()
+                {
+                    Name = userProductViewModel.Name ?? "Блюдо из продукта",
+                    NutritionFacts = userProductViewModel.NutritionFacts,
+                    IsReadyDish = true
+                };
+
+                var createdDish = await _apiService.AddUserDishAsync(newReadyDish);
+                if (createdDish == null)
+                {
+                    _notificationService.ShowError("Ошибка конвертации", "Не удалось создать готовое блюдо");
+                    return;
+                }
+
+                var userMealEntryDto = new UserMealEntryDto
+                {
+                    UserDishId = createdDish.Id,
+                    Date = SelectedDate,
+                    TotalQuantity = (decimal)userProductViewModel.Quantity,
+                    TotalNutrition = createdDish.NutritionFacts,
+                    MealType = userProductViewModel.MealType,
+                    Ingredients = new List<UserMealEntryIngredientDto>()
+                };
+
+                await RemoveEntry(userProductViewModel);
+
+                var userMealEntry = await _apiService.AddUserMealEntryAsync(userMealEntryDto);
+                if (userMealEntry is not null)
+                    await LoadDataForDateAsync(SelectedDate);
+
+                _notificationService.ShowInfo("Готово", $"Продукт «{userProductViewModel.Name}» преобразован в готовое блюдо");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindowViewModel]: {ex.Message}");
+                _notificationService.ShowError("Ошибка", "Не удалось преобразовать продукт в готовое блюдо");
+            }            
         }
 
         [RelayCommand]

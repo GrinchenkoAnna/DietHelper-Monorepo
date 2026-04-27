@@ -1,9 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using DietHelper.Common.Models;
 using DietHelper.Common.Models.Core;
-using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
@@ -18,11 +16,13 @@ namespace DietHelper.ViewModels.Dishes
 {
     public partial class AddUserDishIngredientViewModel : AddItemBaseViewModel<UserProduct, UserProductViewModel>
     {
-        public AddUserDishIngredientViewModel(IApiService _apiService) : base(_apiService) { }
+        public AddUserDishIngredientViewModel(IApiService _apiService, INotificationService _notificationService) : base(_apiService, _notificationService) { }
 
         [ObservableProperty] private BaseProductViewModel? selectedBaseItem;
 
         [ObservableProperty] private double quantity = 100;
+
+        [ObservableProperty] private string barcode = string.Empty;
 
         public ObservableCollection<BaseProductViewModel> BaseSearchResults { get; } = new();
 
@@ -56,7 +56,7 @@ namespace DietHelper.ViewModels.Dishes
                         AllBaseItems.Add(new BaseProductViewModel(baseProduct));
                     }
                 }
-            }            
+            }
         }
 
         protected override async Task DoSearch(string? term)
@@ -103,7 +103,7 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async Task<UserProduct?> CreateNewUserItem()
         {
-            return await CreateProductAsync();
+            return await CreateProductFromDataAsync(ManualName!, ManualCalories, ManualProtein, ManualFat, ManualCarbs);
         }
 
         protected override void AddUserItem()
@@ -138,49 +138,49 @@ namespace DietHelper.ViewModels.Dishes
         [RelayCommand]
         private async void AddBaseItem()
         {
-            if (SelectedBaseItem is null) return;
+            if (SelectedBaseItem is null)
+            {
+                _notificationService.ShowError("Ошибка выбора ингредиента", "Не выбран ингредиент для добавления");
+                return;
+            }
 
             try
             {
-                var userProduct = new UserProduct()
+                var createdUserProduct = await CreateUserProductFromBaseItemAsync(SelectedBaseItem);
+                if (createdUserProduct is null)
                 {
-                    UserId = await GetCurrentUserId(),
-                    BaseProductId = SelectedBaseItem.Id,
-                    CustomNutrition = new NutritionInfo()
+                    _notificationService.ShowError("Ошибка добавления", "Не удалось добавить продукт");
+                    return;
+                }
+
+                var userDishIngredient = new UserDishIngredientViewModel()
+                {
+                    UserProductId = createdUserProduct.Id,
+                    Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
+                    Quantity = SelectedBaseItem.Quantity,
+                    ProductNameSnapshot = SelectedBaseItem.Name!,
+                    ProductNutritionInfoSnapshot = new NutritionInfo()
                     {
-                        Calories = SelectedBaseItem.Calories,
-                        Protein = SelectedBaseItem.Protein,
-                        Fat = SelectedBaseItem.Fat,
-                        Carbs = SelectedBaseItem.Carbs
+                        Calories = SelectedBaseItem.Calories * (Quantity / 100),
+                        Protein = SelectedBaseItem.Protein * (Quantity / 100),
+                        Fat = SelectedBaseItem.Fat * (Quantity / 100),
+                        Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
+                    },
+                    CurrentNutrition = new NutritionInfo()
+                    {
+                        Calories = SelectedBaseItem.Calories * (Quantity / 100),
+                        Protein = SelectedBaseItem.Protein * (Quantity / 100),
+                        Fat = SelectedBaseItem.Fat * (Quantity / 100),
+                        Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
                     }
                 };
-                var createdUserProduct = await _apiService.AddUserProductAsync(userProduct);
-                if (createdUserProduct is not null)
-                {
-                    var userProductViewModel = new UserProductViewModel(createdUserProduct);
 
-                    var userDishIngredient = new UserDishIngredientViewModel()
-                    {
-                        UserProductId = createdUserProduct.Id,
-                        Name = createdUserProduct.BaseProduct?.Name ?? SelectedBaseItem.Name,
-                        Quantity = SelectedBaseItem.Quantity,
-                        ProductNameSnapshot = SelectedBaseItem.Name!,
-                        ProductNutritionInfoSnapshot = new NutritionInfo()
-                        {
-                            Calories = SelectedBaseItem.Calories * (Quantity / 100),
-                            Protein = SelectedBaseItem.Protein * (Quantity / 100),
-                            Fat = SelectedBaseItem.Fat * (Quantity / 100),
-                            Carbs = SelectedBaseItem.Carbs * (Quantity / 100)
-                        }
-                    };
-
-                    WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userDishIngredient));
-                }                
+                WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userDishIngredient));
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[AddUserDishIngredientViewModel]: {ex.Message}");
-            }          
+            }
         }
 
         protected override async void AddManualItem()
@@ -218,6 +218,12 @@ namespace DietHelper.ViewModels.Dishes
                 WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userIngredient));
             }
             ClearManualEntries();
+        }
+
+        [RelayCommand]
+        private async Task FindProductInOpenFoodFacts()
+        {
+            await FindProductInOpenFoodFactsAsync(Barcode, BaseSearchResults);
         }
 
         protected override async void DeleteItemFromDatabase(UserProductViewModel userProductViewModel)

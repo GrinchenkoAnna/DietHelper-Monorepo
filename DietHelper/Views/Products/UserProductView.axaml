@@ -19,11 +19,11 @@
                               Opacity="1"/>
         </Border.Effect>
         <Grid RowDefinitions="Auto, Auto">
-            <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, 25, 25">
                 <TextBlock Grid.Column="0" Text="{Binding Name}" 
                            FontWeight="SemiBold" FontSize="16" />
                 <TextBlock Grid.Column="1" Text=" • изменено" 
-                           Foreground="Gray" FontSize="12" IsVisible="{Binding ShowDirtyIndicator}"/>
+                           Foreground="Gray" FontSize="12" IsVisible="{Binding ShowDirtyIndicator}"/>                
             </Grid>
 
             <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*,Auto,*" HorizontalAlignment="Stretch" Margin="0,6,0,0">
