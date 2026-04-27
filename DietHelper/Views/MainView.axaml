@@ -15,7 +15,7 @@
 
     <UserControl.Resources>
 		<converters:DateStyleConverter x:Key="DateStyleConverter" />
-        <converters:MealTypeToStringConverter x:Key="MealTypeToStringConverter" />        
+        <converters:MealTypeToStringConverter x:Key="MealTypeToStringConverter" />   
     </UserControl.Resources>
 
     <UserControl.DataTemplates>
@@ -119,11 +119,11 @@
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="0,0,16,0">            
             <StackPanel>
-                <Grid ColumnDefinitions="*, Auto, *" HorizontalAlignment="Stretch" Margin="10,10,16,0">
-                    <Border Grid.Column="0" Classes="section" Margin="0,0,10,0" BorderBrush="#008e9b"/>
-                    <TextBlock Grid.Column="1" Text="ЗАВТРАК" FontWeight="Light" FontSize="14" Margin="10,0" Foreground="#008e9b"/>
-                    <Border Grid.Column="2" Classes="section" Margin="10,0,0,0" BorderBrush="#008e9b"/>
-                </Grid>
+                <Border Background="{StaticResource MealBreakfastBackground}" CornerRadius="4" Padding="8,2" 
+                        HorizontalAlignment="Left" Margin="10,12,16,2">
+                    <TextBlock Text="ЗАВТРАК" FontWeight="SemiBold" FontSize="12" 
+                               Foreground="{StaticResource MealBreakfastColor}"/>
+                </Border>
                 <ListBox ItemsSource="{Binding BreakfastEntries}" Background="Transparent" 
                          BorderThickness="0">
                     <ListBox.ItemTemplate>
@@ -133,21 +133,21 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <Grid ColumnDefinitions="*,*" HorizontalAlignment="Stretch" Margin="5">
-                    <Button Grid.Column="0" Content="+ продукт" Classes="small-control-button"
-                            Height="20" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="0" Content="+ продукт" Classes="add-control-button"
+                            Height="20" HorizontalAlignment="Center" Padding="10, 0, 10, 0"
                             Command="{Binding AddUserProductCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Breakfast}"/>
-                    <Button Grid.Column="1" Content="+ блюдо" Classes="small-control-button"
-                            Height="20" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="1" Content="+ блюдо" Classes="add-control-button"
+                            Height="20" HorizontalAlignment="Center" Padding="10, 0, 10, 0"
                             Command="{Binding AddDishCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Breakfast}"/>
                 </Grid>
 
-                <Grid ColumnDefinitions="*, Auto, *" HorizontalAlignment="Stretch" Margin="10,10,16,0">
-                    <Border Grid.Column="0" Classes="section" Margin="0,0,10,0" BorderBrush="#a3b899"/>
-                    <TextBlock Grid.Column="1" Text="ОБЕД" FontWeight="Light" FontSize="14" Margin="10,0" Foreground="#a3b899"/>
-                    <Border Grid.Column="2" Classes="section" Margin="10,0,0,0" BorderBrush="#a3b899"/>
-                </Grid>
+                <Border Background="{StaticResource MealLunchBackground}" CornerRadius="4" Padding="8,2" 
+                        HorizontalAlignment="Left" Margin="10,12,16,2">
+                    <TextBlock Text="ОБЕД" FontWeight="SemiBold" FontSize="12" 
+                               Foreground="{StaticResource MealLunchColor}"/>
+                </Border>
                 <ListBox ItemsSource="{Binding LunchEntries}" Background="Transparent" 
                          BorderThickness="0">
                     <ListBox.ItemTemplate>
@@ -157,21 +157,21 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <Grid ColumnDefinitions="*,*" HorizontalAlignment="Stretch" Margin="5">
-                    <Button Grid.Column="0" Content="+ продукт" Classes="small-control-button"
-                            Height="20" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="0" Content="+ продукт" Classes="add-control-button"
+                            Height="20" HorizontalAlignment="Center" Padding="10, 0, 10, 0"
                             Command="{Binding AddUserProductCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Lunch}"/>
-                    <Button Grid.Column="1" Content="+ блюдо" Classes="small-control-button"
-                            Height="20" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="1" Content="+ блюдо" Classes="add-control-button"
+                            Height="20" HorizontalAlignment="Center" Padding="10, 0, 10, 0"
                             Command="{Binding AddDishCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Lunch}"/>
                 </Grid>
 
-                <Grid ColumnDefinitions="*, Auto, *" HorizontalAlignment="Stretch" Margin="10,10,16,0">
-                    <Border Grid.Column="0" Classes="section" Margin="0,0,10,0" BorderBrush="#f16c76"/>
-                    <TextBlock Grid.Column="1" Text="УЖИН" FontWeight="Light" FontSize="14" Margin="10,0" Foreground="#f16c76"/>
-                    <Border Grid.Column="2" Classes="section" Margin="10,0,0,0" BorderBrush="#f16c76"/>
-                </Grid>
+                <Border Background="{StaticResource MealDinnerBackground}" CornerRadius="4" Padding="8,2" 
+                        HorizontalAlignment="Left" Margin="10,12,16,2">
+                    <TextBlock Text="УЖИН" FontWeight="SemiBold" FontSize="12" 
+                                Foreground="{StaticResource MealDinnerColor}"/>
+                </Border>
                 <ListBox ItemsSource="{Binding DinnerEntries}" Background="Transparent" 
                          BorderThickness="0">
                     <ListBox.ItemTemplate>
@@ -181,21 +181,21 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <Grid ColumnDefinitions="*,*" HorizontalAlignment="Stretch" Margin="5">
-                    <Button Grid.Column="0" Content="+ продукт" Classes="small-control-button"
-                            Height="20" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="0" Content="+ продукт" Classes="add-control-button"
+                            Height="20" HorizontalAlignment="Center" Padding="10, 0, 10, 0"
                             Command="{Binding AddUserProductCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Dinner}"/>
-                    <Button Grid.Column="1" Content="+ блюдо" Classes="small-control-button"
-                            Height="20" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="1" Content="+ блюдо" Classes="add-control-button"
+                            Height="20" HorizontalAlignment="Center" Padding="10, 0, 10, 0"
                             Command="{Binding AddDishCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Dinner}"/>
                 </Grid>
 
-                <Grid ColumnDefinitions="*, Auto, *" HorizontalAlignment="Stretch" Margin="10,10,16,0">
-                    <Border Grid.Column="0" Classes="section" Margin="0,0,10,0" BorderBrush="#c9ada7"/>
-                    <TextBlock Grid.Column="1" Text="ПЕРЕКУС" FontWeight="Light" FontSize="14" Margin="10,0" Foreground="#c9ada7"/>
-                    <Border Grid.Column="2" Classes="section" Margin="10,0,0,0" BorderBrush="#c9ada7"/>
-                </Grid>
+                <Border Background="{StaticResource MealSnackBackground}" CornerRadius="4" Padding="8,2" 
+                        HorizontalAlignment="Left" Margin="10,12,16,2">
+                    <TextBlock Text="ПЕРЕКУС" FontWeight="SemiBold" FontSize="12" 
+                               Foreground="{StaticResource MealSnackColor}"/>
+                </Border>
                 <ListBox ItemsSource="{Binding SnackEntries}" Background="Transparent" 
                          BorderThickness="0">
                     <ListBox.ItemTemplate>
@@ -205,12 +205,12 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
                 <Grid ColumnDefinitions="*,*" HorizontalAlignment="Stretch" Margin="5">
-                    <Button Grid.Column="0" Content="+ продукт" Classes="small-control-button"
-                            Height="20" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="0" Content="+ продукт" Classes="add-control-button"
+                            Height="20" HorizontalAlignment="Center" Padding="10, 0, 10, 0"
                             Command="{Binding AddUserProductCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Snack}"/>
-                    <Button Grid.Column="1" Content="+ блюдо" Classes="small-control-button"
-                            Height="20" HorizontalAlignment="Stretch"
+                    <Button Grid.Column="1" Content="+ блюдо" Classes="add-control-button"
+                            Height="20" HorizontalAlignment="Center" Padding="10, 0, 10, 0"
                             Command="{Binding AddDishCommand}" Margin="5,0,5,0"
                             CommandParameter="{x:Static mealEntries:MealType.Snack}"/>
                 </Grid>

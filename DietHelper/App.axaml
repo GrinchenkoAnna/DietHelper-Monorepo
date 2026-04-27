@@ -45,6 +45,20 @@
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
+        <Style Selector="Button.add-control-button">
+            <Setter Property="Background" Value="{DynamicResource MainBackground}" />
+			<Setter Property="CornerRadius" Value="5" />
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="Padding" Value="0, -5, 0, -5" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.add-control-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource MainBackground}" />
+			<Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Foreground" Value="Green"/>
+        </Style>
+
         <Style Selector="ToggleButton.show-ingredient">
             <Setter Property="Background" Value="{DynamicResource MainBackground}" />
 			<Setter Property="BorderBrush" Value="#696969" />
@@ -113,6 +127,16 @@
 
     <Application.Resources>
 		<ResourceDictionary>
+            <SolidColorBrush x:Key="MealBreakfastColor" Color="#E89B4A"/>
+            <SolidColorBrush x:Key="MealLunchColor" Color="#6DA366"/>
+            <SolidColorBrush x:Key="MealDinnerColor" Color="#C75B6E"/>
+            <SolidColorBrush x:Key="MealSnackColor" Color="#A8947B"/>
+
+            <SolidColorBrush x:Key="MealBreakfastBackground" Color="#1AE89B4A"/>
+            <SolidColorBrush x:Key="MealLunchBackground" Color="#1A6DA366"/>
+            <SolidColorBrush x:Key="MealDinnerBackground" Color="#1AC75B6E"/>
+            <SolidColorBrush x:Key="MealSnackBackground" Color="#1AA8947B"/>
+
 			<ResourceDictionary.ThemeDictionaries>
 				<ResourceDictionary x:Key="Light">
                 <SolidColorBrush x:Key="CardBackground" Color="#EEEEEE"/>
