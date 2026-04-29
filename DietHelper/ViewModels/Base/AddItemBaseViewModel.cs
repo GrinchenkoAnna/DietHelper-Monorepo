@@ -144,26 +144,7 @@ namespace DietHelper.ViewModels.Base
             _ = DoSearch(SearchText);
         }
 
-        protected async virtual Task DoSearch(string? term)
-        {
-            IsBusy = true;
-            UserSearchResults.Clear();
-
-            //временно
-            foreach (var item in AllUserItems)
-            {
-                //не очень эффективный алгоритм поиска -> SearchIndex
-                if (term is not null 
-                    && item.GetType()
-                           .GetProperty("Name")!
-                           .GetValue(item)!
-                           .ToString()
-                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                    UserSearchResults.Add(item);
-            }
-
-            IsBusy = false;
-        }
+        protected abstract Task DoSearch(string? term);
 
         [RelayCommand]
         protected abstract void AddUserItem();

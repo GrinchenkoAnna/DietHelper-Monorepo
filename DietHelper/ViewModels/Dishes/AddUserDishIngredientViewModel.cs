@@ -8,6 +8,7 @@ using DietHelper.Services;
 using DietHelper.ViewModels.Base;
 using DietHelper.ViewModels.Products;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -63,40 +64,32 @@ namespace DietHelper.ViewModels.Dishes
         {
             IsBusy = true;
 
-            UserSearchResults.Clear();
-            BaseSearchResults.Clear();
+            var userResults = new List<UserProductViewModel>();
+            var baseResults = new List<BaseProductViewModel>();
 
-            //UserProducts
-            if (term is null || string.IsNullOrWhiteSpace(term))
-                foreach (var item in AllUserItems) UserSearchResults.Add(item);
-            else
+            await Task.Run(() =>
             {
+                bool isTermEmpty = string.IsNullOrWhiteSpace(term);
+
+                //UserProducts
                 foreach (var item in AllUserItems)
                 {
-                    if (item.GetType()
-                           .GetProperty("Name")!
-                           .GetValue(item)!
-                           .ToString()
-                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                        UserSearchResults.Add(item);
+                    if (isTermEmpty || (item.Name ?? "").Contains(term!, StringComparison.CurrentCultureIgnoreCase))
+                        userResults.Add(item);
                 }
-            }
 
-            //BaseProducts
-            if (term is null || string.IsNullOrWhiteSpace(term))
-                foreach (var item in AllBaseItems) BaseSearchResults.Add(item);
-            else
-            {
+                //BaseProducts
                 foreach (var item in AllBaseItems)
                 {
-                    if (item.GetType()
-                           .GetProperty("Name")!
-                           .GetValue(item)!
-                           .ToString()
-                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                        BaseSearchResults.Add(item);
+                    if (isTermEmpty || (item.Name ?? "").Contains(term!, StringComparison.CurrentCultureIgnoreCase))
+                        baseResults.Add(item);
                 }
-            }
+            });
+
+            UserSearchResults.Clear();
+            foreach (var item in userResults) UserSearchResults.Add(item);
+            BaseSearchResults.Clear();
+            foreach (var item in baseResults) BaseSearchResults.Add(item);
 
             IsBusy = false;
         }

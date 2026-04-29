@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DietHelper.Common.Utils
+namespace DietHelper.Services
 {
-    public class SearchIndex
+    public class SearchService
     {
 
     }

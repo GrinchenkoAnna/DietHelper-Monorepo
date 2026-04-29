@@ -6,6 +6,9 @@ using DietHelper.Common.Models.Dishes;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Base;
+using DietHelper.ViewModels.Products;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels.Dishes
@@ -85,6 +88,29 @@ namespace DietHelper.ViewModels.Dishes
                     }
                 }
             }            
+        }
+
+        protected override async Task DoSearch(string? term)
+        {
+            IsBusy = true;
+
+            var userResults = new List<UserDishViewModel>();
+
+            await Task.Run(() =>
+            {
+                bool isTermEmpty = string.IsNullOrWhiteSpace(term);
+
+                foreach (var item in AllUserItems)
+                {
+                    if (isTermEmpty || (item.Name ?? "").Contains(term!, StringComparison.CurrentCultureIgnoreCase))
+                        userResults.Add(item);
+                }
+            });
+
+            UserSearchResults.Clear();
+            foreach (var item in userResults) UserSearchResults.Add(item);
+
+            IsBusy = false;
         }
 
         protected override void AddUserItem()
