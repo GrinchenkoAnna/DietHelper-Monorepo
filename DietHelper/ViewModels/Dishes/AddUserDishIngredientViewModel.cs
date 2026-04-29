@@ -44,6 +44,8 @@ namespace DietHelper.ViewModels.Dishes
                     }
                 }
             }
+            else
+                _notificationService.ShowInfo("Мои продукты не загружены", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
 
             var baseProducts = await _apiService.GetBaseProductsAsync();
 
@@ -58,6 +60,8 @@ namespace DietHelper.ViewModels.Dishes
                     }
                 }
             }
+            else
+                _notificationService.ShowInfo("Общие продукты не загружены", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
         }
 
         protected override async Task DoSearch(string? term)
@@ -125,7 +129,10 @@ namespace DietHelper.ViewModels.Dishes
                 }
             };
 
-            WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(ingredient));
+            if (ingredient is not null)
+                WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(ingredient));
+            else
+                _notificationService.ShowError("Не удалось создать ингредиент", "Попробуйте выбрать продукт снова");
         }
 
         [RelayCommand]
@@ -142,7 +149,7 @@ namespace DietHelper.ViewModels.Dishes
                 var createdUserProduct = await CreateUserProductFromBaseItemAsync(SelectedBaseItem);
                 if (createdUserProduct is null)
                 {
-                    _notificationService.ShowError("Ошибка добавления", "Не удалось добавить продукт");
+                    _notificationService.ShowError("Ошибка создания ингредиента", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
                     return;
                 }
 
@@ -178,7 +185,11 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void AddManualItem()
         {
-            if (string.IsNullOrEmpty(ManualName)) return;
+            if (string.IsNullOrEmpty(ManualName))
+            {
+                _notificationService.ShowError("Создание ингредиента", "Имя ингредиента не должно быть пустым");
+                return;
+            }
 
             var newProduct = await CreateNewUserItem();
 
@@ -210,7 +221,12 @@ namespace DietHelper.ViewModels.Dishes
 
                 WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userIngredient));
             }
-            ClearManualEntries();
+            else
+            {
+                ClearManualEntries();
+                _notificationService.ShowError("Ошибка создания ингредиента", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
+                return;
+            }
         }
 
         [RelayCommand]

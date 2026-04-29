@@ -87,7 +87,9 @@ namespace DietHelper.ViewModels.Dishes
                         AllUserItems.Add(new UserDishViewModel(dish, _apiService));
                     }
                 }
-            }            
+            }
+            else
+                _notificationService.ShowInfo("Блюда не загружены", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
         }
 
         protected override async Task DoSearch(string? term)
@@ -116,9 +118,9 @@ namespace DietHelper.ViewModels.Dishes
         protected override void AddUserItem()
         {
             if (SelectedUserItem is not null)
-            {
                 WeakReferenceMessenger.Default.Send(new AddUserDishClosedMessage(SelectedUserItem));
-            }
+            else
+                _notificationService.ShowError("Не удалось создать блюдо", "Попробуйте выбрать блюдо снова");
         }
 
         protected override async Task<UserDish?> CreateNewUserItem()
@@ -142,7 +144,11 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void AddManualItem()
         {
-            if (string.IsNullOrEmpty(ManualName)) return;
+            if (string.IsNullOrEmpty(ManualName))
+            {
+                _notificationService.ShowError("Создание блюда", "Имя блюда не должно быть пустым");
+                return;
+            }
 
             var newUserDish = await CreateNewUserItem();
 
@@ -151,7 +157,11 @@ namespace DietHelper.ViewModels.Dishes
                 ClearManualEntries();
 
                 WeakReferenceMessenger.Default.Send(new AddUserDishClosedMessage(new UserDishViewModel(newUserDish, _apiService)));
-            }            
+            }
+            else
+            {
+                _notificationService.ShowError("Ошибка добавления блюда", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
+            }
         }
 
         protected override async void DeleteItemFromDatabase(UserDishViewModel userDishViewModel)

@@ -8,6 +8,7 @@ using DietHelper.ViewModels.Products;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels.Base
@@ -168,6 +169,11 @@ namespace DietHelper.ViewModels.Base
             if (string.IsNullOrWhiteSpace(barcode))
             {
                 _notificationService.ShowError("Ошибка заполнения штрих-кода", "Штрих-код не может быть пустым");
+                return;
+            }
+            if (barcode.Length != 13 || barcode.Any(c => !char.IsDigit(c)))
+            {
+                _notificationService.ShowError("Ошибка заполнения штрих-кода", "Штрих-код должен содержать 13 цифр. Буквы и другие символы не допускаются");
                 return;
             }
 

@@ -169,6 +169,7 @@ namespace DietHelper.ViewModels
                 if (userMealEntriesDto is null) return;
 
                 AllEntries.Clear();
+                bool hasLoadingError = false;
 
                 foreach (var userMealEntryDto in userMealEntriesDto)
                 {
@@ -176,7 +177,11 @@ namespace DietHelper.ViewModels
                     if (!userMealEntryDto.UserDishId.HasValue)
                     {
                         var product = userMealEntryDto.Ingredients.FirstOrDefault();
-                        if (product is null) continue;
+                        if (product is null)
+                        {
+                            hasLoadingError = true;
+                            continue;
+                        }
 
                         var userProductViewModel = new UserProductViewModel(
                             product.UserProductId, product.ProductNameSnapshot,
@@ -192,7 +197,11 @@ namespace DietHelper.ViewModels
                     else // блюдо
                     {
                         var userDish = await _apiService.GetUserDishAsync(userMealEntryDto.UserDishId.Value);
-                        if (userDish is null) continue;
+                        if (userDish is null)
+                        {
+                            hasLoadingError = true;
+                            continue;
+                        }
 
                         var userDishViewModel = new UserDishViewModel(
                             _apiService, userDish.Id, userDish.Name,
@@ -209,10 +218,21 @@ namespace DietHelper.ViewModels
                     }
                 }
 
-                OnPropertyChanged(nameof(HasEntries));
-                OnPropertyChanged(nameof(entriesMessage));
+                if (hasLoadingError)
+                    _notificationService.ShowError("Пропущена запись", "Некоторые записи не были загружены из-за отсутствия данных");
 
-                DistributeEntriesByMealType();
+                if (AllEntries.Count != 0)
+                {
+                    OnPropertyChanged(nameof(HasEntries));
+                    OnPropertyChanged(nameof(entriesMessage));
+
+                    DistributeEntriesByMealType();
+                }
+                else
+                {
+                    _notificationService.ShowInfo("Загрузка истории", $"{SelectedDate.ToString("dd.MM.yyyy")} ничего не добавлено. Начните с завтрака!");
+                    return;
+                }                
             }
             catch (Exception ex)
             {
@@ -496,6 +516,8 @@ namespace DietHelper.ViewModels
                         userDishViewModel.IsDirty = false;
                     }
                 }
+
+                _notificationService.ShowSuccess("Сохранение", "Изменения сохранены");
             }
             catch (Exception ex)
             {

@@ -191,8 +191,6 @@ namespace DietHelper.ViewModels
                 UserMeals = new ObservableCollection<UserMealEntryDto>(userMealsList ?? new List<UserMealEntryDto>());
 
                 CalculateStats();
-
-                _notificationService.ShowSuccess("Sussess", "Loaded");
             }
             catch (Exception ex)
             {
@@ -314,6 +312,9 @@ namespace DietHelper.ViewModels
             }
 
             TotalNutrition = totalNutritions;
+
+            if (totalNutritions.Calories == 0)
+                _notificationService.ShowInfo("Нет данных", "Измените даты или добавьте приемы пищи");
         }
 
         [RelayCommand]
