@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Animation;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DietHelper.Common.DTO;
@@ -30,6 +31,8 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         private bool canAddIngredients = true;
 
+        private bool _isUpdatingIngredients = false;
+
         [ObservableProperty]
         private int id;
 
@@ -55,7 +58,7 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         private double quantity;
         [ObservableProperty]
-        private string formattedQuantity;  
+        private string formattedQuantity;
         private bool isManualQuantity = false;
 
         [ObservableProperty]
@@ -84,7 +87,6 @@ namespace DietHelper.ViewModels.Dishes
                 totalNutritionInfo.Protein += ingredient.CurrentNutrition.Protein;
                 totalNutritionInfo.Fat += ingredient.CurrentNutrition.Fat;
                 totalNutritionInfo.Carbs += ingredient.CurrentNutrition.Carbs;
-                //Quantity += ingredient.Quantity;
             }
 
             NutritionFacts = totalNutritionInfo;
@@ -104,6 +106,8 @@ namespace DietHelper.ViewModels.Dishes
                 Fat = baseNutritionForReadyDish.Fat * factor,
                 Carbs = baseNutritionForReadyDish.Carbs * factor
             };
+
+            FormattedQuantity = $"{Quantity:F0}";
         }
 
         private void RestoreBaseNutritionForReadyDish(NutritionInfo totalNutrition, double quantity)
@@ -172,7 +176,7 @@ namespace DietHelper.ViewModels.Dishes
         }
 
         // загрузка из истории
-        public UserDishViewModel(IApiService apiService, int id, string name, bool isReadyDish, double quantity, 
+        public UserDishViewModel(IApiService apiService, int id, string name, bool isReadyDish, double quantity,
                                 NutritionInfo totalNutrition, IEnumerable<UserMealEntryIngredientDto>? ingredients = null)
         {
             _apiService = apiService;
@@ -200,7 +204,6 @@ namespace DietHelper.ViewModels.Dishes
                         };
                         Ingredients.Add(ingredientViewModel);
                         ingredientViewModel.PropertyChanged += OnIngredientPropertyChanged;
-                        //Quantity += ingredientViewModel.Quantity;
                     }
                     UpdateTotalQuantity();
                 }
@@ -212,7 +215,7 @@ namespace DietHelper.ViewModels.Dishes
             }
             else
             {
-                
+
                 if (quantity != 100)
                 {
                     isManualQuantity = true;
@@ -242,10 +245,12 @@ namespace DietHelper.ViewModels.Dishes
 
             IsDirty = false;
             IsInAddMode = false;
-        }        
+        }
 
         private void OnIngredientPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (_isUpdatingIngredients) return;
+
             if (e.PropertyName == nameof(UserDishIngredientViewModel.Quantity))
             {
                 IsDirty = true;
@@ -268,7 +273,29 @@ namespace DietHelper.ViewModels.Dishes
             {
                 Quantity = Ingredients.Sum(ingredient => ingredient.Quantity);
             }
-            FormattedQuantity = $"{Quantity} г";
+            FormattedQuantity = $"{Quantity:F0}";
+        }
+
+        [RelayCommand]
+        private void ApplyPortion()
+        {
+            if (IsReadyDish || Ingredients.Count == 0) return;
+
+            double currentQuantity = Ingredients.Sum(i => i.Quantity);
+            if (currentQuantity == 0 || currentQuantity <= 0) return;
+
+            double inputQuantity = 0;
+            double.TryParse(FormattedQuantity, out inputQuantity);
+            double factor = inputQuantity / currentQuantity;
+
+            _isUpdatingIngredients = true;
+            foreach (var ingredient in Ingredients)
+                ingredient.Quantity *= factor;
+            _isUpdatingIngredients = false;
+
+            IsDirty = true;
+
+            Recalculate();
         }
 
         [RelayCommand]

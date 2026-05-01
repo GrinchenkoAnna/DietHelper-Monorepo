@@ -28,7 +28,8 @@
 			<Setter Property="MinWidth" Value="25" />
         </Style>
 
-        <Style Selector="Button.small-control-button">
+        <Style Selector="Button.small-control-button, Button.recalculate-button, 
+                        Button.delete-button, Button.add-button">
             <Setter Property="Background" Value="{DynamicResource MainBackground}" />
 			<Setter Property="BorderBrush" Value="#696969" />
 			<Setter Property="BorderThickness" Value="0.5" />
@@ -38,10 +39,39 @@
 			<Setter Property="VerticalContentAlignment" Value="Center" />
 			<Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>
-        <Style Selector="Button.small-control-button:pointerover /template/ ContentPresenter">
+        <Style Selector="Button.small-control-button:pointerover /template/ ContentPresenter,
+                Button.recalculate-button:pointerover /template/ ContentPresenter,
+                Button.delete-button:pointerover /template/ ContentPresenter,
+                Button.add-button:pointerover /template/ ContentPresenter">
 			<Setter Property="BorderBrush" Value="#696969" />
 			<Setter Property="BorderThickness" Value="0.5" />
 			<Setter Property="CornerRadius" Value="5" />
+        </Style>
+
+        <Style Selector="Button.recalculate-button">
+            <Setter Property="Foreground" Value="RoyalBlue" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style Selector="Button.recalculate-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Foreground" Value="RoyalBlue" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style Selector="Button.delete-button">
+            <Setter Property="Foreground" Value="Crimson" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style Selector="Button.delete-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Foreground" Value="Crimson" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style Selector="Button.add-button">
+            <Setter Property="Foreground" Value="Green" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style Selector="Button.add-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Foreground" Value="Green" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 

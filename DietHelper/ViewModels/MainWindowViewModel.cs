@@ -135,12 +135,16 @@ namespace DietHelper.ViewModels
 
             foreach (var entry in AllEntries)
             {
-                if (entry is UserProductViewModel userProduct) totalQuantity += userProduct.Quantity;
-                else if (entry is UserDishViewModel userDish) totalQuantity += userDish.Quantity;
+                if (entry is UserProductViewModel userProduct)
+                    totalQuantity += userProduct.Quantity;
+                else if (entry is UserDishViewModel userDish)
+                    totalQuantity += userDish.IsReadyDish
+                        ? userDish.Quantity
+                        : userDish.Ingredients.Sum(i => i.Quantity);
             }
 
             TotalQuantity = totalQuantity;
-            FormattedTotalQuantity = $"{TotalQuantity} г";
+            FormattedTotalQuantity = $"{TotalQuantity:F0} г";
         }
 
         private void UpdateWeekDays()

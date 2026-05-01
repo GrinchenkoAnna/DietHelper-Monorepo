@@ -11,9 +11,9 @@
              x:DataType="vm:UserDishViewModel" x:Name="Root">
 
     <UserControl.Resources>
-		<converters:BorderThicknessForDishConverter x:Key="BorderThicknessForDishConverter"/>
-		<converters:BoolToArrowConverter x:Key="BoolToArrowConverter"/>
-		<converters:BoolToDoubleConverter x:Key="BoolToDoubleConverter"/>
+        <converters:BorderThicknessForDishConverter x:Key="BorderThicknessForDishConverter"/>
+        <converters:BoolToArrowConverter x:Key="BoolToArrowConverter"/>
+        <converters:BoolToDoubleConverter x:Key="BoolToDoubleConverter"/>
     </UserControl.Resources>
 
     <Border Background="{DynamicResource CardBackground}"
@@ -39,7 +39,7 @@
                         IsVisible="{Binding CanAddIngredients}"
                         Margin="0,0,5,0" Width="25" Height="25"
                         ToolTip.Tip="Добавить ингредиент"
-                        Classes="small-control-button"/>
+                        Classes="add-button"/>
                 <ToggleButton Grid.Column="4" IsChecked="{Binding ShowIngredients}" 
                               Content="{Binding ShowIngredients, Converter={StaticResource BoolToArrowConverter}}"
                               HorizontalAlignment="Stretch" 
@@ -47,38 +47,41 @@
                               Classes="show-ingredient"
                               IsVisible="{Binding !IsReadyDish}"
                               IsEnabled="{Binding !IsReadyDish}"/>
-                <TextBlock Grid.Column="4" Grid.ColumnSpan="3" Text="Готовое блюдо"
+                <TextBlock Grid.Column="4" Grid.ColumnSpan="2" Text="Готовое блюдо"
                        FontSize="10" Foreground="Gray" Margin="0, 5"
                        IsVisible="{Binding IsReadyDish}"/>
             </Grid>
 
-            <StackPanel Grid.Row="1" Margin="0">
-                <Border Background="Transparent"
-                        BorderBrush="Gray"
-                        BorderThickness="{Binding IsReadyDish, Converter={StaticResource BorderThicknessForDishConverter}}">
-                    <StackPanel>
-                        <TextBlock Text="Пищевая ценность всего блюда:" Foreground="Gray" FontSize="12"/>
+            <Border Grid.Row="1"
+                    Background="Transparent"
+                    BorderBrush="Gray"
+                    BorderThickness="{Binding IsReadyDish, Converter={StaticResource BorderThicknessForDishConverter}}">
+                <Grid RowDefinitions="Auto,Auto"
+                      HorizontalAlignment="Stretch">
+                    <TextBlock Grid.Row="0" Text="Пищевая ценность всего блюда:" Foreground="Gray" FontSize="12"/>
+                    <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*,Auto,*"
+                          HorizontalAlignment="Stretch" Margin="0,6,0,0">
+                        <TextBlock Grid.Column="0" Text="К:" FontWeight="Medium" Margin="5,5,0,5"/>
+                        <TextBlock Grid.Column="1" Text="{Binding NutritionFacts.FormattedCalories}" Margin="5,5,0,5"/>
 
-                        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*,Auto,*" HorizontalAlignment="Stretch">
-                            <TextBlock Grid.Column="0" Text="К:" FontWeight="Medium" Margin="5,0,0,0"/>
-                            <TextBlock Grid.Column="1" Text="{Binding NutritionFacts.FormattedCalories}" Margin="5,0,0,0" TextWrapping="NoWrap"/>
+                        <TextBlock Grid.Column="2" Text="Б:" FontWeight="Medium" Margin="5,5,0,5"/>
+                        <TextBlock Grid.Column="3" Text="{Binding NutritionFacts.FormattedProtein}" Margin="5,5,0,5"/>
 
-                            <TextBlock Grid.Column="2" Text="Б:" FontWeight="Medium" Margin="5,0,0,0"/>
-                            <TextBlock Grid.Column="3" Text="{Binding NutritionFacts.FormattedProtein}" Margin="5,0,0,0" TextWrapping="NoWrap"/>
+                        <TextBlock Grid.Column="4" Text="Ж:" FontWeight="Medium" Margin="5,5,0,5"/>
+                        <TextBlock Grid.Column="5" Text="{Binding NutritionFacts.FormattedFat}" Margin="5,5,0,5"/>
 
-                            <TextBlock Grid.Column="4" Text="Ж:" FontWeight="Medium" Margin="5,0,0,0"/>
-                            <TextBlock Grid.Column="5" Text="{Binding NutritionFacts.FormattedFat}" Margin="5,0,0,0" TextWrapping="NoWrap"/>
+                        <TextBlock Grid.Column="6" Text="У:" FontWeight="Medium" Margin="5,5,0,5"/>
+                        <TextBlock Grid.Column="7" Text="{Binding NutritionFacts.FormattedCarbs}" Margin="5,5,0,5"/>
 
-                            <TextBlock Grid.Column="6" Text="У:" FontWeight="Medium" Margin="5,0,0,0"/>
-                            <TextBlock Grid.Column="7" Text="{Binding NutritionFacts.FormattedCarbs}" Margin="5,0,0,0" TextWrapping="NoWrap"/>
-
-                            <TextBlock Grid.Column="8" Text="Вес:" FontWeight="Medium" Margin="5,0,0,0"/>
-                            <TextBox Grid.Column="9" Text="{Binding Quantity}" Width="100" Margin="5,-5,0,0" Background="Transparent" IsVisible="{Binding IsReadyDish}"/>
-                            <TextBlock Grid.Column="9" Text="{Binding FormattedQuantity}" Margin="5,0,0,0" IsVisible="{Binding !IsReadyDish}"/>
-                        </Grid>
-                    </StackPanel>			
-                </Border>                
-            </StackPanel>
+                        <TextBlock Grid.Column="8" Text="Вес:" FontWeight="Medium" Margin="5,5,0,5"/>
+                        <TextBox Grid.Column="9" Text="{Binding FormattedQuantity}" Width="100"
+                                 Margin="5,0,0,2" Background="Transparent" HorizontalAlignment="Left"/>
+                        <Button Grid.Column="9" Content="✓" Command="{Binding ApplyPortionCommand}"
+                                Width="25" Height="25" Margin="0,-5,5,0" HorizontalAlignment="Right" Classes="recalculate-button"
+                                IsVisible="{Binding !IsReadyDish}"/>
+                    </Grid>
+                </Grid>
+            </Border>
 
             <ListBox Grid.Row="2" x:Name="ingredientsList" 
                      ItemsSource="{Binding Ingredients}"
@@ -120,11 +123,10 @@
                                 <TextBlock Grid.Column="7" Text="{Binding CurrentNutrition.FormattedCarbs}" Margin="5,0,0,0" TextWrapping="NoWrap"/>
 
                                 <TextBlock Grid.Column="8" Text="Вес:" FontWeight="Medium" Margin="5,0,0,0"/>
-                                <TextBox Grid.Column="9" Text="{Binding Quantity}" Width="100" Margin="5,-5,0,5" Background="Transparent" HorizontalAlignment="Left"/>
+                                <TextBox Grid.Column="9" Text="{Binding FormattedQuantity}" Width="100" Margin="5,-5,0,5" Background="Transparent" HorizontalAlignment="Left"/>
                                 <Button Grid.Column="9" Content="-" Width="25" Height="25" Margin="5,-5,5,5" 
                                         Command="{Binding $parent[dishes:UserDishView].DataContext.RemoveIngredientCommand, FallbackValue={x:Null}}"
-                                        CommandParameter="{Binding}"
-                                        Classes="small-control-button" HorizontalAlignment="Right"/>
+                                        CommandParameter="{Binding}" Classes="delete-button" HorizontalAlignment="Right"/>
                             </Grid>
                         </Grid>
                     </DataTemplate>
