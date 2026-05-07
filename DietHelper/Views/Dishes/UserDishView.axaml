@@ -74,8 +74,11 @@
                         <TextBlock Grid.Column="7" Text="{Binding NutritionFacts.FormattedCarbs}" Margin="5,5,0,5"/>
 
                         <TextBlock Grid.Column="8" Text="Вес:" FontWeight="Medium" Margin="5,5,0,5"/>
+                        <TextBox Grid.Column="9" Text="{Binding Quantity, Mode=TwoWay}" Width="100"
+                                 Margin="5,0,0,2" Background="Transparent" HorizontalAlignment="Left"
+                                 IsVisible="{Binding IsReadyDish}" />
                         <TextBox Grid.Column="9" Text="{Binding FormattedQuantity}" Width="100"
-                                 Margin="5,0,0,2" Background="Transparent" HorizontalAlignment="Left"/>
+                                 Margin="5,0,0,2" Background="Transparent" HorizontalAlignment="Left" IsVisible="{Binding !IsReadyDish}"/>
                         <Button Grid.Column="9" Content="✓" Command="{Binding ApplyPortionCommand}"
                                 Width="25" Height="25" Margin="0,-5,5,0" HorizontalAlignment="Right" Classes="recalculate-button"
                                 IsVisible="{Binding !IsReadyDish}"/>
@@ -123,7 +126,7 @@
                                 <TextBlock Grid.Column="7" Text="{Binding CurrentNutrition.FormattedCarbs}" Margin="5,0,0,0" TextWrapping="NoWrap"/>
 
                                 <TextBlock Grid.Column="8" Text="Вес:" FontWeight="Medium" Margin="5,0,0,0"/>
-                                <TextBox Grid.Column="9" Text="{Binding FormattedQuantity}" Width="100" Margin="5,-5,0,5" Background="Transparent" HorizontalAlignment="Left"/>
+                                <TextBox Grid.Column="9" Text="{Binding Quantity}" Width="100" Margin="5,-5,0,5" Background="Transparent" HorizontalAlignment="Left"/>
                                 <Button Grid.Column="9" Content="-" Width="25" Height="25" Margin="5,-5,5,5" 
                                         Command="{Binding $parent[dishes:UserDishView].DataContext.RemoveIngredientCommand, FallbackValue={x:Null}}"
                                         CommandParameter="{Binding}" Classes="delete-button" HorizontalAlignment="Right"/>

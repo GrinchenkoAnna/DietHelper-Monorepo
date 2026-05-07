@@ -14,7 +14,7 @@ namespace DietHelper.Common.DTO
         public int? UserDishId { get; set; }
         public string? UserDishName { get; set; }
         public DateTime Date {  get; set; }
-        public decimal TotalQuantity { get; set; }
+        public double TotalQuantity { get; set; }
         public NutritionInfo TotalNutrition { get; set; } = new();
         public List<UserMealEntryIngredientDto> Ingredients { get; set; } = new();
         public MealType MealType { get; set; }

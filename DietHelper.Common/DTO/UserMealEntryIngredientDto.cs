@@ -11,7 +11,7 @@ namespace DietHelper.Common.DTO
     {
         public int Id { get; set; }
         public int UserProductId { get; set; }
-        public decimal Quantity { get; set; }
+        public double Quantity { get; set; }
         public string ProductNameSnapshot { get; set; } = string.Empty;
         public NutritionInfo ProductNutritionInfoSnapshot { get; set; } = new();
     }

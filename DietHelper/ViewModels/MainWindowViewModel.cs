@@ -335,7 +335,7 @@ namespace DietHelper.ViewModels
                         new UserMealEntryIngredientDto()
                         {
                             UserProductId = userProductViewModel.Id,
-                            Quantity = (decimal)userProductViewModel.Quantity,
+                            Quantity = userProductViewModel.Quantity,
                             ProductNameSnapshot = userProductViewModel.Name!,
                             ProductNutritionInfoSnapshot = new NutritionInfo
                             {
@@ -371,7 +371,7 @@ namespace DietHelper.ViewModels
                 var ingredients = userDishViewModel.Ingredients.Select(ingredient => new UserMealEntryIngredientDto()
                 {
                     UserProductId = ingredient.UserProductId,
-                    Quantity = (decimal)ingredient.Quantity,
+                    Quantity = ingredient.Quantity,
                     ProductNameSnapshot = ingredient.ProductNameSnapshot,
                     ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot
                 }).ToList();
@@ -381,7 +381,7 @@ namespace DietHelper.ViewModels
                     UserDishId = userDishViewModel.Id,
                     Date = SelectedDate,
                     Ingredients = ingredients,
-                    TotalQuantity = (decimal)userDishViewModel.Quantity,
+                    TotalQuantity = userDishViewModel.Quantity,
                     TotalNutrition = userDishViewModel.NutritionFacts,
                     MealType = mealType
                 };
@@ -436,7 +436,7 @@ namespace DietHelper.ViewModels
                 {
                     UserDishId = createdDish.Id,
                     Date = SelectedDate,
-                    TotalQuantity = (decimal)userProductViewModel.Quantity,
+                    TotalQuantity = userProductViewModel.Quantity,
                     TotalNutrition = createdDish.NutritionFacts,
                     MealType = userProductViewModel.MealType,
                     Ingredients = new List<UserMealEntryIngredientDto>()
@@ -474,7 +474,7 @@ namespace DietHelper.ViewModels
                                 new UserMealEntryIngredientDto()
                                 {
                                     UserProductId = userProductViewModel.Id,
-                                    Quantity = (decimal)userProductViewModel.Quantity,
+                                    Quantity = userProductViewModel.Quantity,
                                     ProductNameSnapshot = userProductViewModel.Name!,
                                     ProductNutritionInfoSnapshot = new NutritionInfo
                                     {
@@ -500,7 +500,7 @@ namespace DietHelper.ViewModels
                             ingredients.Add(new UserMealEntryIngredientDto()
                             {
                                 UserProductId = ingredient.UserProductId,
-                                Quantity = (decimal)ingredient.Quantity,
+                                Quantity = ingredient.Quantity,
                                 ProductNameSnapshot = ingredient.ProductNameSnapshot,
                                 ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot
                             });
@@ -511,7 +511,7 @@ namespace DietHelper.ViewModels
                             UserDishId = userDishViewModel.Id,
                             Date = SelectedDate,
                             Ingredients = ingredients,
-                            TotalQuantity = (decimal)userDishViewModel.Quantity,
+                            TotalQuantity = userDishViewModel.Quantity,
                             TotalNutrition = userDishViewModel.NutritionFacts,
                             MealType = userDishViewModel.MealType
                         };
