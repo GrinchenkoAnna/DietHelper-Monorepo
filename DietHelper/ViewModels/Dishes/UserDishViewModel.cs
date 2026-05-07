@@ -57,8 +57,8 @@ namespace DietHelper.ViewModels.Dishes
 
         [ObservableProperty]
         private double quantity;
-        [ObservableProperty]
-        private string formattedQuantity;
+        //[ObservableProperty]
+        //private string formattedQuantity;
         private bool isManualQuantity = false;
 
         [ObservableProperty]
@@ -107,7 +107,7 @@ namespace DietHelper.ViewModels.Dishes
                 Carbs = baseNutritionForReadyDish.Carbs * factor
             };
 
-            FormattedQuantity = $"{Quantity:F0}";
+            //FormattedQuantity = $"{Quantity:F0}";
         }
 
         private void RestoreBaseNutritionForReadyDish(NutritionInfo totalNutrition, double quantity)
@@ -273,7 +273,7 @@ namespace DietHelper.ViewModels.Dishes
             {
                 Quantity = Ingredients.Sum(ingredient => ingredient.Quantity);
             }
-            FormattedQuantity = $"{Quantity:F0}";
+            //FormattedQuantity = $"{Quantity:F0}";
         }
 
         [RelayCommand]
@@ -282,15 +282,15 @@ namespace DietHelper.ViewModels.Dishes
             if (IsReadyDish || Ingredients.Count == 0) return;
 
             double currentQuantity = Ingredients.Sum(i => i.Quantity);
-            if (currentQuantity == 0 || currentQuantity <= 0) return;
+            if (currentQuantity <= 0) return;
 
-            double inputQuantity = 0;
-            double.TryParse(FormattedQuantity, out inputQuantity);
-            double factor = inputQuantity / currentQuantity;
+            double factor = Quantity / currentQuantity;
 
             _isUpdatingIngredients = true;
+
             foreach (var ingredient in Ingredients)
                 ingredient.Quantity *= factor;
+
             _isUpdatingIngredients = false;
 
             IsDirty = true;

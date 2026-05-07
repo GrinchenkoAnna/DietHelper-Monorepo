@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -22,7 +23,8 @@ namespace DietHelper.Services
                 var response = await SendRequestAsync(() => _httpClient.GetAsync($"meals/period?start={start:yyyy-MM-dd}&end={end:yyyy-MM-dd}"));
                 if (response is null) return null;
 
-                return await response.Content.ReadFromJsonAsync<List<UserMealEntryDto>>();
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<UserMealEntryDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
             catch (Exception ex)
             {

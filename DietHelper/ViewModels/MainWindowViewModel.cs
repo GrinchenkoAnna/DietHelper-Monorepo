@@ -110,19 +110,21 @@ namespace DietHelper.ViewModels
 
             foreach (var entry in AllEntries)
             {
-                if (entry is UserProductViewModel userProduct)
+                switch (entry)
                 {
-                    calories += userProduct.Calories;
-                    protein += userProduct.Protein;
-                    fat += userProduct.Fat;
-                    carbs += userProduct.Carbs;
-                }
-                else if (entry is UserDishViewModel userDish)
-                {
-                    calories += userDish.NutritionFacts.Calories;
-                    protein += userDish.NutritionFacts.Protein;
-                    fat += userDish.NutritionFacts.Fat;
-                    carbs += userDish.NutritionFacts.Carbs;
+                    case UserProductViewModel userProduct:
+                        calories += userProduct.NutritionFacts.Calories;
+                        protein += userProduct.NutritionFacts.Protein;
+                        fat += userProduct.NutritionFacts.Fat;
+                        carbs += userProduct.NutritionFacts.Carbs;
+                        break;
+
+                    case UserDishViewModel userDish:
+                        calories += userDish.NutritionFacts.Calories;
+                        protein += userDish.NutritionFacts.Protein;
+                        fat += userDish.NutritionFacts.Fat;
+                        carbs += userDish.NutritionFacts.Carbs;
+                        break;
                 }
             }
 
@@ -140,7 +142,7 @@ namespace DietHelper.ViewModels
                 else if (entry is UserDishViewModel userDish)
                     totalQuantity += userDish.IsReadyDish
                         ? userDish.Quantity
-                        : userDish.Ingredients.Sum(i => i.Quantity);
+                        : userDish.Ingredients.Sum(i => i.Quantity);  
             }
 
             TotalQuantity = totalQuantity;

@@ -189,6 +189,7 @@ namespace DietHelper.ViewModels
 
                 var userMealsList = await _apiService.GetUserMealsForPeriod(StartDay, EndDay);
                 UserMeals = new ObservableCollection<UserMealEntryDto>(userMealsList ?? new List<UserMealEntryDto>());
+                Debug.WriteLine($"Stats: загружено {UserMeals.Count} записей");
 
                 CalculateStats();
             }
@@ -283,32 +284,39 @@ namespace DietHelper.ViewModels
         private void CalculateStats()
         {
             Nutritions.Clear();
-
             SetSeries();
 
-            var totalNutritions = new NutritionInfo();
-            var date = DateTime.Now;
+            if (UserMeals.Count == 0) return;
 
-            foreach (var userMeal in UserMeals)
+            var totalNutritions = new NutritionInfo();
+            DateTime? currentDate = null;
+
+            foreach (var userMeal in UserMeals.OrderBy(um => um.Date))
             {
-                if (userMeal.Date != date)
+                if (currentDate == null || userMeal.Date != currentDate.Value)
                 {
-                    Nutritions.Add(userMeal.TotalNutrition);
+                    Nutritions.Add(new NutritionInfo
+                    {
+                        Calories = userMeal.TotalNutrition.Calories,
+                        Protein = userMeal.TotalNutrition.Protein,
+                        Fat = userMeal.TotalNutrition.Fat,
+                        Carbs = userMeal.TotalNutrition.Carbs
+                    });
+                    currentDate = userMeal.Date;
                 }
                 else
                 {
-                    Nutritions.Last().Calories += userMeal.TotalNutrition.Calories;
-                    Nutritions.Last().Protein += userMeal.TotalNutrition.Protein;
-                    Nutritions.Last().Fat += userMeal.TotalNutrition.Fat;
-                    Nutritions.Last().Carbs += userMeal.TotalNutrition.Carbs;
+                    var last = Nutritions.Last();
+                    last.Calories += userMeal.TotalNutrition.Calories;
+                    last.Protein += userMeal.TotalNutrition.Protein;
+                    last.Fat += userMeal.TotalNutrition.Fat;
+                    last.Carbs += userMeal.TotalNutrition.Carbs;
                 }
 
                 totalNutritions.Calories += userMeal.TotalNutrition.Calories;
                 totalNutritions.Protein += userMeal.TotalNutrition.Protein;
                 totalNutritions.Fat += userMeal.TotalNutrition.Fat;
                 totalNutritions.Carbs += userMeal.TotalNutrition.Carbs;
-
-                date = userMeal.Date;
             }
 
             TotalNutrition = totalNutritions;

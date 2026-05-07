@@ -98,7 +98,6 @@ namespace DietHelper.ViewModels
                 if (result!.IsSuccess)
                 {
                     Message = "Регистрация прошла успешно";
-                    //await _navigationService.NavigateToLoginAsync();
                 }
             }
             catch (Exception ex)
