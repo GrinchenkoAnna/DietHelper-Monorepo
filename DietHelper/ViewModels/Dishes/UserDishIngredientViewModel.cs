@@ -3,11 +3,7 @@ using DietHelper.Common.Models.Core;
 using DietHelper.Common.Models.Dishes;
 using DietHelper.Common.Models.Products;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels.Dishes
 {
@@ -30,6 +26,14 @@ namespace DietHelper.ViewModels.Dishes
         [ObservableProperty]
         [Range(0.1, double.MaxValue, ErrorMessage = "Количество должно быть больше 0")]
         private double quantity;
+        [ObservableProperty]
+        private string formattedQuantity = string.Empty;
+
+        partial void OnQuantityChanged(double value)
+        {
+            FormattedQuantity = $"{value:F0}";
+            Recalculate();
+        }
 
         [ObservableProperty]
         private NutritionInfo currentNutrition = new();
@@ -49,6 +53,7 @@ namespace DietHelper.ViewModels.Dishes
             UserProductId = userDishIngredient.UserProductId;
             Name = userDishIngredient.UserProduct.BaseProduct?.Name;
             Quantity = userDishIngredient.Quantity;
+            FormattedQuantity = $"{Quantity} г";
 
             if (userDishIngredient.UserProduct is not null)
             {
@@ -56,11 +61,6 @@ namespace DietHelper.ViewModels.Dishes
                 ProductNutritionInfoSnapshot = userDishIngredient.UserProduct.CustomNutrition ?? userDishIngredient.UserProduct.BaseProduct.NutritionFacts;
             }
 
-            Recalculate();
-        }
-
-        partial void OnQuantityChanged(double value)
-        {
             Recalculate();
         }
 

@@ -64,7 +64,7 @@ namespace DietHelper.Server.Controllers
 
         private async Task<UserMealEntry> AddIngredientsToUserMealEntry(UserMealEntry userMealEntry, UserMealEntryDto request)
         {
-            decimal totalQuantity = 0;
+            double totalQuantity = 0;
             var totalNutrition = new NutritionInfo();
 
             foreach (var ingredientDto in request.Ingredients)

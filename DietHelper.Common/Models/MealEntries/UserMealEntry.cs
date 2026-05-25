@@ -14,7 +14,7 @@ namespace DietHelper.Common.Models.MealEntries
         public int UserId { get; set; }
         public int? UserDishId { get; set; }
         public DateTime Date { get; set; }
-        public decimal TotalQuantity { get; set; }
+        public double TotalQuantity { get; set; }
         public NutritionInfo TotalNutrition { get; set; } = new();
         public List<UserMealEntryIngredient> Ingredients { get; set; } = new();
         public bool IsDeleted { get; set; }

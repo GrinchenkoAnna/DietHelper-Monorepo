@@ -110,19 +110,21 @@ namespace DietHelper.ViewModels
 
             foreach (var entry in AllEntries)
             {
-                if (entry is UserProductViewModel userProduct)
+                switch (entry)
                 {
-                    calories += userProduct.Calories;
-                    protein += userProduct.Protein;
-                    fat += userProduct.Fat;
-                    carbs += userProduct.Carbs;
-                }
-                else if (entry is UserDishViewModel userDish)
-                {
-                    calories += userDish.NutritionFacts.Calories;
-                    protein += userDish.NutritionFacts.Protein;
-                    fat += userDish.NutritionFacts.Fat;
-                    carbs += userDish.NutritionFacts.Carbs;
+                    case UserProductViewModel userProduct:
+                        calories += userProduct.NutritionFacts.Calories;
+                        protein += userProduct.NutritionFacts.Protein;
+                        fat += userProduct.NutritionFacts.Fat;
+                        carbs += userProduct.NutritionFacts.Carbs;
+                        break;
+
+                    case UserDishViewModel userDish:
+                        calories += userDish.NutritionFacts.Calories;
+                        protein += userDish.NutritionFacts.Protein;
+                        fat += userDish.NutritionFacts.Fat;
+                        carbs += userDish.NutritionFacts.Carbs;
+                        break;
                 }
             }
 
@@ -135,12 +137,16 @@ namespace DietHelper.ViewModels
 
             foreach (var entry in AllEntries)
             {
-                if (entry is UserProductViewModel userProduct) totalQuantity += userProduct.Quantity;
-                else if (entry is UserDishViewModel userDish) totalQuantity += userDish.Quantity;
+                if (entry is UserProductViewModel userProduct)
+                    totalQuantity += userProduct.Quantity;
+                else if (entry is UserDishViewModel userDish)
+                    totalQuantity += userDish.IsReadyDish
+                        ? userDish.Quantity
+                        : userDish.Ingredients.Sum(i => i.Quantity);  
             }
 
             TotalQuantity = totalQuantity;
-            FormattedTotalQuantity = $"{TotalQuantity} г";
+            FormattedTotalQuantity = $"{TotalQuantity:F0} г";
         }
 
         private void UpdateWeekDays()
@@ -169,6 +175,7 @@ namespace DietHelper.ViewModels
                 if (userMealEntriesDto is null) return;
 
                 AllEntries.Clear();
+                bool hasLoadingError = false;
 
                 foreach (var userMealEntryDto in userMealEntriesDto)
                 {
@@ -176,7 +183,11 @@ namespace DietHelper.ViewModels
                     if (!userMealEntryDto.UserDishId.HasValue)
                     {
                         var product = userMealEntryDto.Ingredients.FirstOrDefault();
-                        if (product is null) continue;
+                        if (product is null)
+                        {
+                            hasLoadingError = true;
+                            continue;
+                        }
 
                         var userProductViewModel = new UserProductViewModel(
                             product.UserProductId, product.ProductNameSnapshot,
@@ -192,7 +203,11 @@ namespace DietHelper.ViewModels
                     else // блюдо
                     {
                         var userDish = await _apiService.GetUserDishAsync(userMealEntryDto.UserDishId.Value);
-                        if (userDish is null) continue;
+                        if (userDish is null)
+                        {
+                            hasLoadingError = true;
+                            continue;
+                        }
 
                         var userDishViewModel = new UserDishViewModel(
                             _apiService, userDish.Id, userDish.Name,
@@ -209,10 +224,21 @@ namespace DietHelper.ViewModels
                     }
                 }
 
-                OnPropertyChanged(nameof(HasEntries));
-                OnPropertyChanged(nameof(entriesMessage));
+                if (hasLoadingError)
+                    _notificationService.ShowError("Пропущена запись", "Некоторые записи не были загружены из-за отсутствия данных");
 
-                DistributeEntriesByMealType();
+                if (AllEntries.Count != 0)
+                {
+                    OnPropertyChanged(nameof(HasEntries));
+                    OnPropertyChanged(nameof(entriesMessage));
+
+                    DistributeEntriesByMealType();
+                }
+                else
+                {
+                    _notificationService.ShowInfo("Загрузка истории", $"{SelectedDate.ToString("dd.MM.yyyy")} ничего не добавлено. Начните с завтрака!");
+                    return;
+                }                
             }
             catch (Exception ex)
             {
@@ -311,7 +337,7 @@ namespace DietHelper.ViewModels
                         new UserMealEntryIngredientDto()
                         {
                             UserProductId = userProductViewModel.Id,
-                            Quantity = (decimal)userProductViewModel.Quantity,
+                            Quantity = userProductViewModel.Quantity,
                             ProductNameSnapshot = userProductViewModel.Name!,
                             ProductNutritionInfoSnapshot = new NutritionInfo
                             {
@@ -347,7 +373,7 @@ namespace DietHelper.ViewModels
                 var ingredients = userDishViewModel.Ingredients.Select(ingredient => new UserMealEntryIngredientDto()
                 {
                     UserProductId = ingredient.UserProductId,
-                    Quantity = (decimal)ingredient.Quantity,
+                    Quantity = ingredient.Quantity,
                     ProductNameSnapshot = ingredient.ProductNameSnapshot,
                     ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot
                 }).ToList();
@@ -357,7 +383,7 @@ namespace DietHelper.ViewModels
                     UserDishId = userDishViewModel.Id,
                     Date = SelectedDate,
                     Ingredients = ingredients,
-                    TotalQuantity = (decimal)userDishViewModel.Quantity,
+                    TotalQuantity = userDishViewModel.Quantity,
                     TotalNutrition = userDishViewModel.NutritionFacts,
                     MealType = mealType
                 };
@@ -412,7 +438,7 @@ namespace DietHelper.ViewModels
                 {
                     UserDishId = createdDish.Id,
                     Date = SelectedDate,
-                    TotalQuantity = (decimal)userProductViewModel.Quantity,
+                    TotalQuantity = userProductViewModel.Quantity,
                     TotalNutrition = createdDish.NutritionFacts,
                     MealType = userProductViewModel.MealType,
                     Ingredients = new List<UserMealEntryIngredientDto>()
@@ -450,7 +476,7 @@ namespace DietHelper.ViewModels
                                 new UserMealEntryIngredientDto()
                                 {
                                     UserProductId = userProductViewModel.Id,
-                                    Quantity = (decimal)userProductViewModel.Quantity,
+                                    Quantity = userProductViewModel.Quantity,
                                     ProductNameSnapshot = userProductViewModel.Name!,
                                     ProductNutritionInfoSnapshot = new NutritionInfo
                                     {
@@ -476,7 +502,7 @@ namespace DietHelper.ViewModels
                             ingredients.Add(new UserMealEntryIngredientDto()
                             {
                                 UserProductId = ingredient.UserProductId,
-                                Quantity = (decimal)ingredient.Quantity,
+                                Quantity = ingredient.Quantity,
                                 ProductNameSnapshot = ingredient.ProductNameSnapshot,
                                 ProductNutritionInfoSnapshot = ingredient.ProductNutritionInfoSnapshot
                             });
@@ -487,7 +513,7 @@ namespace DietHelper.ViewModels
                             UserDishId = userDishViewModel.Id,
                             Date = SelectedDate,
                             Ingredients = ingredients,
-                            TotalQuantity = (decimal)userDishViewModel.Quantity,
+                            TotalQuantity = userDishViewModel.Quantity,
                             TotalNutrition = userDishViewModel.NutritionFacts,
                             MealType = userDishViewModel.MealType
                         };
@@ -496,6 +522,8 @@ namespace DietHelper.ViewModels
                         userDishViewModel.IsDirty = false;
                     }
                 }
+
+                _notificationService.ShowSuccess("Сохранение", "Изменения сохранены");
             }
             catch (Exception ex)
             {

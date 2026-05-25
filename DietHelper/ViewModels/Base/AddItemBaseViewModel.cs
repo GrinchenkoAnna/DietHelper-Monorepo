@@ -8,6 +8,7 @@ using DietHelper.ViewModels.Products;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels.Base
@@ -144,26 +145,7 @@ namespace DietHelper.ViewModels.Base
             _ = DoSearch(SearchText);
         }
 
-        protected async virtual Task DoSearch(string? term)
-        {
-            IsBusy = true;
-            UserSearchResults.Clear();
-
-            //временно
-            foreach (var item in AllUserItems)
-            {
-                //не очень эффективный алгоритм поиска -> SearchIndex
-                if (term is not null 
-                    && item.GetType()
-                           .GetProperty("Name")!
-                           .GetValue(item)!
-                           .ToString()
-                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                    UserSearchResults.Add(item);
-            }
-
-            IsBusy = false;
-        }
+        protected abstract Task DoSearch(string? term);
 
         [RelayCommand]
         protected abstract void AddUserItem();
@@ -187,6 +169,11 @@ namespace DietHelper.ViewModels.Base
             if (string.IsNullOrWhiteSpace(barcode))
             {
                 _notificationService.ShowError("Ошибка заполнения штрих-кода", "Штрих-код не может быть пустым");
+                return;
+            }
+            if (barcode.Length != 13 || barcode.Any(c => !char.IsDigit(c)))
+            {
+                _notificationService.ShowError("Ошибка заполнения штрих-кода", "Штрих-код должен содержать 13 цифр. Буквы и другие символы не допускаются");
                 return;
             }
 

@@ -6,6 +6,7 @@ using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Base;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -38,6 +39,8 @@ namespace DietHelper.ViewModels.Products
                     }
                 }
             }
+            else
+                _notificationService.ShowInfo("Мои продукты не загружены", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
 
             var baseProducts = await _apiService.GetBaseProductsAsync();
             if (baseProducts is not null)
@@ -51,46 +54,40 @@ namespace DietHelper.ViewModels.Products
                     }
                 }
             }
+            else
+                _notificationService.ShowInfo("Общие продукты не загружены", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
         }
 
         protected override async Task DoSearch(string? term)
         {
             IsBusy = true;
 
-            UserSearchResults.Clear();
-            BaseSearchResults.Clear();
+            var userResults = new List<UserProductViewModel>();
+            var baseResults = new List<BaseProductViewModel>();
 
-            //UserProducts
-            if (term is null || string.IsNullOrWhiteSpace(term))
-                foreach (var item in AllUserItems) UserSearchResults.Add(item);
-            else
+            await Task.Run(() =>
             {
+                bool isTermEmpty = string.IsNullOrWhiteSpace(term);
+
+                //UserProducts
                 foreach (var item in AllUserItems)
                 {
-                    if (item.GetType()
-                           .GetProperty("Name")!
-                           .GetValue(item)!
-                           .ToString()
-                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                        UserSearchResults.Add(item);
+                    if (isTermEmpty || (item.Name ?? "").Contains(term!, StringComparison.CurrentCultureIgnoreCase))
+                        userResults.Add(item);
                 }
-            }
 
-            //BaseProducts
-            if (term is null || string.IsNullOrWhiteSpace(term))
-                foreach (var item in AllBaseItems) BaseSearchResults.Add(item);
-            else
-            {
+                //BaseProducts
                 foreach (var item in AllBaseItems)
                 {
-                    if (item.GetType()
-                           .GetProperty("Name")!
-                           .GetValue(item)!
-                           .ToString()
-                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                        BaseSearchResults.Add(item);
+                    if (isTermEmpty || (item.Name ?? "").Contains(term!, StringComparison.CurrentCultureIgnoreCase))
+                        baseResults.Add(item);
                 }
-            }
+            });            
+
+            UserSearchResults.Clear();
+            foreach (var item in userResults) UserSearchResults.Add(item);
+            BaseSearchResults.Clear();
+            foreach(var item in baseResults) BaseSearchResults.Add(item);
 
             IsBusy = false;
         }
@@ -109,7 +106,7 @@ namespace DietHelper.ViewModels.Products
                 var createdUserProduct = await CreateUserProductFromBaseItemAsync(SelectedBaseItem);
                 if (createdUserProduct is null)
                 {
-                    _notificationService.ShowError("Ошибка добавления", "Не удалось добавить продукт");
+                    _notificationService.ShowError("Не удалось создать продукт", "Попробуйте выбрать продукт снова");
                     return;
                 }
 
@@ -130,19 +127,24 @@ namespace DietHelper.ViewModels.Products
         {
             if (SelectedUserItem is not null)
                 WeakReferenceMessenger.Default.Send(new AddUserProductClosedMessage(SelectedUserItem));
+            else
+                _notificationService.ShowError("Не удалось создать продукт", "Попробуйте выбрать продукт снова");
         }
 
         protected override async void AddManualItem()
         {
-            if (string.IsNullOrEmpty(ManualName)) return;
+            if (string.IsNullOrEmpty(ManualName))
+            {
+                _notificationService.ShowError("Создание продукта", "Имя продукта не должно быть пустым");
+                return;
+            }
 
             var newUserProduct = await CreateNewUserItem();
             if (newUserProduct is null)
             {
-                _notificationService.ShowError("Создание продукта", "Не удалось создать продукт");
+                _notificationService.ShowError("Ошибка создания продукта", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
                 return;
             }
-
 
             var newItem = new UserProductViewModel(newUserProduct)
             {

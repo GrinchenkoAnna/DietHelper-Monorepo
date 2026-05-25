@@ -6,6 +6,9 @@ using DietHelper.Common.Models.Dishes;
 using DietHelper.Models.Messages;
 using DietHelper.Services;
 using DietHelper.ViewModels.Base;
+using DietHelper.ViewModels.Products;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DietHelper.ViewModels.Dishes
@@ -84,15 +87,40 @@ namespace DietHelper.ViewModels.Dishes
                         AllUserItems.Add(new UserDishViewModel(dish, _apiService));
                     }
                 }
-            }            
+            }
+            else
+                _notificationService.ShowInfo("Блюда не загружены", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
+        }
+
+        protected override async Task DoSearch(string? term)
+        {
+            IsBusy = true;
+
+            var userResults = new List<UserDishViewModel>();
+
+            await Task.Run(() =>
+            {
+                bool isTermEmpty = string.IsNullOrWhiteSpace(term);
+
+                foreach (var item in AllUserItems)
+                {
+                    if (isTermEmpty || (item.Name ?? "").Contains(term!, StringComparison.CurrentCultureIgnoreCase))
+                        userResults.Add(item);
+                }
+            });
+
+            UserSearchResults.Clear();
+            foreach (var item in userResults) UserSearchResults.Add(item);
+
+            IsBusy = false;
         }
 
         protected override void AddUserItem()
         {
             if (SelectedUserItem is not null)
-            {
                 WeakReferenceMessenger.Default.Send(new AddUserDishClosedMessage(SelectedUserItem));
-            }
+            else
+                _notificationService.ShowError("Не удалось создать блюдо", "Попробуйте выбрать блюдо снова");
         }
 
         protected override async Task<UserDish?> CreateNewUserItem()
@@ -116,7 +144,11 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void AddManualItem()
         {
-            if (string.IsNullOrEmpty(ManualName)) return;
+            if (string.IsNullOrEmpty(ManualName))
+            {
+                _notificationService.ShowError("Создание блюда", "Имя блюда не должно быть пустым");
+                return;
+            }
 
             var newUserDish = await CreateNewUserItem();
 
@@ -125,7 +157,11 @@ namespace DietHelper.ViewModels.Dishes
                 ClearManualEntries();
 
                 WeakReferenceMessenger.Default.Send(new AddUserDishClosedMessage(new UserDishViewModel(newUserDish, _apiService)));
-            }            
+            }
+            else
+            {
+                _notificationService.ShowError("Ошибка добавления блюда", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
+            }
         }
 
         protected override async void DeleteItemFromDatabase(UserDishViewModel userDishViewModel)

@@ -8,6 +8,7 @@ using DietHelper.Services;
 using DietHelper.ViewModels.Base;
 using DietHelper.ViewModels.Products;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -43,6 +44,8 @@ namespace DietHelper.ViewModels.Dishes
                     }
                 }
             }
+            else
+                _notificationService.ShowInfo("Мои продукты не загружены", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
 
             var baseProducts = await _apiService.GetBaseProductsAsync();
 
@@ -57,46 +60,40 @@ namespace DietHelper.ViewModels.Dishes
                     }
                 }
             }
+            else
+                _notificationService.ShowInfo("Общие продукты не загружены", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
         }
 
         protected override async Task DoSearch(string? term)
         {
             IsBusy = true;
 
-            UserSearchResults.Clear();
-            BaseSearchResults.Clear();
+            var userResults = new List<UserProductViewModel>();
+            var baseResults = new List<BaseProductViewModel>();
 
-            //UserProducts
-            if (term is null || string.IsNullOrWhiteSpace(term))
-                foreach (var item in AllUserItems) UserSearchResults.Add(item);
-            else
+            await Task.Run(() =>
             {
+                bool isTermEmpty = string.IsNullOrWhiteSpace(term);
+
+                //UserProducts
                 foreach (var item in AllUserItems)
                 {
-                    if (item.GetType()
-                           .GetProperty("Name")!
-                           .GetValue(item)!
-                           .ToString()
-                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                        UserSearchResults.Add(item);
+                    if (isTermEmpty || (item.Name ?? "").Contains(term!, StringComparison.CurrentCultureIgnoreCase))
+                        userResults.Add(item);
                 }
-            }
 
-            //BaseProducts
-            if (term is null || string.IsNullOrWhiteSpace(term))
-                foreach (var item in AllBaseItems) BaseSearchResults.Add(item);
-            else
-            {
+                //BaseProducts
                 foreach (var item in AllBaseItems)
                 {
-                    if (item.GetType()
-                           .GetProperty("Name")!
-                           .GetValue(item)!
-                           .ToString()
-                           .Contains(term, System.StringComparison.CurrentCultureIgnoreCase))
-                        BaseSearchResults.Add(item);
+                    if (isTermEmpty || (item.Name ?? "").Contains(term!, StringComparison.CurrentCultureIgnoreCase))
+                        baseResults.Add(item);
                 }
-            }
+            });
+
+            UserSearchResults.Clear();
+            foreach (var item in userResults) UserSearchResults.Add(item);
+            BaseSearchResults.Clear();
+            foreach (var item in baseResults) BaseSearchResults.Add(item);
 
             IsBusy = false;
         }
@@ -132,7 +129,10 @@ namespace DietHelper.ViewModels.Dishes
                 }
             };
 
-            WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(ingredient));
+            if (ingredient is not null)
+                WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(ingredient));
+            else
+                _notificationService.ShowError("Не удалось создать ингредиент", "Попробуйте выбрать продукт снова");
         }
 
         [RelayCommand]
@@ -149,7 +149,7 @@ namespace DietHelper.ViewModels.Dishes
                 var createdUserProduct = await CreateUserProductFromBaseItemAsync(SelectedBaseItem);
                 if (createdUserProduct is null)
                 {
-                    _notificationService.ShowError("Ошибка добавления", "Не удалось добавить продукт");
+                    _notificationService.ShowError("Ошибка создания ингредиента", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
                     return;
                 }
 
@@ -185,7 +185,11 @@ namespace DietHelper.ViewModels.Dishes
 
         protected override async void AddManualItem()
         {
-            if (string.IsNullOrEmpty(ManualName)) return;
+            if (string.IsNullOrEmpty(ManualName))
+            {
+                _notificationService.ShowError("Создание ингредиента", "Имя ингредиента не должно быть пустым");
+                return;
+            }
 
             var newProduct = await CreateNewUserItem();
 
@@ -217,7 +221,12 @@ namespace DietHelper.ViewModels.Dishes
 
                 WeakReferenceMessenger.Default.Send(new AddDishIngredientClosedMessage(userIngredient));
             }
-            ClearManualEntries();
+            else
+            {
+                ClearManualEntries();
+                _notificationService.ShowError("Ошибка создания ингредиента", "Возможна ошибка сети или сервера. Проверьте подключение и попробуйте снова");
+                return;
+            }
         }
 
         [RelayCommand]
